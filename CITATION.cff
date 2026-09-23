@@ -1,0 +1,35 @@
+cff-version: 1.2.0
+message: >-
+  If you use this software, please cite both the software and the paper it
+  accompanies.
+title: >-
+  Information loss of fixed health indicators as a control problem: code and
+  verification suite
+type: software
+authors:
+  - family-names: Le
+    given-names: Huy Hoang
+  - family-names: Nguyen
+    given-names: Kim-Anh
+    email: nkanh@dut.udn.vn
+license: MIT
+repository-code: "https://github.com/HuyHoangLe0201/health-indicator-information-loss"
+keywords:
+  - prognostics
+  - health indicator
+  - information loss
+  - optimal control
+  - reachability
+  - remaining useful life
+preferred-citation:
+  type: unpublished
+  title: >-
+    Information loss of fixed health indicators as a control problem: simplex
+    geometry and reachability limits
+  authors:
+    - family-names: Le
+      given-names: Huy Hoang
+    - family-names: Nguyen
+      given-names: Kim-Anh
+  year: 2026
+  notes: Submitted to Reliability Engineering & System Safety.

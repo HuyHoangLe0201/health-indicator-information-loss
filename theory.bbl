@@ -1,0 +1,210 @@
+\begin{thebibliography}{10}
+\expandafter\ifx\csname url\endcsname\relax
+  \def\url#1{\texttt{#1}}\fi
+\expandafter\ifx\csname urlprefix\endcsname\relax\def\urlprefix{URL }\fi
+\expandafter\ifx\csname href\endcsname\relax
+  \def\href#1#2{#2} \def\path#1{#1}\fi
+
+\bibitem{lei2018}
+Y.~Lei, N.~Li, L.~Guo, N.~Li, T.~Yan, J.~Lin, Machinery health prognostics: A
+  systematic review from data acquisition to {RUL} prediction, Mech. Syst.
+  Signal Process. 104 (2018) 799--834.
+\newblock \href {https://doi.org/10.1016/j.ymssp.2017.11.016}
+  {\path{doi:10.1016/j.ymssp.2017.11.016}}.
+
+\bibitem{coble2009}
+J.~Coble, J.~W. Hines, Identifying optimal prognostic parameters from data: A
+  genetic algorithms approach, in: Annu. Conf. PHM Soc., 2009.
+
+\bibitem{le2026jestech}
+H.~H. Le, K.-A. Nguyen, Information-theoretic limits of health indicator
+  construction for remaining useful life prediction, Eng. Sci. Technol. Int. J.
+  81 (2026) 102485.
+\newblock \href {https://doi.org/10.1016/j.jestch.2026.102485}
+  {\path{doi:10.1016/j.jestch.2026.102485}}.
+
+\bibitem{le2026mst}
+H.~H. Le, K.-A. Nguyen, Generalization bounds and sample complexity for
+  remaining useful life prediction from complete degradation trajectories,
+  Meas. Sci. Technol. 37 (2026) 226203.
+\newblock \href {https://doi.org/10.1088/1361-6501/ae7109}
+  {\path{doi:10.1088/1361-6501/ae7109}}.
+
+\bibitem{guo2017}
+L.~Guo, N.~Li, F.~Jia, Y.~Lei, J.~Lin, A recurrent neural network based health
+  indicator for remaining useful life prediction of bearings, Neurocomputing
+  240 (2017) 98--109.
+\newblock \href {https://doi.org/10.1016/j.neucom.2017.02.045}
+  {\path{doi:10.1016/j.neucom.2017.02.045}}.
+
+\bibitem{javed2017}
+K.~Javed, R.~Gouriveau, N.~Zerhouni, State of the art and taxonomy of
+  prognostics approaches, trends of prognostics applications and open issues
+  towards maturity at different technology readiness levels, Mech. Syst. Signal
+  Process. 94 (2017) 214--236.
+\newblock \href {https://doi.org/10.1016/j.ymssp.2017.01.050}
+  {\path{doi:10.1016/j.ymssp.2017.01.050}}.
+
+\bibitem{ye2015}
+Z.-S. Ye, M.~Xie, Stochastic modelling and analysis of degradation for highly
+  reliable products, Appl. Stoch. Models Bus. Ind. 31~(1) (2015) 16--32.
+\newblock \href {https://doi.org/10.1002/asmb.2063}
+  {\path{doi:10.1002/asmb.2063}}.
+
+\bibitem{noortwijk2009}
+J.~M. van Noortwijk, A survey of the application of gamma processes in
+  maintenance, Reliab. Eng. Syst. Saf. 94~(1) (2009) 2--21.
+\newblock \href {https://doi.org/10.1016/j.ress.2007.03.019}
+  {\path{doi:10.1016/j.ress.2007.03.019}}.
+
+\bibitem{si2011}
+X.-S. Si, W.~Wang, C.-H. Hu, D.-H. Zhou, Remaining useful life estimation --- a
+  review on the statistical data driven approaches, Eur. J. Oper. Res. 213~(1)
+  (2011) 1--14.
+\newblock \href {https://doi.org/10.1016/j.ejor.2010.11.018}
+  {\path{doi:10.1016/j.ejor.2010.11.018}}.
+
+\bibitem{zhang2018}
+Z.~Zhang, X.~Si, C.~Hu, Y.~Lei, Degradation data analysis and remaining useful
+  life estimation: a review on {W}iener-process-based methods, Eur. J. Oper.
+  Res. 271~(3) (2018) 775--796.
+\newblock \href {https://doi.org/10.1016/j.ejor.2018.02.033}
+  {\path{doi:10.1016/j.ejor.2018.02.033}}.
+
+\bibitem{lee2014}
+J.~Lee, F.~Wu, W.~Zhao, M.~Ghaffari, L.~Liao, D.~Siegel, Prognostics and health
+  management design for rotary machinery systems --- reviews, methodology and
+  applications, Mech. Syst. Signal Process. 42~(1--2) (2014) 314--334.
+\newblock \href {https://doi.org/10.1016/j.ymssp.2013.06.004}
+  {\path{doi:10.1016/j.ymssp.2013.06.004}}.
+
+\bibitem{hac2020}
+F.~Karimi~Pour, D.~Theilliol, V.~Puig, G.~Cembrano, Health-aware control design
+  based on remaining useful life estimation for autonomous racing vehicle, ISA
+  Trans. 113 (2021) 196--209.
+\newblock \href {https://doi.org/10.1016/j.isatra.2020.03.032}
+  {\path{doi:10.1016/j.isatra.2020.03.032}}.
+
+\bibitem{rulcontrol2025}
+M.~S. F{\'e}lix, J.~J. Martinez, C.~B{\'e}renguer, Remaining useful life
+  {(RUL)} control of controlled systems under degradation, Int. J. Robust
+  Nonlinear Control 35~(18) (2025) 8095--8116.
+\newblock \href {https://doi.org/10.1002/rnc.70105}
+  {\path{doi:10.1002/rnc.70105}}.
+
+\bibitem{feldbaum1960}
+A.~A. Feldbaum, Dual control theory {I}, Autom. Remote Control 21~(9) (1960)
+  874--880.
+
+\bibitem{oato2021}
+C.~Grebe, E.~Wise, J.~Kelly, Observability-aware trajectory optimization:
+  Theory, viability, and state of the art, in: IEEE Int. Conf. Multisensor
+  Fusion Integr. (MFI), 2021, pp. 1--8.
+\newblock \href {https://doi.org/10.1109/mfi52462.2021.9591177}
+  {\path{doi:10.1109/mfi52462.2021.9591177}}.
+
+\bibitem{hooker2015}
+G.~Hooker, K.~K. Lin, B.~Rogers, Control theory and experimental design in
+  diffusion processes, SIAM/ASA J. Uncertain. Quantif. 3~(1) (2015) 234--264.
+\newblock \href {https://doi.org/10.1137/140962280}
+  {\path{doi:10.1137/140962280}}.
+
+\bibitem{adt2011}
+H.~Lim, B.-J. Yum, Optimal design of accelerated degradation tests based on
+  {W}iener process models, J. Appl. Stat. 38~(2) (2011) 309--325.
+\newblock \href {https://doi.org/10.1080/02664760903406488}
+  {\path{doi:10.1080/02664760903406488}}.
+
+\bibitem{amari2016}
+S.-i. Amari, Information Geometry and Its Applications, Springer, 2016.
+\newblock \href {https://doi.org/10.1007/978-4-431-55978-8}
+  {\path{doi:10.1007/978-4-431-55978-8}}.
+
+\bibitem{bhattacharyya1943}
+A.~Bhattacharyya, On a measure of divergence between two statistical
+  populations defined by their probability distributions, Bull. Calcutta Math.
+  Soc. 35 (1943) 99--109.
+
+\bibitem{hofbauer1998}
+J.~Hofbauer, K.~Sigmund, Evolutionary Games and Population Dynamics, Cambridge
+  Univ. Press, 1998.
+\newblock \href {https://doi.org/10.1017/cbo9781139173179}
+  {\path{doi:10.1017/cbo9781139173179}}.
+
+\bibitem{sandholm2010}
+W.~H. Sandholm, Population Games and Evolutionary Dynamics, MIT Press, 2010.
+
+\bibitem{meeker1998}
+W.~Q. Meeker, L.~A. Escobar, Statistical Methods for Reliability Data, Wiley,
+  1998.
+
+\bibitem{cover2006}
+T.~M. Cover, J.~A. Thomas, Elements of Information Theory, 2nd Edition, Wiley,
+  2006.
+\newblock \href {https://doi.org/10.1002/047174882x}
+  {\path{doi:10.1002/047174882x}}.
+
+\bibitem{oja1982}
+E.~Oja, A simplified neuron model as a principal component analyzer, J. Math.
+  Biol. 15 (1982) 267--273.
+\newblock \href {https://doi.org/10.1007/bf00275687}
+  {\path{doi:10.1007/bf00275687}}.
+
+\bibitem{bardi1997}
+M.~Bardi, I.~Capuzzo-Dolcetta, Optimal Control and Viscosity Solutions of
+  Hamilton--Jacobi--Bellman Equations, Birkh\"auser, 1997.
+\newblock \href {https://doi.org/10.1007/978-0-8176-4755-1}
+  {\path{doi:10.1007/978-0-8176-4755-1}}.
+
+\bibitem{dinkelbach1967}
+W.~Dinkelbach, On nonlinear fractional programming, Manage. Sci. 13~(7) (1967)
+  492--498.
+\newblock \href {https://doi.org/10.1287/mnsc.13.7.492}
+  {\path{doi:10.1287/mnsc.13.7.492}}.
+
+\bibitem{falcone2014}
+M.~Falcone, R.~Ferretti, Semi-Lagrangian Approximation Schemes for Linear and
+  Hamilton--Jacobi Equations, SIAM, 2014.
+\newblock \href {https://doi.org/10.1137/1.9781611973051}
+  {\path{doi:10.1137/1.9781611973051}}.
+
+\bibitem{severson2019}
+K.~A. Severson, P.~M. Attia, N.~Jin, N.~Perkins, B.~Jiang, Z.~Yang, M.~H. Chen,
+  M.~Aykol, P.~K. Herring, D.~Fraggedakis, M.~Z. Bazant, S.~J. Harris, W.~C.
+  Chueh, R.~D. Braatz, Data-driven prediction of battery cycle life before
+  capacity degradation, Nat. Energy 4 (2019) 383--391.
+\newblock \href {https://doi.org/10.1038/s41560-019-0356-8}
+  {\path{doi:10.1038/s41560-019-0356-8}}.
+
+\bibitem{xjtu2020}
+B.~Wang, Y.~Lei, N.~Li, N.~Li, A hybrid prognostics approach for estimating
+  remaining useful life of rolling element bearings, IEEE Trans. Rel. 69~(1)
+  (2020) 401--412.
+\newblock \href {https://doi.org/10.1109/tr.2018.2882682}
+  {\path{doi:10.1109/tr.2018.2882682}}.
+
+\bibitem{pronostia2012}
+P.~Nectoux, R.~Gouriveau, K.~Medjaher, E.~Ramasso, B.~Chebel-Morello,
+  N.~Zerhouni, C.~Varnier, {PRONOSTIA}: An experimental platform for bearings
+  accelerated degradation tests, in: IEEE Int. Conf. Prognostics Health Manage.
+  (PHM), Denver, CO, USA, 2012, pp. 1--8.
+
+\bibitem{saha2007}
+B.~Saha, K.~Goebel, Battery data set, NASA Ames Prognostics Data Repository
+  (2007).
+
+\bibitem{saxena2008}
+A.~Saxena, K.~Goebel, D.~Simon, N.~Eklund, Damage propagation modeling for
+  aircraft engine run-to-failure simulation, in: Int. Conf. Prognostics Health
+  Manage. (PHM), Denver, CO, USA, 2008, pp. 1--9.
+\newblock \href {https://doi.org/10.1109/phm.2008.4711414}
+  {\path{doi:10.1109/phm.2008.4711414}}.
+
+\bibitem{arias2021}
+M.~Arias~Chao, C.~Kulkarni, K.~Goebel, O.~Fink, Aircraft engine run-to-failure
+  dataset under real flight conditions for prognostics and diagnostics, Data
+  6~(1) (2021) 5.
+\newblock \href {https://doi.org/10.3390/data6010005}
+  {\path{doi:10.3390/data6010005}}.
+
+\end{thebibliography}
