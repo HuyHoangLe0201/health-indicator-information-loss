@@ -260,7 +260,11 @@ def discussion_order(path):
     # Two unconditional readings, not three: "Misalignment is
     # worth measuring" went with the remaining-life benchmark that
     # supported it when the paper was cut to its theory.
-    lead = ("Test the separability", "A Fisher criterion")
+    # "A Fisher criterion cannot be used to design a fixed indicator" was
+    # broader than Proposition 4.6, which rules out ranking by the loss
+    # and not designing on other grounds. The reading was reworded; the
+    # check still asks that the two plant-independent readings lead.
+    lead = ("Test the separability", "No Fisher criterion")
     got = tuple(p[:22] for p in paras[1:3])
     return float(all(g.startswith(x[:22]) for g, x in zip(got, lead)))
 
@@ -339,19 +343,34 @@ def longest_echo(path):
 
 
 def fleet_count(path):
-    """The announced number of fleets against the number cited with it."""
+    """The announced number of fleets against the number cited for them.
+
+    The fleets used to be listed in the sentence that announces them, and the
+    citations sat between the colon and the next full stop. They are rows of
+    Table~\\ref{tab:fleets} now, so the citations moved with them and this
+    reads the announcement from the sentence and the citations from the table.
+    The check is unchanged in intent: a paper that says "six fleets" and cites
+    five has an error in the one place a reader counts.
+
+    Keys are counted rather than \\cite groups, because one row cites two
+    fleets in two commands and another might cite two in one.
+    """
     t = io.open(path, encoding="utf-8").read()
     # this helper reads the RAW file, not claims() output, so the
     # pattern has to survive an 78-column wrap falling anywhere
-    m = re.search(r"what\s+(\w+)\s+public\s+run-to-failure\s+"
-                  r"fleets\s+currently\s+settle:(.*?)\.", t,
-                  flags=re.S)
+    m = re.search(r"what\s+(\w+)\s+public\s+run-to-failure\s+fleets", t)
     if not m:
         return -1.0
     words = dict(three=3, four=4, five=5, six=6, seven=7, eight=8)
     said = words.get(m.group(1).lower(), -1)
-    cited = len(set(re.findall(r"\\cite\{([^}]*)\}", m.group(2))))
-    return float(said - cited)
+    i = t.find(r"\label{tab:fleets}")
+    if i < 0:
+        return -1.0
+    j = t.find(r"\end{tabular}", i)
+    keys = set()
+    for grp in re.findall(r"\\cite\{([^}]*)\}", t[i:j]):
+        keys.update(k.strip() for k in grp.split(",") if k.strip())
+    return float(said - len(keys))
 
 
 def roadmap_gap(path):
@@ -600,6 +619,62 @@ def limitation_count(path):
     return float(said - len(given))
 
 
+def rho_sweep_stats():
+    """The recorded regime-index sweep, recomputed from what it produced.
+
+    rho_sweep.py draws 300 plants from a fixed seed -- two to five mechanisms,
+    one or two inputs, and every other parameter varied with them -- and for
+    each records the regime index and the gain of adaptive steering over the
+    best constant input. It runs for about three hours, so the gate reads the
+    recorded result rather than repeating it.
+
+    CANNOT SEE: whether the sweep itself is right. It checks that Section 6.7
+    quotes this file correctly, not that this file deserves to be quoted. The
+    script is shipped so that a reader can regenerate it.
+    """
+    # os is imported here rather than at the top because the source copy of
+    # this script does not import it; the repository copy does, added by the
+    # $RESS_DATA patch. Importing locally keeps the two copies differing by
+    # that patch alone, which is what the packaging audit checks.
+    import json
+    import os
+    fn = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                      "rho_sweep.json")
+    if not os.path.exists(fn):
+        return None
+    rows = json.load(io.open(fn, encoding="utf-8"))
+    rho = np.array([r["rho"] for r in rows])
+    arc = np.array([r["arc"] for r in rows])
+    gain = np.array([r["gain"] for r in rows])
+
+    def sp(a, b):
+        ra = np.argsort(np.argsort(a)).astype(float)
+        rb = np.argsort(np.argsort(b)).astype(float)
+        ra -= ra.mean()
+        rb -= rb.mean()
+        return float((ra * rb).sum()
+                     / np.sqrt((ra ** 2).sum() * (rb ** 2).sum()))
+
+    big = gain >= 5.0
+    low = rho < 1.0
+    veto = rho >= 1.0
+    near = np.abs(np.log(rho) - np.log(0.88)) < 0.35
+    return dict(
+        n=float(len(rows)),
+        sp=sp(rho, gain),
+        sp_arc=sp(arc, gain),
+        # rho = drift / arc by construction, so the drift is recovered
+        # rather than stored. Section 6.7 claims it ranks the plants at
+        # below 0.05 in magnitude, which is the evidence that the ratio's
+        # numerator is not doing the work.
+        sp_drift=sp(rho * arc, gain),
+        share_low=100.0 * big[low].mean(),
+        base=100.0 * big.mean(),
+        miss=100.0 * big[veto].mean(),
+        med_near=float(np.median(gain[near])),
+    )
+
+
 def check(rows):
     w1 = max(len(r[0]) for r in rows) + 1
     print(f"\n{'quantity':<{w1}} {'manuscript':>12} {'recomputed':>12}  status")
@@ -674,7 +749,7 @@ def main():
          find(s, r"rising to \$([0-9]+)\$ at \$161\$ points"), ratio_fine,
          0.01),
         ("Table I span",
-         find(s, r"duty cycle \$\\delta\$\.\s+The loss still spans a "
+         find(s, r"exposure factor \$\\delta\$\.\s+The loss still spans a "
                  r"factor(?:\s+of)?\s+\$([0-9.]+)\$"), span, 0.01),
         ("Table I span, restated in Sec 6.2",
          find(s, r"held equal to seven digits,\s+the loss still spans a "
@@ -693,7 +768,7 @@ def main():
          ratio, 0.01),
         # a fifth copy, in the abstract, which no pattern above reaches
         ("headline ratio, restated in the abstract",
-         find(s, r"information by a factor of \$([0-9]+)\$"), ratio, 0.01),
+         find(s, r"objective defined here by a factor of \$([0-9]+)\$"), ratio, 0.01),
         ("beta_min upper, restated in Sec 6.4",
          find(s, r"peak floor moves from \$([0-9.]+)\^\{\\circ\}\$"),
          bmin_hi, 0.01),
@@ -746,6 +821,45 @@ def main():
                      float(m.group(2)) if m else None, rms, 0.01))
         rows.append((f"Table I u={u:.1f}: loss",
                      float(m.group(3)) if m else None, L, 0.02))
+
+    _rs = rho_sweep_stats()
+    if _rs is None:
+        skip("  SKIPPED Section 6.7 sweep: rho_sweep.json not found")
+    else:
+        rows += [
+            ("6.7 sweep plants",
+             find(s, r"tested on \$([0-9]+)\$ further plants"),
+             _rs["n"], 0.0),
+            ("6.7 Spearman rho vs gain",
+             find(s, r"between \$\\rho\$ and the gain is \$(-?[0-9.]+)\$"),
+             _rs["sp"], 0.02),
+            ("6.7 share repaying at rho<1",
+             find(s, r"\$([0-9]+)\\%\$ repay steering"),
+             _rs["share_low"], 0.02),
+            ("6.7 base rate repaying",
+             find(s, r"against \$([0-9]+)\\%\$ over the"),
+             _rs["base"], 0.02),
+            ("6.7 veto miss rate",
+             find(s, r"would also reject \$([0-9]+)\\%\$"),
+             _rs["miss"], 0.02),
+            # The manuscript quotes a MAGNITUDE here, because the arc
+            # correlates positively with the gain (a wider reachable set is
+            # more authority) while rho correlates negatively. Quoting the
+            # arc as -0.47 to make the comparison look tidy would have been a
+            # sign error in the paper, hidden by a negation in the gate.
+            ("6.7 arc alone, magnitude",
+             find(s, r"at \$([0-9.]+)\$ in magnitude"),
+             abs(_rs["sp_arc"]), 0.02),
+            ("6.7 median gain at Table II's rho",
+             find(s, r"the median gain is \$([0-9.]+)\$ rather"),
+             _rs["med_near"], 0.02),
+            # stated as a bound, not a value: 0.045 against a quoted 0.04
+            # would fail a 2 per cent relative tolerance while agreeing
+            # perfectly with what the sentence says.
+            ("6.7 drift alone, magnitude bound",
+             find(s, r"at below \$([0-9.]+)\$ in magnitude"),
+             abs(_rs["sp_drift"]), "<"),
+        ]
 
     if args.regime or args.full:
 
@@ -901,7 +1015,7 @@ def main():
         else:
             rows += [
                 ("Severson cells used",
-                 find(s, r"On \$([0-9]+)\$ Severson lithium-ion cells"), st["n"], 0.0),
+                 find(s, r"\$([0-9]+)\$ Severson lithium-ion cells"), st["n"], 0.0),
                 ("Severson arc travel (deg)",
                  find(s, r"travels\s*\n?\$([0-9.]+)\^\{\\circ\}\$ of arc"),
                  st["travel"], 0.01),

@@ -13,6 +13,10 @@
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta,positioning,calc}
 \usepackage{lineno}
+\usepackage{array}         % >{\raggedright} column prefixes, so a
+                           % narrow table column breaks instead of
+                           % overfilling
+\newcolumntype{R}[1]{>{\raggedright\arraybackslash}p{#1\textwidth}}
 \usepackage{url}           % elsarticle loads neither url nor
                            % hyperref; \url breaks the repository
                            % address, \texttt would overfull it
@@ -49,7 +53,7 @@
 
 \begin{frontmatter}
 
-\title{Information loss of fixed health indicators as a control problem:
+\title{Information loss of fixed linear health indicators as a control problem:
 simplex geometry and reachability limits}
 
 \author[a]{Huy Hoang Le}
@@ -66,6 +70,7 @@ simplex geometry and reachability limits}
 \begin{abstract}
 A health indicator compresses several condition-monitoring channels into one
 scalar, and normally keeps the same weights for the life of the component.
+We take it to be a fixed linear map of the noise-whitened channels.
 Because degradation runs through several mechanisms at differing rates, the
 channel combination carrying most information about remaining life rotates as
 the component ages, so a fixed indicator necessarily discards information. We
@@ -74,8 +79,8 @@ a control variable. The loss reduces to a single angle, between the indicator an
 directions reachable at each instant share a common point, which for generic
 plants needs one fewer independently adjustable operating variable than there
 are mechanisms. Scaling every channel by the same factor leaves the loss
-unchanged, so no scalar summary of the Fisher information matrix can detect
-it. On a representative three-mechanism plant, steering the operating point cuts the discarded information by a factor of $68$, and a dimensionless index, available before any indicator is chosen, says whether such a gain is plausible. Six public run-to-failure fleets test the premises separately: the informative direction does rotate on measured cells, and simulated turbofan records confirm against a negative control that the operating point moves it. The same fleets bound the theory: the highest-fidelity turbofan data reject the separable plant form under which the operator's authority becomes computable offline, so that branch describes a model class rather than measured machinery.
+unchanged, so no criterion built from the Fisher information about
+remaining life can detect it. On a representative three-mechanism synthetic plant, steering the operating point reduces the information-loss objective defined here by a factor of $68$ against the best constant operating point, and a dimensionless index, available before any indicator is chosen, indicates whether such a gain is plausible. Six public run-to-failure fleets test the premises separately: the informative direction does rotate on measured cells, and simulated turbofan records confirm against a negative control that the operating point moves it. The same fleets bound the theory: the highest-fidelity turbofan data reject the separable plant form under which the operator's authority becomes computable offline, so that branch describes a model class rather than measured machinery.
 \end{abstract}
 
 \begin{keyword}
@@ -168,6 +173,38 @@ dynamics~\cite{hofbauer1998,sandholm2010}. These are standard objects; what is
 new here is their identification with the informative direction of a degrading
 component, and the fact that the fitness driving the flow is actuated.
 
+\begin{table*}[t]
+\caption{Where this paper sits. The columns are the axes that separate these
+literatures, not a ranking: each body of work answers a question the others do
+not ask, and the last column is a restriction this paper imposes on itself
+rather than an advantage over the others. ``Input alters degradation'' means
+the operating point enters the degradation dynamics; ``direction'' means the
+informative direction of Section~\ref{sec:prelim} is itself an objective.}
+\label{tab:position}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}R{0.34}cccc@{}}
+\hline
+ & input alters & lifetime is & direction is & indicator\\
+ & degradation & an objective & an objective & fixed, scalar\\
+\hline
+Indicator design~\cite{coble2009,guo2017,lei2018} &
+  --- & --- & --- & $\checkmark$\\
+Fixed-indicator limits~\cite{le2026jestech,le2026mst} &
+  --- & --- & --- & $\checkmark$\\
+Stochastic life models~\cite{ye2015,si2011} &
+  --- & --- & --- & ---\\
+Health-aware control~\cite{hac2020,rulcontrol2025} &
+  $\checkmark$ & $\checkmark$ & --- & ---\\
+Observability-aware~\cite{feldbaum1960,oato2021,adt2011} &
+  $\checkmark$ & --- & partly & ---\\
+\hline
+This paper & $\checkmark$ & secondary & $\checkmark$ & $\checkmark$\\
+\hline
+\end{tabular}
+\end{table*}
+
 The contributions are as follows.
 
 \begin{enumerate}
@@ -188,15 +225,36 @@ fixed set, which turns the question into a containment and shows the counting
 rule to be sufficient but not necessary; the exceptions exist for any number of mechanisms and are too fragile to build on (Section~\ref{sec:translate}). The count separates two objectives that are easily conflated: holding the misalignment at a constant level is a single scalar condition and generically needs one input, whereas freezing the informative direction outright is $d-1$ conditions. That gap is the difference between useful steering and lossless steering, and an installation with one controllable variable can have the first without the second.
 
 \item The loss is invariant to a common gain on all channels and is therefore
-invisible to every scalarisation of the Fisher information matrix, so
-observability-driven criteria cannot be used to choose an indicator.
+invisible to every scalarisation of the Fisher information about remaining
+life, so no criterion built from that information alone can rank indicators by
+the loss they incur.
 
 \item The best achievable loss is the value of an optimal control problem
 whose objective is a ratio, and whose terminal time is itself controlled
-(Section~\ref{sec:limit}), and a dimensionless regime index, computable before any indicator is designed, screens for the regime in which steering can have substantial value (Section~\ref{sec:regime}).
+(Section~\ref{sec:limit}), and a dimensionless regime index, computable before any indicator is designed, indicates the regime in which steering can have substantial value, with its accuracy and the direction of its errors measured on $299$ randomly drawn plants (Section~\ref{sec:regime}).
 
-\item The premises the construction rests on are separately testable on public run-to-failure data, and Section~\ref{sec:scope} tests them in three stages: whether the informative direction rotates at all, whether the operating point moves it, and whether the separable stress model survives. Two survive and one does not, which makes that section a test of which hypotheses withstand contact with data rather than a demonstration that the method works. The rotation is present in measured fleets; the actuation premise is so far confirmed on simulation only; and higher-fidelity turbofan data reject the separability of Lemma~\ref{lem:sep}, which places that lemma, and the offline route it opens, as statements about a model class rather than about measured machinery.
+\item The premises are separately testable on public run-to-failure
+data, and Section~\ref{sec:scope} tests three in turn: whether the informative
+direction rotates, whether the operating point moves it, and whether the
+separable stress model survives. The first holds on measured fleets, the
+second so far only in simulation, and the third is rejected. That section
+therefore reports which hypotheses withstand contact with data rather than
+demonstrating that the method works.
 \end{enumerate}
+
+The results do not all rest on the same assumptions, and it is worth
+separating them before any of them is stated. Lemma~\ref{lem:exact},
+Proposition~\ref{prop:record} and Theorem~\ref{thm:zero} need only the
+observation model of Section~\ref{sec:prelim}: a fixed linear indicator on
+whitened channels, and a scalar latent. Lemma~\ref{lem:sep} and
+Proposition~\ref{prop:contain} need more, namely that the input enters each
+mechanism through a single separable factor, and Section~\ref{sec:scope}
+reports that the highest-fidelity turbofan data reject exactly that. The
+empirical readings of Section~\ref{sec:scope} need more again, since
+estimating one informative direction from a fleet presumes the units differ by
+a time shift rather than by their degradation coefficients.
+Fig.~\ref{fig:scope} is the map, and the reader who wants to know which branch
+a given result sits on should consult it rather than infer it.
 
 Section~\ref{sec:prelim} states the model. Sections~\ref{sec:simplex}
 to~\ref{sec:limit} develop the theory, Section~\ref{sec:num} exercises the
@@ -471,6 +529,8 @@ The design objective throughout is its average over the life of the component,
 \label{eq:objective}
 \end{equation}
 a loss per unit time. We optimise this rate rather than the information the whole observation record forfeits, because \eqref{eq:objective} is unaffected by how densely the record is sampled and is therefore a property of the indicator rather than of the measurement schedule. The two are different quantities, and Proposition~\ref{prop:record} gives the second in closed form.
+
+A third quantity is the one an operator actually pays for: the error of whatever remaining-life estimator runs downstream. It is neither of the first two and is not a function of them. The loss is a logarithmic information quantity and the error is a time, and an estimator holding a whole history recovers much of what any single instant discards, so a large spread in \eqref{eq:objective} does not imply a comparable spread in error. What the theory can offer downstream is therefore an ordering rather than a conversion, and Section~\ref{sec:downstream} tests that ordering against an estimator built from none of this construction: it survives, with a spread in error much smaller than the spread in loss. Equation~\eqref{eq:objective} should be read accordingly, as an information-geometric objective whose ranking carries downstream, not as a surrogate for prognostic accuracy.
 
 Two remarks on what \eqref{eq:lossraw} does and does not say. It is a loss
 relative to an oracle that no fixed map can realise, so it measures the price
@@ -1246,20 +1306,25 @@ finite differencing; and \eqref{eq:bhat} to $1.1\times10^{-16}$.
 \subsection{A Fisher level set of varying loss}
 
 Proposition~\ref{prop:blind} is easy to demonstrate on this plant. For a
-constant input, the duty cycle only reparametrises time, so it moves
-$\|\dvec\|$ while leaving $\dhat(\tau)$, and hence $\beta$, untouched: the
-Fisher score and the loss can be varied independently.
+constant input, a common gain on $\dvec$ moves $\|\dvec\|$ while leaving
+$\dhat(\tau)$, and hence $\beta$, untouched: the Fisher score and the loss can
+be varied independently. Write $\delta(u)$ for the gain that equalises the
+score across inputs, fixed by $\delta(u)^{2}\,\overline{\|\dvec\|^{2}}(u)=F$
+with $F$ its value at $u=1.5$. It is realised by rescaling how long the
+component runs under load, which is why it does not rotate $\dhat$. By
+construction $\delta=1$ at $u=1.5$, and $\delta>1$ wherever the raw score is
+smaller, so it is a multiplier on exposure rather than a fraction of it.
 Table~\ref{tab:levelset} does exactly that, holding the Fisher score equal to
-seven digits by tuning the duty cycle $\delta$. The loss still spans a factor
+seven digits by tuning the exposure factor $\delta$. The loss still spans a factor
 $9.4$.
 
 \begin{table}[t]
-\caption{Loss of the fixed indicator at a Fisher score held equal. The duty cycle $\delta$ holds $\overline{\|\dvec\|^{2}}$ fixed and leaves $\dhat(\tau)$ unaffected. Losses use $\gamma=\|\dvec\|^{2}\Var[R]$ with $\Var[R]=10^{3}$.}
+\caption{Loss of the fixed indicator at a Fisher score held equal. The exposure factor $\delta$, defined in the text, holds $\delta^{2}\overline{\|\dvec\|^{2}}$ fixed and leaves $\dhat(\tau)$ unaffected. Losses use $\gamma=\|\dvec\|^{2}\Var[R]$ with $\Var[R]=10^{3}$.}
 \label{tab:levelset}
 \centering
 \begin{tabular}{ccccc}
 \hline
-$u$ & $\delta$ & $\overline{\|\dvec\|^{2}}$ & rms $\beta$ (deg)
+$u$ & $\delta$ & $\delta^{2}\overline{\|\dvec\|^{2}}$ & rms $\beta$ (deg)
 & $\bar{\lloss}$ (nat)\\
 \hline
 $0.0$ & $0.235$ & $0.4307565$ & $6.23$ & $0.0215$\\
@@ -1342,7 +1407,7 @@ adaptive policy attains $1.68\times10^{-4}$ against $1.15\times10^{-2}$ under th
 $\mathcal U$ is discretised for the policy, rising to $72$ at $161$ points; we
 report it on the $41$-point grid used throughout.
 
-The factor is an information ratio and is not free in reliability terms: the policy that attains it runs the component differently, and Section~\ref{sec:frac} finds the two closed loops separated by a factor of $3.4$ in life. Aligning the indicator and prolonging the component are competing objectives, which is what makes the horizon in \eqref{eq:frac} a controlled quantity rather than a constant. That factor is the value of steering at all, not the value of steering optimally: a myopic policy that attends only to the numerator of
+The factor is a ratio of information losses, not of information, and it is not free in reliability terms: the policy that attains it runs the component differently, and Section~\ref{sec:frac} finds the two closed loops separated by a factor of $3.4$ in life. Aligning the indicator and prolonging the component are competing objectives, which is what makes the horizon in \eqref{eq:frac} a controlled quantity rather than a constant. That factor is the value of steering at all, not the value of steering optimally: a myopic policy that attends only to the numerator of
 \eqref{eq:frac} sits $2.8\%$ above the optimum at $q^{\star}$.
 
 The fraction in \eqref{eq:frac} is doing visible work at this operating point.
@@ -1369,7 +1434,7 @@ and third and was discarded, as did a first attempt with mismatched control
 grids. A converse bound uniform over trajectories, which would replace this
 computation by a theorem, remains open.
 
-\subsection{The regime index as a screening test}
+\subsection{The regime index, and how far it screens}
 \label{sec:regime}
 
 For a practitioner the first question is not how to steer but whether to
@@ -1385,6 +1450,29 @@ falls from $68$ to $2.7$: with weak authority there is little left to steer.
 Fig.~\ref{fig:main}(b) plots the two against $\rho$. The construction of this
 paper is a statement about the low-$\rho$ regime, and $\rho$ can be computed
 from a nominal degradation model before any indicator is designed.
+
+Three plants differing only in their activation energies are not a screening
+law, so the index was tested on $299$ further plants drawn at random: two to
+five mechanisms, one or two independently adjustable inputs, and the
+pre-exponentials, activation energies, shape coefficients, input envelope,
+initial state and signal-to-noise ratio varied together. The rank correlation
+between $\rho$ and the gain is $-0.36$, and it keeps its sign inside every
+stratum of the mechanism count and of the input count, so it is not an
+artefact of either.
+
+Its useful direction is the optimistic one. Of the plants with $\rho<1$,
+$53\%$ repay steering by a factor of five or more, against $32\%$ over the
+whole sample. As a veto it is weaker: rejecting every plant with $\rho\ge1$
+would also reject $23\%$ of plants that would in fact have repaid a factor of
+five, and that is the expensive error rather than the cheap one. Most of the
+index's discriminating power is in its denominator: the reachable arc alone
+ranks the plants almost as well, at $0.35$ in magnitude against the ratio's
+$0.36$, while the drift on its own ranks them at below $0.05$ in magnitude,
+which is nothing. The drift earns its place
+only when plants of equal arc are compared. The first row of
+Table~\ref{tab:regime} is also not typical of its own regime: among sampled
+plants within a factor $1.4$ of its $\rho$, the median gain is $5.2$ rather
+than $68$. $\rho$ indicates a regime; it does not decide a design.
 
 \begin{table}[t]
 \caption{The regime index. The activation energies $E$ set the actuation authority; $c$, the noise and $\mathcal U$ are held fixed. $L^{\star}$ is the loss under adaptive control, and the gain its ratio to the best constant input.}
@@ -1406,7 +1494,7 @@ $(0.80,0.805,0.798)$ & $0.45^{\circ}$ & $53.1$ & $4.2\times10^{-3}$ & $2.7\times
 
 Corollary~\ref{cor:mmse} prices the loss in the error of the estimate the model itself prescribes. A practitioner does not use that estimate, so the ordering is worth checking against a procedure that uses none of the construction: sample the indicator over the last $40\%$ of life, match the observed history against the indicator's own reference curve, and read remaining life off the best-fitting time offset. That estimator sees a scalar signal and nothing else --- not $\dhat$, not $\gamma$, not the loss.
 
-Over twelve indicators spanning $\bar\lloss$ from $0.012$ to $0.37$, its median absolute error --- one of the standard prognostic accuracy measures~\cite{saxena2008metrics} --- rises with the loss, at Spearman correlation $0.89$, and the best-aligned indicator beats the worst by a factor $1.5$. The factor is far smaller than the $31$-fold spread in $\bar\lloss$, and it should be: the loss is a logarithmic information quantity, the error is a time, and an estimator with the whole history recovers much of what any one instant discards. What the experiment settles is the direction, which is what the objection was about.
+Over twelve indicators spanning $\bar\lloss$ from $0.012$ to $0.37$, its median absolute error --- one of the standard prognostic accuracy measures~\cite{saxena2008metrics} --- rises with the loss, at Spearman correlation $0.89$, and the best-aligned indicator beats the worst by a factor $1.5$. The factor is far smaller than the $31$-fold spread in $\bar\lloss$, and it should be: the loss is a logarithmic information quantity, the error is a time, and an estimator with the whole history recovers much of what any one instant discards.
 
 \section{What public data can say about the premises}
 \label{sec:scope}
@@ -1416,14 +1504,9 @@ testable. They do not carry equal weight, and Fig.~\ref{fig:scope} separates
 what depends on which. Two are premises about the plant: that the informative
 direction rotates along the trajectory, and that the input moves it. The third
 is the separability of Lemma~\ref{lem:sep}, which is what makes the operator's
-authority computable offline. This section summarises what six public
-run-to-failure fleets currently settle: the Severson lithium-ion
-cells~\cite{severson2019}, the XJTU-SY~\cite{xjtu2020} and
-PRONOSTIA~\cite{pronostia2012} bearing fleets, the NASA battery
-cells~\cite{saha2007}, and the C-MAPSS~\cite{saxena2008} and
-N-CMAPSS~\cite{arias2021} turbofan simulations. The protocols are not
-reproduced here; the datasets are named so that each test can be located and
-repeated.
+authority computable offline. Table~\ref{tab:fleets} summarises what six public run-to-failure
+fleets currently settle. The protocols are not reproduced here; the datasets
+are named so that each test can be located and repeated.
 
 
 \begin{figure*}[tb]
@@ -1495,36 +1578,52 @@ repeated.
 \label{fig:scope}
 \end{figure*}
 
-\paragraph{Rotation} On $129$ Severson lithium-ion cells~\cite{severson2019}, taking capacity fade, resistance growth and mean temperature as the three monitoring channels, the fleet-mean informative direction travels $30.7^{\circ}$ of arc
-over $\tau\in[0.15,0.9]$ and ends $21^{\circ}$ from where it began
-(Fig.~\ref{fig:mech}(c)). Mean temperature is a monitoring channel and not a damage state --- it is the operating variable itself in the Arrhenius form of Section~\ref{sec:prelim} --- so this test reads the rotation of a direction formed from three measured series, which is what the premise asserts, and does not need \eqref{eq:obs}'s pairing of channels with mechanisms. The direction stays in the open positive orthant once the differentiating window reaches $301$ cycles, so the positivity that
-Remark~\ref{rem:pos} shows to be load-bearing is a property of this fleet and
-not only of the model.
+\begin{table*}[tb]
+\caption{What the six public fleets settle, and what they cannot. Only the two
+turbofan simulations vary the operating point within a unit, which is why the
+actuation premise is confirmed in simulation and open on measured hardware.}
+\label{tab:fleets}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}R{0.16}R{0.14}R{0.31}R{0.34}@{}}
+\hline
+fleet & premise & what is measured & reading\\
+\hline
+Severson lithium-ion~\cite{severson2019} & rotation &
+arc of the fleet-mean informative direction over $\tau\in[0.15,0.9]$, on
+$129$ Severson lithium-ion cells &
+travels $30.7^{\circ}$ of arc and ends $21^{\circ}$ from its start
+(Fig.~\ref{fig:mech}(c)); stays in the open positive orthant once the
+window reaches $301$ cycles\\[3pt]
+XJTU-SY~\cite{xjtu2020}, PRONOSTIA~\cite{pronostia2012} & actuation &
+--- & the operating condition is fixed per unit, so condition and group of
+units cannot be separated\\[3pt]
+NASA batteries~\cite{saha2007} & actuation & --- & four cells\\[3pt]
+C-MAPSS~\cite{saxena2008} & actuation &
+between-regime minus within-regime angle, each engine serving as its own
+control &
+by $7.9^{\circ}$ (FD004) and $10.8^{\circ}$ (FD002), positive for $436$ of $439$ engines; fake regimes give $\lvert B-W\rvert\le0.5^{\circ}$\\[3pt]
+N-CMAPSS DS02, DS01~\cite{arias2021} & separability &
+interaction against both main effects, in a two-way layout inside engines &
+larger by a factor $1.65$ over the operating-point effect on DS02 and $1.84$ on DS01, under every clustering and staging tried: \textbf{rejected}\\
+\hline
+\end{tabular}
+\end{table*}
 
-\paragraph{Actuation} This premise needs the operating point to vary while
-everything else is held fixed, which of the six fleets only the two turbofan
-simulations permit. On C-MAPSS~\cite{saxena2008}, whose regimes interleave
-cycle by cycle inside each engine so that an engine serves as its own control,
-the angle between half-samples of different regimes exceeds the angle between
-half-samples of the same regime by $7.9^{\circ}$ (FD004) and $10.8^{\circ}$
-(FD002), positive for $436$ of $439$ engines. Against fake regimes cut from a
-single real one, where no contrast exists by construction, the same machinery
-returns $\lvert B-W\rvert\le0.5^{\circ}$. On the four measured fleets the
-obstacle is the estimator rather than the physics: in the two bearing fleets
-the operating condition is fixed per unit, so ``condition'' and ``group of
-units'' cannot be separated, and the NASA fleet has four cells. The premise is
-therefore confirmed on simulation and open on hardware.
+Three readings qualify the table. The Severson channels are capacity fade,
+resistance growth and mean temperature, and mean temperature is a monitoring
+channel rather than a damage state --- it is the operating variable itself in
+the Arrhenius form of Section~\ref{sec:prelim}. That row therefore reads the
+rotation of a direction formed from three measured series, which is what the
+premise asserts, and does not need \eqref{eq:obs}'s pairing of channels with
+mechanisms. On the four measured fleets the obstacle to testing actuation is
+the estimator and not the physics, so the premise is confirmed in simulation
+and open on hardware. And the C-MAPSS contrast is reported against a negative
+control --- fake regimes cut from a single real one, where no contrast exists
+by construction --- because a procedure that returned a positive contrast
+regardless would produce the same table entry.
 
-\paragraph{Separability} Lemma~\ref{lem:sep} is a statement about a plant
-class, and data can refute it. If the shift between two operating regimes were
-the same at every stage of life, regime and stage would act additively on
-$\xi$ and a two-way layout would show no interaction. On
-N-CMAPSS~\cite{arias2021}, which records altitude, Mach number and throttle
-every second of real flight profiles, the interaction exceeds \emph{both} main
-effects on the sums of squares, by a factor $1.65$ over the operating-point
-effect on DS02 and $1.84$ on DS01, and remains larger under every clustering
-and staging tried. Separability is therefore rejected on the highest-fidelity
-public turbofan simulation.
 
 The consequence is the scope of the results above. The geometry of
 Sections~\ref{sec:simplex} and~\ref{sec:reach} needs only $\varphi_i>0$ and
@@ -1541,41 +1640,41 @@ Four practical readings follow from the results above. The first two hold
 whatever the plant is, because one is a test and the other an invariance. The
 last two assume the separable form of \eqref{eq:plant}, which
 Section~\ref{sec:scope} reports as rejected on the only data able to test it,
-so they apply where that form does and not otherwise. The distinction matters
-more than any of the four.
+so they apply where that form does and not otherwise.
 
-Test the separability assumption before relying on it. The two-way layout of
-Section~\ref{sec:scope} needs only a fleet whose operating point varies within
-a unit, and it returns an interaction against a measured noise floor. If the
-interaction clears that floor, the stress model is not separable on that
-fleet, the offline route to the operator's authority is unavailable, and the
-two model-based readings below do not apply. The test costs one pass over data
-the programme already holds.
+Test the separability assumption before relying on it. The two-way
+layout of Section~\ref{sec:scope} needs only a fleet whose operating point
+varies within a unit, and costs one pass over data a reliability programme
+already holds. If the interaction clears the measured noise floor, the offline
+route to the operator's authority is unavailable and the two model-based
+readings below do not apply.
 
-A Fisher criterion cannot be used to design a fixed indicator. This is the
-second of the two unconditional readings: Proposition~\ref{prop:blind} is an
-invariance of the loss under a common gain, and holds whatever the plant.
-Design rules that maximise a scalarisation of the Fisher information, a
-natural and common choice, are provably unable to distinguish configurations
-whose losses differ by an order of magnitude, because they measure the
-strength of the signal and not the direction it points in. If the two
-objectives coincide in a given application, that is a property of the
-application and should be verified, not assumed.
+No Fisher criterion can rank fixed indicators by the loss they incur.
+This is the second of the two unconditional readings:
+Proposition~\ref{prop:blind} is an invariance of the loss under a common gain
+and holds whatever the plant, so rules that maximise a scalarisation of the
+Fisher information cannot separate configurations whose losses differ by an
+order of magnitude. Where the two objectives do coincide, that is a property
+of the application, to be verified rather than assumed.
 
-The binding constraint is actuation authority, not indicator sophistication.
-The counting rule of Theorem~\ref{thm:zero} prices the operating variables a
+The binding constraint is actuation authority, not indicator
+sophistication. Theorem~\ref{thm:zero} prices the operating variables a
 lossless fixed indicator would need, and Proposition~\ref{prop:contain}
-sharpens it: the count is sufficient and not necessary, but the exceptions ask
-the plant's log-offsets to slide along the input's own direction, which
+sharpens the count to sufficient but not necessary, with exceptions that
 Remark~\ref{rem:family} shows to be a knife edge. Care in choosing the weights
-substitutes for actuation in neither case. What one controllable variable does buy is the weaker objective of Corollary~\ref{cor:tri}: an installation that could never freeze the informative direction can still hold the misalignment constant, though not at zero. Authority bought this way is not free either. On the test plant the indicator whose loss is smallest is served by a policy that changes the component's life by a factor of $3.4$ against a balanced indicator, so information-preserving operation and long life are competing objectives and the trade between them is a reliability decision rather than an estimation one.
+substitutes for actuation in neither case. What one controllable variable does
+buy is the weaker objective of Corollary~\ref{cor:tri}: an installation that
+could never freeze the informative direction can still hold the misalignment
+constant, though not at zero. Authority bought this way is not free, and
+Section~\ref{sec:frac} prices it in life.
 
-The decision to steer precedes the design of the indicator. The regime index
-$\rho$ of Section~\ref{sec:regime} requires only a nominal degradation model
-and the operating envelope. When $\rho$ is large, the reachable arc is short
-relative to the drift, and Table~\ref{tab:regime} shows the value of steering
-collapsing from $68\times$ to under $3\times$. The index is therefore a
-screening test to run before committing engineering effort.
+The decision to steer precedes the design of the indicator. The regime
+index $\rho$ of Section~\ref{sec:regime} requires only a nominal degradation
+model and the operating envelope, and Table~\ref{tab:regime} shows the value
+of steering collapsing from $68\times$ to under $3\times$ as the reachable arc
+shortens relative to the drift. It indicates a regime rather than deciding a design:
+Section~\ref{sec:regime} measures how often it is wrong, and in which
+direction.
 
 \paragraph{Limitations} Four limitations qualify the readings above. The
 separable form of \eqref{eq:plant} is not only an idealisation but one the
@@ -1590,8 +1689,10 @@ than proved, to two digits. The actuation premise is confirmed on simulated rath
 
 A fixed health indicator discards information, and this paper has treated what
 it discards as a quantity the operating point controls. Indicator design then
-becomes a reachability question. The family of reachable direction sets bounds what the operating point can achieve, and their drift relative to their width is a dimensionless measure of whether substantial benefit is plausible. That ratio is
-dimensionless and available before the designer fixes any indicator. Actuation
+becomes a reachability question. The family of reachable direction sets bounds what the operating
+point can achieve, and their drift relative to their width is a dimensionless
+measure, available before any indicator is fixed, of whether substantial
+benefit is plausible. Actuation
 authority, rather than sophistication of the indicator, governs whether a
 fixed compression can come close to lossless. Whether that authority is
 present is an empirical question rather than a modelling assumption, and on
@@ -1599,13 +1700,12 @@ $439$ simulated turbofan records it is. Establishing the same on measured
 fleets awaits records in which the operating point varies enough to show the
 effect.
 
-The separable plant form that makes all of this computable is rejected by the
-data, on two datasets of the highest-fidelity public turbofan simulation, so
-the geometry of Section~\ref{sec:translate} describes a model class rather
-than measured machinery, and the offline route it opens is available only
-where that class applies. What replaces it when the stress model is not
-separable, and whether a weaker structure still yields a computable
-reachability criterion, is the question this leaves.
+Section~\ref{sec:scope} rejects that separable form on the
+highest-fidelity public turbofan data, so the geometry of
+Section~\ref{sec:translate}, and the offline route it opens, describe a model
+class rather than measured machinery. What replaces that structure when the
+stress model is not separable, and whether a weaker one still yields a
+computable reachability criterion, remains open.
 
 Two further questions remain open, the first of them now in a more specific
 form. Proposition~\ref{prop:converse} reduces the search for a converse bound

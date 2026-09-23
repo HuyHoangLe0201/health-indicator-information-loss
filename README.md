@@ -20,7 +20,7 @@ written in `theory.tex` — not against a stored expectation, but against the
 text itself, so the paper and the code cannot drift apart quietly. It ends with
 `ALL CHECKS PASS` or names the rows that failed.
 
-For all 114 checks you need the fleets; see [DATA.md](DATA.md).
+For all 122 checks you need the fleets; see [DATA.md](DATA.md).
 
 ```bash
 export RESS_DATA=/path/to/data
@@ -36,7 +36,8 @@ python verify_numbers.py --full        # about 30 minutes
 | `Ref.bib`, `theory.bbl` | bibliography |
 | `fig1.pdf`, `fig2.pdf`, `fig4.pdf` | the three plotted figures |
 | `make_fig1.py`, `make_fig2.py`, `make_fig4.py` | the scripts that draw them |
-| `verify_numbers.py` | the 114 checks |
+| `verify_numbers.py` | the 122 checks |
+| `rho_sweep.py`, `rho_sweep.json` | the regime-index sweep of Section 6.7, and what it produced |
 | `verified_run.log` | the output of the run that checked the shipped PDF |
 | `make_sub.py` | renders `sub.tex` from `theory.tex` |
 | `check_fonts.py` | Type 3 and embedding check on every PDF |
@@ -110,7 +111,7 @@ value:
 ## What a passing run looks like
 
 `verified_run.log` is the real output of `--full` against the files in
-this repository: 114 rows, each with the value the manuscript states
+this repository: 122 rows, each with the value the manuscript states
 beside the value recomputed from the model, and `ALL CHECKS PASS` at the
 end. Compare your own run against it line by line.
 
@@ -118,10 +119,10 @@ It opens and closes with the md5 of `theory.tex` and `verify_numbers.py`.
 That bracket is the point: it says the checks and the manuscript were the
 same files throughout, so a run that passed against an edited copy cannot
 be presented as a run that passed against this one. `theory.tex` here is
-`649046af748d`, which is the hash the log records.
+`fe5366df95db`, which is the hash the log records.
 
 The row count depends on the data you have. Without the fleets a subset
-runs and the total is smaller; 114 is the number with all six present.
+runs and the total is smaller; 122 is the number with all six present.
 
 ## Reproducing on another machine
 

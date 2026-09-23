@@ -1,6 +1,6 @@
 md5 BEFORE
-  649046af748d0ceefdbbde2e0c475453  theory.tex
-  31c1ebea9f0ef3f66518ce4088dd060c  verify_numbers.py
+  fe5366df95db02c5bde984b87da2ca65  theory.tex
+  aa3e6a450ebf20ef22cbdc1585a9bda0  verify_numbers.py
   2fca511bba69262b0645136c0078246c  fig4.pdf
   cc7ba4d06914e3fcd800c98f13f6bdd5  make_fig4.py
 CONFIG: {'a': [0.0, 0.3, -0.2], 'E': [0.6, 1.1, 0.8], 'c': [-0.5, 2.0, 0.8], 'U': (0.0, 3.0), 'w': 0.9, 'xfail': 0.9, 'x0': 0.005, 'tmax': 200.0, 'NU': 41, 'Ngrid': (25, 29, 35), 'qstar': [0.466109, 0.770508, 0.434809], 'gain': 1000.0}
@@ -75,6 +75,14 @@ Table I u=2.0: loss                                        0.0379    0.0378746  
 Table I u=3.0: delta                                        3.769      3.76874  ok
 Table I u=3.0: rms beta                                      6.57      6.57367  ok
 Table I u=3.0: loss                                        0.1161     0.116105  ok
+6.7 sweep plants                                              299          299  ok
+6.7 Spearman rho vs gain                                    -0.36    -0.355179  ok
+6.7 share repaying at rho<1                                    53       53.125  ok
+6.7 base rate repaying                                         32      32.4415  ok
+6.7 veto miss rate                                             23      22.6601  ok
+6.7 arc alone, magnitude                                     0.35     0.348676  ok
+6.7 median gain at Table II's rho                             5.2      5.19632  ok
+6.7 drift alone, magnitude bound                             0.05    0.0450257  ok (bound)
 4.1 family misalignment (deg)                                 1.5      1.47878  ok (bound)
 4.1 family mean loss                                           15      15.9683  ok (bound)
 4.1 best constant, low                                        1.2      1.23007  ok
@@ -150,9 +158,9 @@ Sec 6.5 myopic gap at q* (%)                                  2.8      2.76179  
 
 ALL CHECKS PASS
 
-exit 0 after 44.3 min
+exit 0 after 31.0 min
 md5 AFTER
-  649046af748d0ceefdbbde2e0c475453  theory.tex  [same]
-  31c1ebea9f0ef3f66518ce4088dd060c  verify_numbers.py  [same]
+  fe5366df95db02c5bde984b87da2ca65  theory.tex  [same]
+  aa3e6a450ebf20ef22cbdc1585a9bda0  verify_numbers.py  [same]
   2fca511bba69262b0645136c0078246c  fig4.pdf  [same]
   cc7ba4d06914e3fcd800c98f13f6bdd5  make_fig4.py  [same]
