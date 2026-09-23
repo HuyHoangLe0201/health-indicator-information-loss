@@ -168,6 +168,14 @@ M.~Falcone, R.~Ferretti, Semi-Lagrangian Approximation Schemes for Linear and
 \newblock \href {https://doi.org/10.1137/1.9781611973051}
   {\path{doi:10.1137/1.9781611973051}}.
 
+\bibitem{saxena2008metrics}
+A.~Saxena, J.~Celaya, E.~Balaban, K.~Goebel, B.~Saha, S.~Saha, M.~Schwabacher,
+  Metrics for evaluating performance of prognostic techniques, in:
+  International Conference on Prognostics and Health Management, 2008, pp.
+  1--17.
+\newblock \href {https://doi.org/10.1109/phm.2008.4711436}
+  {\path{doi:10.1109/phm.2008.4711436}}.
+
 \bibitem{severson2019}
 K.~A. Severson, P.~M. Attia, N.~Jin, N.~Perkins, B.~Jiang, Z.~Yang, M.~H. Chen,
   M.~Aykol, P.~K. Herring, D.~Fraggedakis, M.~Z. Bazant, S.~J. Harris, W.~C.

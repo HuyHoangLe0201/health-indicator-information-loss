@@ -51,8 +51,24 @@ UMIN, UMAX = CFG["U"]
 QS = CFG["qstar"] / np.linalg.norm(CFG["qstar"])
 
 
-def ell(b):
-    return -0.5 * np.log(np.maximum(1 - WS * np.sin(b) ** 2, 1e-300))
+def ell(b, d2=None):
+    """Exact loss of Lemma 2.2.
+
+    w := gamma/(1+gamma) with gamma = ||d||^2 Var[R]. Pass d2 = ||d||^2 to
+    evaluate at the plant's own signal-to-noise ratio, which is what the
+    definition asks for and what Table I does.
+
+    d2=None falls back to the declared constant CFG["w"]. That branch is for
+    the generic families of Section 5.1 only: those plants carry no Var[R],
+    so there is no gamma to form, and their claims are bounds with orders of
+    magnitude of headroom.
+    """
+    if d2 is None:
+        w = WS
+    else:
+        g = CFG["gain"] * np.asarray(d2, dtype=float)
+        w = g / (1.0 + g)
+    return -0.5 * np.log(np.maximum(1 - w * np.sin(b) ** 2, 1e-300))
 
 
 def grid(NU):
@@ -88,15 +104,17 @@ def greedy(q, NU=None, fast=False):
 
     def bb(x):
         D = PHI * (1.0 + HC[None, :] * x[None, :])
-        D = D / np.linalg.norm(D, axis=1, keepdims=True)
+        nr = np.linalg.norm(D, axis=1, keepdims=True)
+        D = D / nr
         b = np.arccos(np.clip(D @ q, -1, 1))
         j = int(np.argmin(b))
-        return US[j], float(b[j])
+        return US[j], float(b[j]), float(nr[j, 0] ** 2)
 
     X, Tf = traj(lambda x: bb(x)[0], n_s, rt)
     if X is None:
         return np.inf, np.inf, None
-    return float(np.mean(ell(np.array([bb(x)[1] for x in X])))), Tf, X
+    v = np.array([bb(x)[1:] for x in X])        # columns: beta, ||d||^2
+    return float(np.mean(ell(v[:, 0], v[:, 1]))), Tf, X
 
 
 def best_constant(q, NU=None):
@@ -108,8 +126,10 @@ def best_constant(q, NU=None):
         if X is None:
             continue
         D = np.exp(A - u * E)[None, :] * (1 + HC[None, :] * X)
-        D = D / np.linalg.norm(D, axis=1, keepdims=True)
-        L = float(np.mean(ell(np.arccos(np.clip(D @ q, -1, 1)))))
+        nr = np.linalg.norm(D, axis=1, keepdims=True)
+        D = D / nr
+        L = float(np.mean(ell(np.arccos(np.clip(D @ q, -1, 1)),
+                              nr[:, 0] ** 2)))
         if L < best[0]:
             best = (L, float(u))
     return best
@@ -814,6 +834,19 @@ def main():
             ("Sec 6.7 loss rises by a factor over the regimes",
              find(s, r"rises by a factor \$([0-9]+)\$"),
              _Lst_all[-1] / _Lst_all[0], 0.05))
+        print("\n[Sec 6.8] loss against remaining-life error ...",
+              flush=True)
+        _id, _sp, _rt = downstream_rul()
+        rows += [
+            # exact algebra, so this is a machine-precision claim
+            ("6.8 exp(2l) identity (rel err)", 1e-12, _id, "<"),
+            ("6.8 loss vs RUL error, Spearman",
+             find(s, r"at Spearman correlation \$([0-9.]+)\$"), _sp, 0.05),
+            ("6.8 best-aligned beats worst",
+             find(s, r"beats the worst by a factor \$([0-9.]+)\$"),
+             _rt, 0.10),
+        ]
+
         print("\n[Sec 6.1] sensitivity to the condemnation limit ...",
               flush=True)
         _pk, _gn, _dl = threshold_sensitivity(1.0)
@@ -871,13 +904,6 @@ def main():
                  find(s, r"On \$([0-9]+)\$ Severson lithium-ion cells"), st["n"], 0.0),
                 ("Severson arc travel (deg)",
                  find(s, r"travels\s*\n?\$([0-9.]+)\^\{\\circ\}\$ of arc"),
-                 st["travel"], 0.01),
-                # the abstract now restates the arc travel. It says "turns"
-                # where Section 7 says "travels", deliberately: one pattern
-                # matching both would leave the Section 7 row silently
-                # checking the abstract, since find() takes the first match.
-                ("Severson arc travel, restated in the abstract",
-                 find(s, r"direction turns \$([0-9.]+)\^\{\\circ\}\$"),
                  st["travel"], 0.01),
                 ("Severson end-to-end (deg)",
                  find(s, r"ends \$([0-9]+)\^\{\\circ\}\$ from"),
@@ -1010,9 +1036,6 @@ def main():
                  find(s, r"positive for \$([0-9]+)\$ of"), float(npos), 0.0),
                 ("C-MAPSS engines total",
                  find(s, r"of \$([0-9]+)\$ engines"),
-                 float(ntot), 0.0),
-                ("C-MAPSS engines total, abstract",
-                 find(s, r"control, \$([0-9]+)\$ simulated turbofan records confirm"),
                  float(ntot), 0.0),
                 ("C-MAPSS engines total, conclusion",
                  find(s, r"and on \$([0-9]+)\$ simulated turbofan records it is"),
@@ -2100,6 +2123,84 @@ def cmapss_dose(fname):
     return float(r.slope), float(r.intercept), len(sep), means
 
 
+def downstream_rul(nind=12, nunit=160, K=30, span=0.40, seed=5):
+    """Section 6.8: does a lower loss buy a lower remaining-life error?
+
+    Returns (worst relative error of the exp(2 l) identity, Spearman
+    correlation between mean loss and median absolute error, ratio of the
+    worst indicator's median error to the best's).
+
+    The estimator deliberately knows nothing about the construction: it
+    matches an observed scalar history against the indicator's own reference
+    curve and reads remaining life from the best-fitting offset.
+    """
+    X, Tf = traj(lambda x: 1.5, 4000)
+    if X is None:
+        return np.nan, np.nan, np.nan
+    tg = np.linspace(0.0, Tf, 4000)
+
+    def at(t):
+        t = np.atleast_1d(t)
+        return np.stack([np.interp(t, tg, X[:, k]) for k in range(3)], -1)
+
+    def dv(x):
+        return np.exp(A - 1.5 * E) * (1.0 + HC * x)
+
+    dm = dv(at(0.5 * Tf)[0])
+    dh = dm / np.linalg.norm(dm)
+    o = np.ones(3) / np.sqrt(3)
+    pp = o - (o @ dh) * dh
+    pp /= np.linalg.norm(pp)
+
+    # --- the exact identity, at several misalignments -------------------
+    worst = 0.0
+    gm = CFG["gain"] * float(dm @ dm)
+    for pd in (0.5, 2.0, 5.0, 15.0, 40.0):
+        p = np.radians(pd)
+        v = np.cos(p) * dh + np.sin(p) * pp
+        c2 = float(dm @ v) ** 2 / float(dm @ dm)
+        ratio = (1.0 + gm) / (1.0 + gm * c2)
+        lo = 0.5 * (np.log1p(gm) - np.log1p(gm * c2))
+        worst = max(worst, abs(ratio - np.exp(2 * lo)) / ratio)
+
+    # --- the practitioner's estimator ------------------------------------
+    aoff = np.linspace(0.0, span * Tf, K)
+    grid_t = np.linspace(0.0, 0.60 * Tf, 900)
+    cand = grid_t[grid_t + aoff[-1] <= Tf]
+    XC = np.stack([at(t + aoff) for t in cand])          # (nc, K, 3)
+    rg = np.random.default_rng(seed)
+    taus = rg.uniform(0.0, 0.45 * Tf, nunit)
+    XU = np.stack([at(t + aoff) for t in taus])          # (nu, K, 3)
+
+    ts = np.linspace(0.05 * Tf, 0.95 * Tf, 400)
+    XS = at(ts)
+
+    out = []
+    for k in range(nind):
+        p = np.radians(0.0 if k == 0 else 2.0 * k ** 1.5)
+        v = np.abs(np.cos(p) * dh + np.sin(p) * pp)
+        v /= np.linalg.norm(v)
+        li = []
+        for x in XS:
+            dd = dv(x)
+            gg = CFG["gain"] * float(dd @ dd)
+            c2 = float(dd @ v) ** 2 / float(dd @ dd)
+            li.append(0.5 * (np.log1p(gg) - np.log1p(gg * c2)))
+        L = float(np.mean(li))
+        r2 = np.random.default_rng(400 + k)
+        Z = XU @ v + r2.normal(0.0, 1.0, (nunit, K))
+        zc = XC @ v
+        j = np.argmin(((zc[None] - Z[:, None]) ** 2).sum(axis=2), axis=1)
+        e = np.abs((Tf - cand[j] - aoff[-1]) - (Tf - taus - aoff[-1]))
+        out.append((L, float(np.median(e))))
+    out.sort()
+    Lv = np.array([a for a, _ in out])
+    Mv = np.array([b for _, b in out])
+    sp = float(np.corrcoef(np.argsort(np.argsort(Lv)),
+                           np.argsort(np.argsort(Mv)))[0, 1])
+    return worst, sp, float(Mv.max() / Mv.min())
+
+
 def threshold_sensitivity(xf=1.0):
     """How much of Section 6 rides on the condemnation limit x_f = 0.9?
 
@@ -2681,7 +2782,8 @@ def dinkelbach_limit():
             ST.append(P + st[:, None] * gg)
             TI.append(st / nf[:, 0])
             HI.append(st < h - 1e-15)
-            RU.append(ell(np.arccos(np.clip(gg @ QS, -1, 1))))
+            RU.append(ell(np.arccos(np.clip(gg @ QS, -1, 1)),
+                          nf[:, 0] ** 2))
         RU = np.stack(RU)
         W = np.zeros(len(P))
         for _ in range(500):
