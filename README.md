@@ -31,7 +31,7 @@ python verify_numbers.py --full        # about 30 minutes
 
 | | |
 |---|---|
-| `theory.tex`, `theory.pdf` | the manuscript, 40 pages |
+| `theory.tex`, `theory.pdf` | the manuscript, 41 pages |
 | `sub.tex`, `sub.pdf` | the same source in the journal's two-column layout |
 | `Ref.bib`, `theory.bbl` | bibliography |
 | `fig1.pdf`, `fig2.pdf`, `fig4.pdf` | the three plotted figures |
