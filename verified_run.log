@@ -1,7 +1,7 @@
 md5 BEFORE
-  8756cb229b1d316471079a53face0dbe  theory.tex
+  0b39cb6fba2769949864267c6900858f  theory.tex
   5137adb46edb4eb1cfe0de6e6edb2ca1  supplement.tex
-  710daaf500ce7459e43aabb0f70a1737  verify_numbers.py
+  6ad91bfa7227fccfdfe0f2dd25f03725  verify_numbers.py
   c0db59819961d0f743f9c0fc5d58cac5  rho_sweep.json
   506f77029478c7d27b65de63b294c58f  downstream_sweep.json
   2fca511bba69262b0645136c0078246c  fig4.pdf
@@ -56,6 +56,8 @@ figure panels the text never points at                          0            0  
 unscoped six-regime claims about C-MAPSS                        0            0  ok
 unqualified consequences of $m<d-1$                             0            0  ok
 sub.tex matches theory.tex                                      1            1  ok
+6.7 Table 3 drift, smallest (deg)                              24       23.895  ok
+6.7 Table 3 drift, largest (deg)                               30       29.832  ok
 supplement pointers that do not resolve                         0            0  ok
 S1 Severson window (cycles)                                   301          301  ok
 S1 Severson minimum cycles                                    400          400  ok
@@ -109,14 +111,26 @@ Table I u=3.0: loss                                        0.1161     0.116105  
 6.7 AUC of the drift, lower                                  0.46      0.46171  ok
 6.7 AUC of the drift, upper                                   0.6     0.603063  ok
 6.7 drift AUC interval contains 0.5                             1            1  ok
-6.7 repaying below rho = 2.6                                   52      51.7007  ok
-6.7 repaying above rho = 2.6                                   14      13.8158  ok
-6.7 veto miss rate                                             23      22.6601  ok
 6.7 lowest decile repaying                                     43      43.3333  ok
+6.7 nested: drift adds to arc, p                             0.47     0.473567  ok
+6.7 nested: drift adds nothing (p > 0.05)                       1            1  ok
+6.7 nested: ratio constraint, p (x1e-5)                       7.7      7.71273  ok
+6.7 nested: Akaike information of rho                         351      351.086  ok
+6.7 nested: Akaike information of the arc                     336      335.972  ok
+6.7 nested: both hold in each input count                       1            1  ok
+6.7 nested: interaction p (x1e-4)                               3       3.0192  ok
+6.7 tercile: low authority, low drift                        0.18     0.176471  ok
+6.7 tercile: low authority, high drift                       0.08         0.08  ok
+6.7 tercile: high authority, low drift                       0.48     0.477273  ok
+6.7 tercile: high authority, high drift                      0.61     0.612903  ok
+6.7 cross-validated AUC, arc                                 0.72     0.722441  ok
+6.7 cross-validated AUC, rho                                 0.72     0.723984  ok
+6.7 cross-validated AUC, with interaction                    0.74     0.744414  ok
+6.7 interaction better in every repeat                          1            1  ok
 6.7 lowest decile drift (deg)                                 2.7      2.68688  ok
 6.7 median drift, all plants (deg)                             14      14.3627  ok
 6.7 median gain at Table II's rho                             5.2      5.19632  ok
-abstract: AUC of rho                                         0.73     0.733898  ok
+abstract: AUC of the arc                                     0.73     0.731346  ok
 abstract: sweep plants                                        299          299  ok
 6.8 Spearman interval, lower                                 0.34     0.342657  ok
 6.8 Spearman interval, upper                                  0.9     0.902098  ok
@@ -212,11 +226,11 @@ Sec 6.5 myopic gap at q* (%)                                  2.8      2.76179  
 
 ALL CHECKS PASS
 
-exit 0 after 28.8 min
+exit 0 after 35.4 min
 md5 AFTER
-  8756cb229b1d316471079a53face0dbe  theory.tex  [same]
+  0b39cb6fba2769949864267c6900858f  theory.tex  [same]
   5137adb46edb4eb1cfe0de6e6edb2ca1  supplement.tex  [same]
-  710daaf500ce7459e43aabb0f70a1737  verify_numbers.py  [same]
+  6ad91bfa7227fccfdfe0f2dd25f03725  verify_numbers.py  [same]
   c0db59819961d0f743f9c0fc5d58cac5  rho_sweep.json  [same]
   506f77029478c7d27b65de63b294c58f  downstream_sweep.json  [same]
   2fca511bba69262b0645136c0078246c  fig4.pdf  [same]

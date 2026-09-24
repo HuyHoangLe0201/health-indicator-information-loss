@@ -674,6 +674,8 @@ def rho_sweep_stats():
         # rather than stored.
         sp_drift=sp(rho * arc, gain),
         **_rho_classifier(rho, arc, gain),
+        **_rho_nested(rho, arc, gain,
+                      np.array([r["m"] for r in rows])),
         share_low=100.0 * big[low].mean(),
         base=100.0 * big.mean(),
         miss=100.0 * big[veto].mean(),
@@ -735,6 +737,84 @@ def _rho_classifier(rho, arc, gain, B=2000, seed=31):
                            / np.sqrt((ra ** 2).sum() * (rb ** 2).sum())))
     out["sp_lo"] = float(np.percentile(ranks, 2.5))
     out["sp_hi"] = float(np.percentile(ranks, 97.5))
+    return out
+
+
+def _rho_nested(rho, arc, gain, m):
+    """Is rho better than the reachable arc alone? Nested logistic models.
+
+    With x1 = log arc and x2 = log drift, P(gain >= 5) = sigmoid(a + b1 x1 +
+    b2 x2) contains the arc alone (b2 = 0) and the ratio rho (b1 = -b2) as
+    special cases, so likelihood-ratio tests settle what AUC cannot: the two
+    rank the plants alike, but only one of them fits.
+
+    CANNOT SEE: whether the drift's role would differ under a response other
+    than "repays fivefold"; the least-squares fit on log gain agreed in the
+    exploratory analysis and is not re-run here.
+    """
+    from scipy import stats as _st
+    from scipy.optimize import minimize as _min
+    y = (gain >= 5.0).astype(float)
+    x1, x2 = np.log(arc), np.log(rho * arc)
+
+    def fit(X, yy):
+        X = np.column_stack([np.ones(len(yy)), X])
+        r = _min(lambda b: np.sum(np.logaddexp(0, X @ b) - yy * (X @ b)),
+                 np.zeros(X.shape[1]), method="BFGS")
+        return r.x, -r.fun
+
+    def lls(sel):
+        a, b, i = x1[sel], x2[sel], y[sel]
+        return dict(arc=fit(np.column_stack([a]), i)[1],
+                    rho=fit(np.column_stack([b - a]), i)[1],
+                    full=fit(np.column_stack([a, b]), i)[1],
+                    inter=fit(np.column_stack([a, b, a * b]), i)[1])
+
+    L = lls(np.ones(len(y), bool))
+    out = dict(
+        p_drift_main=float(_st.chi2.sf(2 * (L["full"] - L["arc"]), 1)),
+        p_ratio=float(_st.chi2.sf(2 * (L["full"] - L["rho"]), 1)),
+        p_interaction=float(_st.chi2.sf(2 * (L["inter"] - L["full"]), 1)),
+        aic_arc=4.0 - 2 * L["arc"], aic_rho=4.0 - 2 * L["rho"])
+    ok = True
+    for mm in (1, 2):
+        Lm = lls(m == mm)
+        ok &= (_st.chi2.sf(2 * (Lm["full"] - Lm["arc"]), 1) > 0.05
+               and _st.chi2.sf(2 * (Lm["full"] - Lm["rho"]), 1) < 0.05)
+    out["strata_agree"] = float(ok)
+
+    qa = np.quantile(x1, [1 / 3, 2 / 3])
+    qd = np.quantile(x2, [1 / 3, 2 / 3])
+    ia, idd = np.digitize(x1, qa), np.digitize(x2, qd)
+    for tag, a_, d_ in (("lo_lo", 0, 0), ("lo_hi", 0, 2),
+                        ("hi_lo", 2, 0), ("hi_hi", 2, 2)):
+        out["t_" + tag] = float(y[(ia == a_) & (idd == d_)].mean())
+
+    def auc(sc, yy):
+        pos, neg = sc[yy == 1], sc[yy == 0]
+        return float(((pos[:, None] > neg[None, :]).sum()
+                      + 0.5 * (pos[:, None] == neg[None, :]).sum())
+                     / (len(pos) * len(neg)))
+
+    MOD = {"arc": np.column_stack([x1]), "rho": np.column_stack([x2 - x1]),
+           "inter": np.column_stack([x1, x2, x1 * x2])}
+    rng = np.random.default_rng(41)
+    cv = {k: [] for k in MOD}
+    n = len(y)
+    for _ in range(20):
+        idx = rng.permutation(n)
+        folds = np.array_split(idx, 10)
+        for k, X in MOD.items():
+            sc = np.empty(n)
+            for te in folds:
+                tr = np.setdiff1d(idx, te)
+                b, _l = fit(X[tr], y[tr])
+                sc[te] = b[0] + X[te] @ b[1:]
+            cv[k].append(auc(sc, y))
+    for k in MOD:
+        out["cv_" + k] = float(np.mean(cv[k]))
+    out["cv_inter_always_better"] = float(
+        all(a > b for a, b in zip(cv["inter"], cv["arc"])))
     return out
 
 
@@ -978,6 +1058,17 @@ def main():
     rows.append(("unqualified consequences of $m<d-1$",
                  0.0, generic_qualifiers(args.tex), 0.0))
     rows.append(("sub.tex matches theory.tex", 1.0, sub_is_current(), 0.0))
+    _t3 = re.findall(r"\$\([0-9.,]+\)\$ & \$([0-9.]+)\^\{\\circ\}\$ & "
+                     r"\$([0-9.]+)\$ &", s)
+    _dr = [float(a) * float(b) for a, b in _t3]
+    rows += [
+        ("6.7 Table 3 drift, smallest (deg)",
+         find(s, r"staying between \$([0-9]+)\^\{\\circ\}\$ and"),
+         min(_dr) if _dr else None, 0.02),
+        ("6.7 Table 3 drift, largest (deg)",
+         find(s, r"and \$([0-9]+)\^\{\\circ\}\$ while the arc spans"),
+         max(_dr) if _dr else None, 0.02),
+    ]
     rows.append(("supplement pointers that do not resolve",
                  0.0, supplement_refs(args.tex), 0.0))
     _pc = protocol_constants()
@@ -1104,18 +1195,54 @@ def main():
             # the sentence says the drift's interval includes a coin toss
             ("6.7 drift AUC interval contains 0.5", 1.0,
              float(_rs["auc_drift_lo"] < 0.5 < _rs["auc_drift_hi"]), 0.0),
-            ("6.7 repaying below rho = 2.6",
-             find(s, r"below \$\\rho=2.6\$, \$([0-9]+)\\%\$ repay"),
-             _rs["p_below"], 0.02),
-            ("6.7 repaying above rho = 2.6",
-             find(s, r"fivefold, against \$([0-9]+)\\%\$ above it"),
-             _rs["p_above"], 0.02),
-            ("6.7 veto miss rate",
-             find(s, r"would also reject \$([0-9]+)\\%\$"),
-             _rs["miss"], 0.02),
             ("6.7 lowest decile repaying",
-             find(s, r"lowest tenth of \$\\rho\$ only \$([0-9]+)\\%\$"),
+             find(s, r"lowest tenth of \$\\rho\$ repays fivefold only "
+                     r"\$([0-9]+)\\%\$"),
              _rs["p_lowest_decile"], 0.02),
+            # nested logistic models: is the ratio better than its parts?
+            ("6.7 nested: drift adds to arc, p",
+             find(s, r"as a main effect \(\$p=([0-9.]+)\$\)"),
+             _rs["p_drift_main"], 0.02),
+            ("6.7 nested: drift adds nothing (p > 0.05)", 1.0,
+             float(_rs["p_drift_main"] > 0.05), 0.0),
+            ("6.7 nested: ratio constraint, p (x1e-5)",
+             find(s, r"worse than the arc alone \(\$p=([0-9.]+)\\times10\^\{-5\}\$"),
+             _rs["p_ratio"] * 1e5, 0.02),
+            ("6.7 nested: Akaike information of rho",
+             find(s, r"Akaike information \$([0-9]+)\$ against"),
+             _rs["aic_rho"], 0.005),
+            ("6.7 nested: Akaike information of the arc",
+             find(s, r"Akaike information \$[0-9]+\$ against \$([0-9]+)\$"),
+             _rs["aic_arc"], 0.005),
+            ("6.7 nested: both hold in each input count", 1.0,
+             _rs["strata_agree"], 0.0),
+            ("6.7 nested: interaction p (x1e-4)",
+             find(s, r"\(\$p=([0-9.]+)\\times10\^\{-4\}\$ for their interaction\)"),
+             _rs["p_interaction"] * 1e4, 0.02),
+            ("6.7 tercile: low authority, low drift",
+             find(s, r"repaying fivefold falls from \$([0-9.]+)\$ to"),
+             _rs["t_lo_lo"], 0.03),
+            ("6.7 tercile: low authority, high drift",
+             find(s, r"repaying fivefold falls from \$[0-9.]+\$ to \$([0-9.]+)\$"),
+             _rs["t_lo_hi"], 0.03),
+            ("6.7 tercile: high authority, low drift",
+             find(s, r"high authority it rises from \$([0-9.]+)\$ to"),
+             _rs["t_hi_lo"], 0.03),
+            ("6.7 tercile: high authority, high drift",
+             find(s, r"high authority it rises from \$[0-9.]+\$ to \$([0-9.]+)\$"),
+             _rs["t_hi_hi"], 0.03),
+            # out of sample, the claim the recommendation rests on
+            ("6.7 cross-validated AUC, arc",
+             find(s, r"each rank unseen plants with an area of \$([0-9.]+)\$"),
+             _rs["cv_arc"], 0.02),
+            ("6.7 cross-validated AUC, rho",
+             find(s, r"each rank unseen plants with an area of \$([0-9.]+)\$"),
+             _rs["cv_rho"], 0.02),
+            ("6.7 cross-validated AUC, with interaction",
+             find(s, r"interaction with the arc reaches \$([0-9.]+)\$"),
+             _rs["cv_inter"], 0.02),
+            ("6.7 interaction better in every repeat", 1.0,
+             _rs["cv_inter_always_better"], 0.0),
             ("6.7 lowest decile drift (deg)",
              find(s, r"a median of \$([0-9.]+)\^\{\\circ\}\$ against"),
              _rs["drift_lowest_decile"], 0.02),
@@ -1126,9 +1253,10 @@ def main():
              find(s, r"the median gain is \$([0-9.]+)\$ rather"),
              _rs["med_near"], 0.02),
             # the abstract quotes the same AUC and the same sample size
-            ("abstract: AUC of rho",
+            # the abstract now quotes the ARC's area, not rho's
+            ("abstract: AUC of the arc",
              find(s, r"receiver-operating curve of \$([0-9.]+)\$ over"),
-             _rs["auc_rho"], 0.02),
+             _rs["auc_arc"], 0.02),
             ("abstract: sweep plants",
              find(s, r"curve of \$[0-9.]+\$ over \$([0-9]+)\$ random plants"),
              _rs["n"], 0.0),
@@ -1482,7 +1610,7 @@ def main():
                  find(s, r"of \$([0-9]+)\$ engines"),
                  float(ntot), 0.0),
                 ("C-MAPSS engines total, conclusion",
-                 find(s, r"and on \$([0-9]+)\$ simulated turbofan records it is"),
+                 find(s, r"and on \$([0-9]+)\$ simulated turbofan records the evidence"),
                  float(ntot), 0.0),
                 # "stable over w in {7,9,11}": the smallest effect over the
                 # three windows must still clear the largest control bias

@@ -80,7 +80,7 @@ directions reachable at each instant share a common point, which for generic
 plants needs one fewer independently adjustable operating variable than there
 are mechanisms. Scaling every channel by the same factor leaves the loss
 unchanged, so no criterion built from the Fisher information about
-remaining life can detect it. Steering the operating point reduces the loss substantially when the authority it offers is large beside the drift of the informative direction; on a representative three-mechanism synthetic plant the information-loss objective defined here falls by a factor of $68$ against the best constant operating point. A dimensionless index of that balance, available before any indicator is chosen, describes the regime rather than deciding it, with an area under the receiver-operating curve of $0.73$ over $299$ random plants. Six public run-to-failure fleets test the premises separately: an informative direction estimated from measured cells rotates, and simulated turbofan records confirm against a negative control that the operating point moves it. The same fleets bound the theory: the highest-fidelity turbofan data reject the separable plant form under which the operator's authority becomes computable offline, so that branch describes a model class rather than measured machinery.
+remaining life can detect it. Steering the operating point reduces the loss substantially when the authority it offers is large beside the drift of the informative direction; on a representative three-mechanism synthetic plant the information-loss objective defined here falls by a factor of $68$ against the best constant operating point. The width of the reachable set of informative directions measures that authority before any indicator is chosen, and screens for the regime with an area under the receiver-operating curve of $0.73$ over $299$ random plants; the drift refines the screen only in combination with it, hurting where the authority is small and helping where it is large. Six public run-to-failure fleets test the premises separately: an informative direction estimated from measured cells rotates, and simulated turbofan records, checked against a negative control, support the premise that the operating point moves it. The same fleets bound the theory: the highest-fidelity turbofan data reject the separable plant form under which the operator's authority becomes computable offline, so that branch describes a model class rather than measured machinery.
 \end{abstract}
 
 \begin{keyword}
@@ -231,7 +231,7 @@ the loss they incur.
 
 \item The best achievable loss is the value of an optimal control problem
 whose objective is a ratio, and whose terminal time is itself controlled
-(Section~\ref{sec:limit}); we compute its value to two digits and do not certify it. A dimensionless regime index, computable before any indicator is designed, describes the regime in which steering can have substantial value, and its accuracy and the direction of its errors are measured on $299$ randomly drawn plants (Section~\ref{sec:regime}).
+(Section~\ref{sec:limit}); we compute its value to two digits and do not certify it. The actuation authority, measured by the width of the reachable set and computable before any indicator is designed, screens for the regime in which steering can have substantial value; on $299$ randomly drawn plants it ranks them as well as its ratio to the drift of the informative direction and fits them better, and the drift matters only in combination with it (Section~\ref{sec:regime}).
 
 \item The premises are separately testable on public run-to-failure
 data, and Section~\ref{sec:scope} tests three in turn: whether the informative
@@ -1212,8 +1212,7 @@ binds in both directions on a generic plant, and that the best achievable loss
 is a finite number one can compute. This section instantiates the model on a
 synthetic three-mechanism plant on which every quantity is available in closed
 form, checks those three claims against it, measures what steering is worth,
-and reads off the dimensionless index that says in advance whether it will
-repay the effort. Section~\ref{sec:scope} then reports what measured fleets
+and asks which quantity, available in advance, says whether it will repay the effort. Section~\ref{sec:scope} then reports what measured fleets
 can and cannot establish about the premises.
 
 \subsection{The test plant}
@@ -1286,7 +1285,7 @@ indicator while the arcs at $\tau=0.05$ and $\tau=0.9$ stand off it.
 
 \begin{figure}[t]
 \centering \includegraphics[width=\linewidth]{fig1.pdf}
-\caption{(a)~The information-share curve $p_\tau$ on the 2-simplex (circle: start, square: failure), the reachable sets $\mathcal D(x_\tau)$ at $\tau=0.05$, $0.45$ and $0.9$, and the optimal indicator $q^{\star}$. No point lies on all three, so $\beta$ cannot be held at zero (Theorem~\ref{thm:zero}). (b)~What steering buys, against the regime index $\rho$.}
+\caption{(a)~The information-share curve $p_\tau$ on the 2-simplex (circle: start, square: failure), the reachable sets $\mathcal D(x_\tau)$ at $\tau=0.05$, $0.45$ and $0.9$, and the optimal indicator $q^{\star}$. No point lies on all three, so $\beta$ cannot be held at zero (Theorem~\ref{thm:zero}). (b)~What steering buys, against $\rho$, the drift of the reachable arc over its length.}
 \label{fig:main}
 \end{figure}
 
@@ -1363,22 +1362,17 @@ and third and was discarded, as did a first attempt with mismatched control
 grids. A converse bound uniform over trajectories, which would replace this
 computation by a theorem, remains open.
 
-\subsection{The regime index, and how far it screens}
+\subsection{Authority, drift, and how far they screen}
 \label{sec:regime}
 
 For a practitioner the first question is not how to steer but whether to
-bother. One dimensionless ratio answers it. The reachable set $\mathcal D(x)$
-is an arc; write $\rho$ for the drift of its midpoint over the life divided by
-its mean length, so $\rho$ measures how far the informative direction wanders
-in units of the actuation authority available to chase it.
+bother. The reachable set $\mathcal D(x)$ is an arc, and it offers two natural answers: its mean length, which is the actuation authority available to chase the informative direction, and the drift of its midpoint over the life, which is how far that direction wanders. Write $\rho$ for the drift divided by the length, which weighs the two against each other.
 
 Table~\ref{tab:regime} varies the spread of the activation energies, which by
 \eqref{eq:repl} is what sets that authority. As the arc collapses, the
 attainable loss $L^{\star}$ rises by a factor $25$ and the value of control
 falls from $68$ to $2.7$: with weak authority there is little left to steer.
-Fig.~\ref{fig:main}(b) plots the two against $\rho$. The construction of this
-paper is a statement about the low-$\rho$ regime, and $\rho$ can be computed
-from a nominal degradation model before any indicator is designed.
+Fig.~\ref{fig:main}(b) plots the two against $\rho$. In this family the drift barely moves, staying between $24^{\circ}$ and $30^{\circ}$ while the arc spans nearly two decades, so $\rho$ is the reciprocal of the arc in all but name and the table cannot say which of the two matters. Both can be computed from a nominal degradation model before any indicator is designed.
 
 Three plants differing only in their activation energies are not a screening
 law, so the index was tested on $299$ further plants drawn at random: two to
@@ -1393,22 +1387,38 @@ Read as a classifier of whether steering repays a factor of five, which
 $32\%$ of the plants do, $\rho$ has an area under the receiver-operating curve
 of $0.73$, with interval $0.67$ to $0.79$. The reachable arc alone scores
 $0.73$ as well, and the drift alone $0.53$, with interval $0.46$ to $0.60$,
-which includes the $0.5$ of a coin toss: most of the index's discriminating
-power is in its denominator, and the drift earns its place only among plants
-of equal arc. Of the plants below $\rho=2.6$, $52\%$ repay steering fivefold,
-against $14\%$ above it, a split read off this same sample and so optimistic. As a veto the index is weaker than that suggests:
-rejecting every plant with $\rho\ge1$ would also reject $23\%$ of plants that
-would in fact have repaid a factor of five, and that is the expensive error
-rather than the cheap one. Nor is lower always better. In the lowest tenth of
-$\rho$ only $43\%$ repay fivefold, because there the drift itself is small, a
-median of $2.7^{\circ}$ against $14^{\circ}$ over the sample: steering needs
-authority, and it also needs something to chase. The first row of
-Table~\ref{tab:regime} is not typical of its own regime either: among sampled
-plants within a factor $1.4$ of its $\rho$, the median gain is $5.2$ rather
-than $68$. $\rho$ describes a regime; it does not decide a design.
+which includes the $0.5$ of a coin toss.
+
+Equal areas do not make the two equally good, and the question is settled by a
+model that contains both as special cases: a logistic regression on the
+logarithms of arc and drift as separate terms, of which the arc alone and the
+ratio $\rho$ are each a constrained case. The drift adds nothing to the arc as
+a main effect ($p=0.47$), and constraining the two to enter as a ratio fits
+significantly worse than the arc alone ($p=7.7\times10^{-5}$; Akaike
+information $351$ against $336$). Both results hold in each input count
+separately. The drift does carry information, but through the arc
+($p=3.0\times10^{-4}$ for their interaction), and in opposite directions at the
+two ends. Among plants of low authority the share repaying fivefold falls from
+$0.18$ to $0.08$ as the drift rises from its lowest to its highest third; among
+plants of high authority it rises from $0.48$ to $0.61$. Drift that outruns the
+authority defeats steering, and drift that the authority can follow is what
+gives steering something to do. The ratio encodes only the first of these. It
+is also why the lowest tenth of $\rho$ repays fivefold only $43\%$ of the time:
+there the drift is small, a median of $2.7^{\circ}$ against $14^{\circ}$ over
+the sample.
+
+Out of sample the ranking agrees. Over repeated ten-fold cross-validation the
+arc and $\rho$ each rank unseen plants with an area of $0.72$, and a model
+adding the drift and its interaction with the arc reaches $0.74$, higher in
+every repeat. The quantity to screen with is therefore the arc, the authority
+itself, refined by the drift only through that interaction; $\rho$ remains a
+convenient description of the family of Table~\ref{tab:regime}, where the drift
+is nearly fixed. The first row of that table is not typical of its own regime:
+among sampled plants within a factor $1.4$ of its $\rho$, the median gain is
+$5.2$ rather than $68$.
 
 \begin{table}[t]
-\caption{The regime index. The activation energies $E$ set the actuation authority; $c$, the noise and $\mathcal U$ are held fixed. $L^{\star}$ is the loss under adaptive control, and the gain its ratio to the best constant input.}
+\caption{Authority and drift in a one-parameter family. The activation energies $E$ set the actuation authority; $c$, the noise and $\mathcal U$ are held fixed. $L^{\star}$ is the loss under adaptive control, and the gain its ratio to the best constant input.}
 \label{tab:regime}
 \centering
 \begin{tabular}{lcccc}
@@ -1456,7 +1466,7 @@ what depends on which. Two are premises about the plant: that the informative
 direction rotates along the trajectory, and that the input moves it. The third
 is the separability of Lemma~\ref{lem:sep}, which is what makes the operator's
 authority computable offline. Table~\ref{tab:fleets} summarises what six public run-to-failure
-fleets currently settle. Supplementary Section~S1 gives the protocol behind every row, with the parameters of the code that produced it.
+fleets currently settle. Supplementary Section~S1 gives the protocol behind every row, and its Table~S1 lists the parameters of the code that produced it.
 
 
 \begin{figure*}[tb]
@@ -1612,13 +1622,14 @@ could never freeze the informative direction can still hold the misalignment
 constant, though not at zero. Authority bought this way is not free, and
 Section~\ref{sec:frac} prices it in life.
 
-The decision to steer precedes the design of the indicator. The regime
-index $\rho$ of Section~\ref{sec:regime} requires only a nominal degradation
-model and the operating envelope, and Table~\ref{tab:regime} shows the value
-of steering collapsing from $68\times$ to under $3\times$ as the reachable arc
-shortens relative to the drift. It indicates a regime rather than deciding a design:
-Section~\ref{sec:regime} measures how often it is wrong, and in which
-direction.
+The decision to steer precedes the design of the indicator. The width
+of the reachable arc requires only a nominal degradation model and the
+operating envelope, and Table~\ref{tab:regime} shows the value of steering
+collapsing from $68\times$ to under $3\times$ as it shortens. It screens rather
+than decides, and across random plants the drift of the informative direction
+refines it only in combination: drift the authority can follow gives steering
+something to do, and drift that outruns it defeats steering
+(Section~\ref{sec:regime}).
 
 \paragraph{Limitations} Four limitations qualify the readings above. The
 separable form of \eqref{eq:plant} is not only an idealisation but one the
@@ -1633,13 +1644,8 @@ holds. The optimum of Section~\ref{sec:limit} is computed rather than certified,
 A fixed health indicator discards information, and this paper has treated what
 it discards as a quantity the operating point controls. Indicator design then
 becomes a reachability question. The family of reachable direction sets bounds what the operating
-point can achieve, and their drift relative to their width is a dimensionless
-measure, available before any indicator is fixed, of whether substantial
-benefit is plausible. Actuation
-authority, rather than sophistication of the indicator, governs whether a
-fixed compression can come close to lossless. Whether that authority is
-present is an empirical question rather than a modelling assumption, and on
-$439$ simulated turbofan records it is. Establishing the same on measured
+point can achieve, and their width, available before any indicator is fixed, indicates whether substantial benefit is plausible, and across random plants of this model the drift of the informative direction refines that indication only in combination with it. Under the proposed model, actuation authority, rather than sophistication of the indicator, governs whether a fixed compression can come close to lossless. Whether that authority is
+present is an empirical question rather than a modelling assumption, and on $439$ simulated turbofan records the evidence supports it. Establishing the same on measured
 fleets awaits records in which the operating point varies enough to show the
 effect.
 

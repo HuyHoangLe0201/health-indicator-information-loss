@@ -20,7 +20,7 @@ written in `theory.tex` — not against a stored expectation, but against the
 text itself, so the paper and the code cannot drift apart quietly. It ends with
 `ALL CHECKS PASS` or names the rows that failed.
 
-For all 173 checks you need the fleets; see [DATA.md](DATA.md).
+For all 187 checks you need the fleets; see [DATA.md](DATA.md).
 
 ```bash
 export RESS_DATA=/path/to/data
@@ -31,13 +31,13 @@ python verify_numbers.py --full        # about 30 minutes
 
 | | |
 |---|---|
-| `theory.tex`, `theory.pdf` | the manuscript, 40 pages |
+| `theory.tex`, `theory.pdf` | the manuscript, 41 pages |
 | `supplement.tex`, `supplement.pdf` | Supplementary Sections S1-S4: the Section 7 protocols, two proofs, the candidate certificates, the numerical checks |
 | `sub.tex`, `sub.pdf` | the same source in the journal's two-column layout |
 | `Ref.bib`, `theory.bbl` | bibliography |
 | `fig1.pdf`, `fig2.pdf`, `fig4.pdf` | the three plotted figures |
 | `make_fig1.py`, `make_fig2.py`, `make_fig4.py` | the scripts that draw them |
-| `verify_numbers.py` | the 173 checks |
+| `verify_numbers.py` | the 187 checks |
 | `rho_sweep.py`, `rho_sweep.json` | the regime-index sweep of Section 6.7, and what it produced |
 | `downstream_sweep.py`, `downstream_sweep.json` | Section 6.8 repeated on 120 random plants, and what it produced |
 | `verified_run.log` | the output of the run that checked the shipped PDF |
@@ -124,7 +124,7 @@ value:
 ## What a passing run looks like
 
 `verified_run.log` is the real output of `--full` against the files in
-this repository: 173 rows, each with the value the manuscript states
+this repository: 187 rows, each with the value the manuscript states
 beside the value recomputed from the model, and `ALL CHECKS PASS` at the
 end. Compare your own run against it line by line.
 
@@ -132,10 +132,10 @@ It opens and closes with the md5 of `theory.tex` and `verify_numbers.py`.
 That bracket is the point: it says the checks and the manuscript were the
 same files throughout, so a run that passed against an edited copy cannot
 be presented as a run that passed against this one. `theory.tex` here is
-`8756cb229b1d`, which is the hash the log records.
+`0b39cb6fba27`, which is the hash the log records.
 
 The row count depends on the data you have. Without the fleets a subset
-runs and the total is smaller; 173 is the number with all six present.
+runs and the total is smaller; 187 is the number with all six present.
 
 ## Reproducing on another machine
 
