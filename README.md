@@ -20,7 +20,7 @@ written in `theory.tex` — not against a stored expectation, but against the
 text itself, so the paper and the code cannot drift apart quietly. It ends with
 `ALL CHECKS PASS` or names the rows that failed.
 
-For all 122 checks you need the fleets; see [DATA.md](DATA.md).
+For all 173 checks you need the fleets; see [DATA.md](DATA.md).
 
 ```bash
 export RESS_DATA=/path/to/data
@@ -31,13 +31,15 @@ python verify_numbers.py --full        # about 30 minutes
 
 | | |
 |---|---|
-| `theory.tex`, `theory.pdf` | the manuscript, 41 pages |
+| `theory.tex`, `theory.pdf` | the manuscript, 40 pages |
+| `supplement.tex`, `supplement.pdf` | Supplementary Sections S1-S4: the Section 7 protocols, two proofs, the candidate certificates, the numerical checks |
 | `sub.tex`, `sub.pdf` | the same source in the journal's two-column layout |
 | `Ref.bib`, `theory.bbl` | bibliography |
 | `fig1.pdf`, `fig2.pdf`, `fig4.pdf` | the three plotted figures |
 | `make_fig1.py`, `make_fig2.py`, `make_fig4.py` | the scripts that draw them |
-| `verify_numbers.py` | the 122 checks |
+| `verify_numbers.py` | the 173 checks |
 | `rho_sweep.py`, `rho_sweep.json` | the regime-index sweep of Section 6.7, and what it produced |
+| `downstream_sweep.py`, `downstream_sweep.json` | Section 6.8 repeated on 120 random plants, and what it produced |
 | `verified_run.log` | the output of the run that checked the shipped PDF |
 | `make_sub.py` | renders `sub.tex` from `theory.tex` |
 | `check_fonts.py` | Type 3 and embedding check on every PDF |
@@ -73,6 +75,8 @@ python make_fig1.py && python make_fig2.py && python make_fig4.py
 python make_sub.py
 pdflatex theory.tex && bibtex theory
 pdflatex theory.tex && pdflatex theory.tex
+pdflatex supplement.tex && bibtex supplement
+pdflatex supplement.tex && pdflatex supplement.tex
 python check_fonts.py
 ```
 
@@ -82,6 +86,15 @@ citation resolves to `[?]`; skipping it once put an unresolved citation into
 a shipped PDF, and the build reported clean because the warning comes from
 natbib rather than from LaTeX itself. The build should end with **zero
 overfull boxes, no warnings from any package, and no `[?]` in the PDF**.
+
+The supplement is built after the manuscript because it reads
+`theory.aux` through the `xr` package, so its references to equations
+and sections of the paper cannot go stale. The manuscript does NOT
+reference the supplement that way: the journal compiles `theory.tex`
+without the supplement's `.aux` and would print `??`. It writes
+"Supplementary Section S1" in plain text instead, and
+`verify_numbers.py` checks each such pointer against the supplement's
+section list and against the topic it should point at.
 
 Publisher preflight rejects Type 3 fonts and matplotlib emits them by default,
 so each figure script sets `pdf.fonttype = 42`. `check_fonts.py` verifies the
@@ -111,7 +124,7 @@ value:
 ## What a passing run looks like
 
 `verified_run.log` is the real output of `--full` against the files in
-this repository: 122 rows, each with the value the manuscript states
+this repository: 173 rows, each with the value the manuscript states
 beside the value recomputed from the model, and `ALL CHECKS PASS` at the
 end. Compare your own run against it line by line.
 
@@ -119,10 +132,10 @@ It opens and closes with the md5 of `theory.tex` and `verify_numbers.py`.
 That bracket is the point: it says the checks and the manuscript were the
 same files throughout, so a run that passed against an edited copy cannot
 be presented as a run that passed against this one. `theory.tex` here is
-`fe5366df95db`, which is the hash the log records.
+`8756cb229b1d`, which is the hash the log records.
 
 The row count depends on the data you have. Without the fleets a subset
-runs and the total is smaller; 122 is the number with all six present.
+runs and the total is smaller; 173 is the number with all six present.
 
 ## Reproducing on another machine
 

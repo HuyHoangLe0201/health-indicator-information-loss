@@ -1,0 +1,312 @@
+\documentclass[preprint,12pt]{elsarticle}
+
+% Same fonts and macros as the manuscript, so a symbol means the same thing
+% in both files. The supplement is uploaded as a PDF built here, not compiled
+% by the journal's system, so it can refer back into the manuscript with xr:
+% every \ref{M-...} below is resolved from theory.aux and fails the build if
+% the manuscript's numbering moves. The manuscript refers forward to this
+% file only in plain text ("Supplementary Section S1"), because the journal
+% DOES compile the manuscript and would not have this file's .aux; those plain
+% references are checked by verify_numbers.py instead.
+%
+% Sections S2 to S4 were moved here verbatim from theory.tex, once, by a
+% script that cut each block by anchors matching exactly once and
+% re-pointed its references at the manuscript. The move cannot be repeated
+% -- the blocks are no longer in theory.tex -- so this file is edited
+% directly from now on.
+\usepackage{lmodern}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{amsthm}
+\usepackage{array}
+\usepackage{url}
+\usepackage{xr}
+\externaldocument[M-]{theory}
+
+\tolerance=1500
+\emergencystretch=2em
+\hyphenpenalty=100
+\hbadness=4000
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\dvec}{\mathbf{d}}
+\newcommand{\dhat}{\hat{\mathbf{d}}}
+\newcommand{\Var}{\mathrm{Var}}
+\newcommand{\Std}{\mathrm{Std}}
+\newcommand{\dFR}{d_{\mathrm{FR}}}
+\newcommand{\DB}{D_{\mathrm{B}}}
+\newcommand{\lloss}{\ell}
+
+\renewcommand{\thesection}{S\arabic{section}}
+\renewcommand{\theequation}{S\arabic{equation}}
+\renewcommand{\thetable}{S\arabic{table}}
+
+\journal{Reliability Engineering \& System Safety}
+
+\begin{document}
+
+\begin{frontmatter}
+\title{Supplementary material for: Information loss of fixed linear health
+indicators as a control problem: simplex geometry and reachability limits}
+
+% copied verbatim from theory.tex; make_supplement.py checks they still agree
+\author[a]{Huy Hoang Le}
+\ead{lhhoang@powermore.vn}
+\author[b]{Kim-Anh Nguyen\corref{cor}}
+\ead{nkanh@dut.udn.vn}
+\cortext[cor]{Corresponding author}
+\affiliation[a]{organization={R\&D Department, PowerMore Ltd.},
+  city={Da Nang}, postcode={550000}, country={Viet Nam}}
+\affiliation[b]{organization={Faculty of Electrical Engineering, University
+  of Science and Technology, The University of Danang},
+  city={Da Nang}, postcode={550000}, country={Viet Nam}}
+
+\begin{abstract}
+Section~\ref{sec:protocols} gives the protocol behind every row of
+Table~\ref{M-tab:fleets} of the main text, with the parameters of the code
+that produced it. Sections~\ref{sec:proofs} to~\ref{sec:verification} hold
+material moved out of the main text: two proofs, the two candidate
+certificates for Proposition~\ref{M-prop:converse} and why neither qualifies,
+and the numerical verification of the identities and of the exceptional
+family of Remark~\ref{M-rem:family}. Equation, section and proposition numbers
+without an S refer to the main text.
+\end{abstract}
+\end{frontmatter}
+
+\section{Protocols for the public-fleet tests}
+\label{sec:protocols}
+
+Every number in Table~\ref{M-tab:fleets} is recomputed by
+\texttt{verify\_numbers.py} in the repository named in the main text, and the
+parameters below are the ones that script passes; where a test was also run
+at other settings to check stability, both are given. All four protocols read
+an empirical informative direction as a time derivative of the monitoring
+channels along normalised life, and so rely on the time-shift population of
+Section~\ref{M-sec:prelim}, under which that derivative is the sensitivity of
+Eq.~\eqref{M-eq:sens}.
+
+\subsection{The rotation test on the Severson cells}
+
+Channels are capacity at discharge, internal resistance and mean cell
+temperature. A cell is used if its life is recorded, it has at least $400$
+cycles, and all three channels are finite throughout; $129$ cells qualify.
+Life is normalised per cell to $\tau\in[0,1]$ by cycle index. Each channel is
+differentiated with a Savitzky--Golay filter of polynomial order $3$ and
+window $\min(301,\,2\lfloor n/4\rfloor+1)$ cycles for a cell of $n$ cycles,
+and the derivative is divided by the standard deviation of that channel's
+residual about the same filter, which whitens the channel by its own measured
+noise. The whitened derivative is interpolated onto $40$ points of
+$\tau\in[0.15,0.90]$. One sign per channel, the median sign over every cell
+and grid point, orients all cells alike; each cell's vector is then
+normalised at every grid point, and the fleet mean, renormalised, is the
+empirical informative direction. Its arc is the sum of the angles between
+consecutive grid points, and its end-to-end angle is the angle between the
+first and the last. Positivity is the fraction of grid points at which every
+component of the fleet mean is positive; it is one at the window used.
+
+\subsection{Why three measured fleets cannot test actuation}
+
+Testing actuation needs the operating point to change within a unit while
+everything else is held. In XJTU-SY each of three operating conditions is
+applied to its own five bearings, and in PRONOSTIA each of three conditions
+to its own bearings, so a difference between conditions cannot be told apart
+from a difference between groups of units. The NASA battery fleet has four
+cells. These fleets are therefore listed with the reason and no statistic.
+
+\subsection{The actuation test on C-MAPSS}
+
+The training files of FD004 and FD002 are used. Life is normalised per engine
+by its final cycle. Operating regimes are labelled by standardising the three
+operating settings over the file and rounding to one decimal; each file has
+$6$ regimes. A sensor is kept if its standard deviation within a
+(engine, regime) group has a positive median, and each kept sensor is
+standardised within each regime, so that a regime's level does not enter the
+direction.
+
+Within one engine, each regime's cycles are resampled to a common count $m$,
+the smallest over that engine's regimes, and an engine enters only if
+$m\ge2(w+3)$. Each resampled series is split into its even and its odd
+cycles, two half-samples of the same regime. On each half the direction is
+estimated as for the Severson cells, with polynomial order $2$ and window $w$,
+and interpolated onto $10$ points of $\tau\in[0.30,0.85]$. The angle between
+two directions is the mean over grid points of the pointwise angle. $W$ is the
+mean, over the engine's regimes, of the angle between the two halves of the
+same regime, and $B$ the mean, over pairs of different regimes, of the angle
+between a half of one and a half of the other. $B-W$ is positive when regimes
+differ by more than half-samples of one regime differ from each other, which
+is what an operating point that moves the direction predicts. The table
+reports the mean of $B-W$ over engines, and the number of engines for which it
+is positive, at $w=7$; at $w=9$ and $w=11$ every value keeps its sign and
+exceeds the largest control bias.
+
+The negative control uses the same machinery on fake regimes. Within one
+regime of one engine with at least $4(w+3)$ cycles, the four interleaved
+subsequences of every fourth cycle stand in for four regimes; $W$ compares the
+first with the second and $B$ the first with the fourth. No contrast exists by
+construction. Over all three windows and both files the mean of $B-W$ stays
+within $0.5^{\circ}$ of zero, and a paired $t$ test of $B$ against $W$ does
+not reject equality at any window, the smallest $p$ being $0.35$.
+
+\subsection{The separability test on N-CMAPSS}
+
+The development sets of DS02, units $2$, $5$, $10$, $16$, $18$ and $20$, and of
+DS01, units $1$ to $6$, are used. The operating point is held fixed by
+clustering flight points, by $k$-means with $6$ clusters, on standardised
+altitude, Mach number and throttle-resolver angle; life is divided into $2$
+stages of equal width in cycles. A (stage, cluster) cell enters only with at
+least $400$ points.
+
+Within a cell each sensor is regressed on standardised remaining life, and
+the slope is divided by the standard deviation of that sensor's residual, so
+that the vector of slopes is the informative direction at a fixed operating
+point rather than a residual after standardisation. The vector is normalised,
+and the logarithms of the absolute values of its components, centred on
+their mean, are what the test compares. The logarithm is the point: under the
+separable form of Lemma~\ref{M-lem:sep} each component is a product of an
+operating-point factor and a state factor, so in logarithms the two act
+additively, and separability is the absence of interaction.
+
+Each cell is estimated twice, from its even and from its odd points. The mean
+of the two is the signal; their half-difference measures noise, and applying
+the same decomposition to it gives each effect its own noise floor. The
+decomposition is the ordinary two-way one over the cells, into a grand mean,
+a stage effect, an operating-point effect and an interaction, with sums of
+squares taken over cells and sensors and pooled over units. With $6$ clusters
+and $2$ stages the operating-point effect and the interaction each have $5$
+degrees of freedom per sensor and the stage effect $1$, so the reported ratio
+of interaction to operating-point effect compares quantities with equal
+degrees of freedom. That ratio is $1.65$ for DS02 and $1.84$ for DS01. Against
+its own noise floor the interaction is $566$ times larger on DS02
+and $110$ times on DS01, so it is not noise. The test was repeated
+at $3$, $4$, $6$, $8$ and $10$ clusters with $2$ stages, at $6$ clusters with
+$3$ stages and at $4$ clusters with $4$ stages, with at least $300$ points per
+cell; the interaction exceeds the operating-point effect in every
+configuration, by a factor of at least $1.42$.
+
+\begin{table}[tb]
+\caption{The parameters of each test as run.}
+\label{tab:params}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.17\textwidth}
+                  >{\raggedright\arraybackslash}p{0.78\textwidth}@{}}
+\hline
+test & parameters\\
+\hline
+Severson rotation & $129$ cells with at least $400$ cycles; Savitzky--Golay
+order $3$, window $301$ cycles or $2\lfloor n/4\rfloor+1$ if smaller; $40$
+points on $\tau\in[0.15,0.90]$\\[2pt]
+C-MAPSS actuation & FD004 and FD002 training sets; $6$ regimes each; order
+$2$, window $w=7$, stability at $w=9,11$; $10$ points on
+$\tau\in[0.30,0.85]$; engine enters if $m\ge2(w+3)$; control needs
+$4(w+3)$ cycles in one regime\\[2pt]
+N-CMAPSS separability & DS02 units $2,5,10,16,18,20$ and DS01 units $1$--$6$;
+$6$ clusters, $2$ stages, at least $400$ points per cell; sweep over seven
+(cluster, stage) settings with at least $300$ points\\
+\hline
+\end{tabular}
+\end{table}
+
+\section{Proofs of Propositions~\ref{M-prop:record} and~\ref{M-prop:bary}}
+\label{sec:proofs}
+
+\begin{proof}[Proof of Proposition~\ref{M-prop:record}]
+In whitened coordinates the linearised record is $\tilde y_k=\dvec_k R+\epsilon_k$ with $\epsilon_k\sim N(0,I_d)$ independent, so the Fisher information it carries about $R$ is $\sum_k\dvec_k^{\top}\dvec_k=\sum_k\|\dvec_k\|^{2}$ and an oracle reading the whole record obtains $\tfrac12\log(1+G)$ nats. The fixed indicator returns the scalars $z_k=\mathbf v^{\top}\tilde y_k=(\mathbf v^{\top}\dvec_k)R+\mathbf v^{\top}\epsilon_k$, whose noise terms $\mathbf v^{\top}\epsilon_k$ are standard normal and independent because $\|\mathbf v\|=1$, so the compressed record carries Fisher information $\sum_k(\mathbf v^{\top}\dvec_k)^{2}$. Since $\mathbf v^{\top}\dvec_k=\|\dvec_k\|\cos\psi_k$,
+\[
+\Var[R]\sum_k(\mathbf v^{\top}\dvec_k)^{2}
+=\Var[R]\sum_k\|\dvec_k\|^{2}\cos^{2}\psi_k=G(1-S),
+\]
+and subtracting the two mutual informations gives $\tfrac12\log(1+G)-\tfrac12\log\big(1+G(1-S)\big)=-\tfrac12\log\frac{1+G-GS}{1+G}=-\tfrac12\log(1-WS)$.
+\end{proof}
+
+\begin{proof}[Proof of Proposition~\ref{M-prop:bary}]
+(i) As $\gamma\to\infty$ we have $w\to1$, and \eqref{M-eq:exact} gives
+\[
+\lloss\to-\tfrac12\log\cos^{2}\psi=-\log\sum_i\sqrt{p_iq_i}=\DB
+\]
+by Proposition~\ref{M-prop:bhat}. The convergence is uniform, which is what
+carries the minimisers with it. Positivity keeps $p_\tau$ interior, and
+$\sqrt{q_i}\ge q_i$ with $\sum_iq_i=1$ gives
+$\cos\psi=\sum_i\sqrt{p_iq_i}\ge\min_i\sqrt{p_i}$ for every $q$ in the
+simplex, so $\cos\psi$ is bounded away from zero uniformly in $q$ and in
+$\tau$ and $\DB$ stays finite. Both objectives are continuous on a compact set
+and uniformly close on it, so their minimisers converge. (ii) By
+\eqref{M-eq:expansion}, $\bar\lloss=\tfrac12\bar
+w\,\E_\mu[\psi^{2}]+O(\psi^{4})$ with $d\mu=w\,d\tau/\bar w$; minimising a
+$\mu$-weighted mean square of a geodesic distance is the definition of the
+weighted Fr\'echet mean, and $\psi=\tfrac12\dFR$ converts $\tfrac12\bar
+w\,\E_\mu[\psi^{2}]$ into $\tfrac18\bar w\,\E_\mu[\dFR^{2}]$.
+\end{proof}
+
+\section{Two candidate certificates for Proposition~\ref{M-prop:converse}}
+\label{sec:certificates}
+
+The $C^{1}$ hypothesis cannot be weakened to Lipschitz continuity. A Lipschitz
+$V$ is differentiable almost everywhere in the state by Rademacher's theorem,
+but a single trajectory is a null set and could in principle run inside the
+exceptional set, so the chain rule step would be unavailable; recovering the
+argument at that generality needs the Clarke generalised gradient in place of
+$\nabla V$. Smoothness is also, as it turns out, exactly what the natural
+candidates lack.
+
+We tried two. The value function of the Dinkelbach problem of Section~\ref{M-sec:limit} satisfies
+\eqref{M-eq:cert} with equality in the viscosity sense~\cite{bardi1997}, but
+value functions of this class are only Lipschitz. Computed on a $41^{3}$ grid
+and tested on a $61^{3}$ one, \eqref{M-eq:cert} fails at about $45\%$ of test
+points by up to $2.9\times10^{-3}$. Halving $\lambda$ moves that violation by
+$0.6\%$, so the fault lies in the candidate and not in the bound. At the
+opposite extreme an affine $V(x)=c_0-a_0^{\top}x$ has an exactly constant
+gradient and makes every requirement linear, so the best certifiable $\lambda$
+is a linear program; over $167{,}936$ constraints it returns $V\equiv0$ and
+only the pointwise bound $\min_{x,u}\lloss$, which is vacuous here because the
+reachable floor falls to within sampling resolution of zero at mid-life.
+Deleting the two boundary requirements lets that program run to any cap
+imposed on it, which identifies them as what binds: trajectories of
+\eqref{M-eq:plant} increase in every coordinate, so an affine $V$ is monotone
+along all of them at once and $V(x_0)\ge0\ge V|_{\text{failure}}$ forces it to
+decrease, while the near-aligned states, where the running cost vanishes,
+demand a local increase.
+
+The two failures are complementary, and together they say what a certificate
+needs. The value function varies its gradient exactly as the two demands
+require but is not differentiable where that matters; affine functions are
+perfectly smooth but cannot vary their gradient at all. A certificate must
+therefore be both smooth and non-constant in its gradient, which points at a
+smooth under-approximation of the value function, obtained by sum-of-squares
+programming when the plant data are polynomial, or by interval arithmetic with
+an explicit Lipschitz constant.
+
+\section{Numerical verification}
+\label{sec:verification}
+
+\subsection{The identities}
+
+The analytical results of the main text were checked numerically before
+they were used. The rotation identity \eqref{M-eq:repl} holds to
+relative error below $1.1\times10^{-7}$ over the five input--channel pairs
+$(d,m)=(2,1)$, $(3,2)$, $(3,1)$, $(4,2)$ and $(5,3)$; the replicator form to
+$6.9\times10^{-8}$; Theorem~\ref{M-thm:beta} to $5.1\times10^{-6}$, limited by
+finite differencing; and \eqref{M-eq:bhat} to $1.1\times10^{-16}$.
+
+\subsection{The exceptional family of Remark~\ref{M-rem:family}}
+
+Integrating the construction of Remark~\ref{M-rem:family}
+for $d=2$ to $8$ with one input holds the misalignment below
+$1.5\times10^{-6}$ degrees and the mean loss below $10^{-15}$. These families carry no prior variance of their own, so their losses are evaluated at a fixed $w=0.9$ rather than at a $\gamma$ the plant supplies; the bound has fifteen orders of magnitude of headroom and does not turn on the choice. That is against
+$1.2\times10^{-5}$ to $5.4\times10^{-4}$ for the best constant input on the
+same plant.
+
+The family is a knife edge. Perturbing the shape coefficients $\nu$ by $1\%$ raises the mean loss to
+$3.2\times10^{-4}$ under the myopic policy, against $1.8\times10^{-4}$ for the
+best constant input on the same perturbed plant. At one percent of shape
+error, steering is already worse than not steering. Closing the loop halves
+the damage but does not repair it, so the fragility belongs to the
+construction and not to the open-loop schedule. Mistuning the activation
+energies instead is tolerated to about two percent.
+
+\bibliographystyle{elsarticle-num}
+\bibliography{Ref}
+
+\end{document}

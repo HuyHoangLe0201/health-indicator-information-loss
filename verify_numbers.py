@@ -484,7 +484,13 @@ def generic_qualifiers(path):
         # a sufficiency claim, the opposite of the overclaim hunted here
         if head.startswith("suffices"):
             continue
-        if not re.search(r"generic|Remark~\\ref\{rem:family\}", tail):
+        # "almost every q" is the measure statement Theorem 4.1 proves, and
+        # is the correct hedge rather than an overclaim. Only that
+        # quantifier is accepted: "null subset" alone is not, because
+        # "D(x) is a null set, so zero loss is impossible" contains it and is
+        # exactly the overclaim this row exists to catch.
+        if not re.search(r"generic|almost every|Remark~\\ref\{rem:family\}",
+                         tail):
             bad += 1
     return float(bad)
 
@@ -574,12 +580,13 @@ def repro_exceptions(path):
     a fifth exists that the sentence does not mention at all.
     """
     t = re.sub(r"\s+", " ", io.open(path, encoding="utf-8").read())
-    m = re.search(r"(\w+) groups of numbers lie outside it:(.*?)\.\s", t)
+    m = re.search(r"(\w+) groups of numbers lie outside (?:it|the checks):(.*?)\.\s", t)
     if not m:
         return -1.0
     words = dict(two=2, three=3, four=4, five=5, six=6)
     said = words.get(m.group(1).lower(), -1)
-    listed = len(re.findall(r"Section~\\ref\{", m.group(2)))
+    # an exception may sit in the supplement, cited in plain text
+    listed = len(re.findall(r"Section~(?:\\ref\{|S\d)", m.group(2)))
     return float(said - listed)
 
 
@@ -664,14 +671,176 @@ def rho_sweep_stats():
         sp=sp(rho, gain),
         sp_arc=sp(arc, gain),
         # rho = drift / arc by construction, so the drift is recovered
-        # rather than stored. Section 6.7 claims it ranks the plants at
-        # below 0.05 in magnitude, which is the evidence that the ratio's
-        # numerator is not doing the work.
+        # rather than stored.
         sp_drift=sp(rho * arc, gain),
+        **_rho_classifier(rho, arc, gain),
         share_low=100.0 * big[low].mean(),
         base=100.0 * big.mean(),
         miss=100.0 * big[veto].mean(),
         med_near=float(np.median(gain[near])),
+    )
+
+
+def _rho_classifier(rho, arc, gain, B=2000, seed=31):
+    """The regime index read as a classifier of "steering repays fivefold".
+
+    A rank correlation says the index and the gain move together; it does not
+    say how often an engineer who acts on the index is right. AUC does, and
+    it is threshold-free. The intervals come from a seeded bootstrap over
+    plants.
+
+    The 2.6 split is read off the decile table of this same sample, so the
+    two probabilities either side of it are optimistic, and the manuscript
+    says so. The lowest decile is reported because it is where lower is NOT
+    better: its drift is small, so there is little for steering to chase.
+    """
+    y = gain >= 5.0
+    drift = rho * arc
+
+    def auc(sc, yy):
+        pos, neg = sc[yy], sc[~yy]
+        gt = (pos[:, None] > neg[None, :]).sum()
+        eq = (pos[:, None] == neg[None, :]).sum()
+        return float((gt + 0.5 * eq) / (len(pos) * len(neg)))
+
+    rng = np.random.default_rng(seed)
+    out = {}
+    for name, sc in (("auc_rho", -np.log(rho)), ("auc_arc", arc),
+                     ("auc_drift", -drift)):
+        out[name] = auc(sc, y)
+        bs = []
+        for _ in range(B):
+            i = rng.integers(0, len(y), len(y))
+            if y[i].all() or (~y[i]).all():
+                continue
+            bs.append(auc(sc[i], y[i]))
+        out[name + "_lo"] = float(np.percentile(bs, 2.5))
+        out[name + "_hi"] = float(np.percentile(bs, 97.5))
+    out["p_below"] = 100.0 * float(y[rho < 2.6].mean())
+    out["p_above"] = 100.0 * float(y[rho >= 2.6].mean())
+    d1 = rho <= np.percentile(rho, 10)
+    out["p_lowest_decile"] = 100.0 * float(y[d1].mean())
+    out["drift_lowest_decile"] = float(np.median(drift[d1]))
+    out["drift_all"] = float(np.median(drift))
+    rs = np.random.default_rng(seed + 1)
+    ranks = []
+    for _ in range(B):
+        i = rs.integers(0, len(y), len(y))
+        a, g = rho[i], gain[i]
+        ra = np.argsort(np.argsort(a)).astype(float)
+        rb = np.argsort(np.argsort(g)).astype(float)
+        ra -= ra.mean()
+        rb -= rb.mean()
+        ranks.append(float((ra * rb).sum()
+                           / np.sqrt((ra ** 2).sum() * (rb ** 2).sum())))
+    out["sp_lo"] = float(np.percentile(ranks, 2.5))
+    out["sp_hi"] = float(np.percentile(ranks, 97.5))
+    return out
+
+
+def downstream_sweep_stats():
+    """Section 6.8's uncertainty and its 120-plant repeat, from the record.
+
+    downstream_sweep.py reproduces downstream_rul() on the paper's plant to
+    machine precision before it is allowed to sweep, then records for each of
+    120 random plants the rank correlation under two indicator designs: the
+    paper's, which tilts every indicator the same way (so loss and error grow
+    with one parameter and agree almost by construction), and random tilts,
+    against which the angle to the mid-life informative direction is the
+    naive competitor. It also records the bootstrap interval and permutation
+    p on the paper's own plant.
+
+    CANNOT SEE: whether the random-tilt design is the right harder test. It
+    was chosen because the paper's design could not fail; it turned out also
+    unable to separate the loss from a mid-life snapshot, and the manuscript
+    says that rather than claiming the separation.
+    """
+    import json
+    import os
+    fn = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                      "downstream_sweep.json")
+    if not os.path.exists(fn):
+        return None
+    J = json.load(io.open(fn, encoding="utf-8"))
+    ok = [r for r in J["plants"] if r["ok"]]
+    sp = np.array([r["sp"] for r in ok])
+    rl = np.array([r["random"]["sp_loss"] for r in ok])
+    la = np.array([r["random"]["sp_loss_angle"] for r in ok])
+    return dict(
+        paper=J["paper"], n=float(len(ok)),
+        sp_min=float(sp.min()), sp_max=float(sp.max()),
+        rand_median=float(np.median(rl)),
+        rand_excl=100.0 * float(np.mean([r["random"]["lo"] > 0 for r in ok])),
+        identical=100.0 * float(np.mean(la > 0.9999)))
+
+
+def supplement_refs(path):
+    """Plain-text pointers into the supplement that do not resolve.
+
+    Zero passes. The manuscript cannot use xr references into the supplement,
+    because the journal compiles the manuscript without the supplement's .aux
+    and would print "??"; so it writes "Supplementary Section~S2" as text.
+    Text always builds, which means it can point at the wrong section and
+    nothing notices. Each pointer is checked twice: the section must exist,
+    with the title expected for its number, and the words around the pointer
+    must be about what that section holds. The context window is short and
+    mostly BEFORE the pointer, so two pointers in one sentence cannot vouch
+    for each other when their numbers are swapped.
+    """
+    import os
+    title_word = {1: "Protocols", 2: "Proofs", 3: "certificates",
+                  4: "verification"}
+    topic = {1: r"protocol", 2: r"proof", 3: r"certif|candidate",
+             4: r"numerical|integrat|residual|shape coefficient"}
+    t = re.sub(r"\s+", " ", io.open(path, encoding="utf-8").read())
+    sp = os.path.join(os.path.dirname(os.path.abspath(path)), "supplement.tex")
+    if not os.path.exists(sp):
+        return -1.0
+    u = io.open(sp, encoding="utf-8").read()
+    titles = re.findall(r"\\section\{((?:[^{}]|\{[^{}]*\})*)\}", u)
+    bad = 0
+    for m in re.finditer(r"Section~S(\d+)", t):
+        k = int(m.group(1))
+        if k > len(titles) or title_word.get(k, "\0") not in titles[k - 1]:
+            bad += 1
+            continue
+        ctx = t[max(0, m.start() - 150):m.end() + 40]
+        if not re.search(topic[k], ctx, re.I):
+            bad += 1
+    return float(bad)
+
+
+def protocol_constants():
+    """The parameters the Section S1 protocol states, read from the code.
+
+    Returned as numbers so each can be compared with the sentence that states
+    it. Reading them by inspection rather than retyping them is the point: a
+    protocol retyped from memory describes the analysis the author remembers,
+    not necessarily the one that produced Table 5.
+    """
+    import inspect
+    sv = inspect.getsource(severson_stats)
+    mn = inspect.getsource(main)
+    sw = inspect.getsource(ncmapss_sweep)
+    cm = inspect.signature(cmapss_stats).parameters["windows"].default
+    nc = inspect.signature(ncmapss_sep).parameters
+    G = re.search(r"G = np\.linspace\(([0-9.]+), ([0-9.]+), (\d+)\)", sv)
+    return dict(
+        sev_window=float(re.search(r"severson_stats\((\d+)\)", mn).group(1)),
+        sev_min_cycles=float(re.search(r"n < (\d+)", sv).group(1)),
+        sev_order=float(re.search(r"savgol_filter\(y, w, (\d+), deriv=1\)",
+                                  sv).group(1)),
+        sev_lo=float(G.group(1)), sev_hi=float(G.group(2)),
+        sev_points=float(G.group(3)),
+        cm_points=float(len(CM_GRID)), cm_lo=float(CM_GRID[0]),
+        cm_hi=float(CM_GRID[-1]),
+        cm_w0=float(re.search(r"W0 = (\d+)", mn).group(1)),
+        cm_w1=float(cm[1]), cm_w2=float(cm[2]),
+        nc_clusters=float(nc["nclust"].default),
+        nc_stages=float(nc["nstage"].default),
+        nc_minpts=float(nc["minpts"].default),
+        nc_units=tuple(nc["units"].default),
+        nc_sweep_minpts=float(re.search(r"minpts=(\d+)", sw).group(1)),
     )
 
 
@@ -719,6 +888,17 @@ def main():
     ap.add_argument("--tex", default=TEX)
     args = ap.parse_args()
     s = claims(args.tex)
+    # The supplementary material carries moved blocks and the Section 7
+    # protocol, and its numbers are checked like the manuscript's. It is
+    # appended, so a pattern matching in both reads the manuscript first;
+    # the pre-flight reports any such pattern as ambiguous.
+    import os as _os
+    _sup = _os.path.join(_os.path.dirname(_os.path.abspath(args.tex)),
+                         "supplement.tex")
+    if _os.path.exists(_sup):
+        s = s + " " + claims(_sup)
+    else:
+        skip("  supplement.tex not found: its numbers are unchecked")
 
     print("CONFIG:", {k: (v.tolist() if isinstance(v, np.ndarray) else v)
                       for k, v in CFG.items()})
@@ -762,13 +942,17 @@ def main():
         # correction that reaches only the gated copy would leave those
         # stale and every check here would still pass
         ("headline ratio, restated in Sec 6.7",
-         find(s, r"falls from \$([0-9]+)\$ to"), ratio, 0.01),
+         # anchored on "value of control": "falls from $68$ to" alone also
+         # matches the threshold sentence of Section 6.1, and find() took
+         # that one first -- both said 68, so the row passed while reading
+         # the wrong sentence
+         find(s, r"value of control falls from \$([0-9]+)\$ to"), ratio, 0.01),
         ("headline ratio, restated in the Discussion",
          find(s, r"collapsing from \$([0-9]+)\\times\$ to under"),
          ratio, 0.01),
         # a fifth copy, in the abstract, which no pattern above reaches
         ("headline ratio, restated in the abstract",
-         find(s, r"objective defined here by a factor of \$([0-9]+)\$"), ratio, 0.01),
+         find(s, r"objective defined here falls by a factor of \$([0-9]+)\$"), ratio, 0.01),
         ("beta_min upper, restated in Sec 6.4",
          find(s, r"peak floor moves from \$([0-9.]+)\^\{\\circ\}\$"),
          bmin_hi, 0.01),
@@ -794,6 +978,59 @@ def main():
     rows.append(("unqualified consequences of $m<d-1$",
                  0.0, generic_qualifiers(args.tex), 0.0))
     rows.append(("sub.tex matches theory.tex", 1.0, sub_is_current(), 0.0))
+    rows.append(("supplement pointers that do not resolve",
+                 0.0, supplement_refs(args.tex), 0.0))
+    _pc = protocol_constants()
+    _units = re.search(r"DS02, units \$(\d+)\$, \$(\d+)\$, \$(\d+)\$, "
+                       r"\$(\d+)\$, \$(\d+)\$ and \$(\d+)\$", s)
+    rows += [
+        ("S1 Severson window (cycles)",
+         find(s, r"window \$\\min\(([0-9]+),"), _pc["sev_window"], 0.0),
+        ("S1 Severson minimum cycles",
+         find(s, r"has at least \$([0-9]+)\$ cycles"),
+         _pc["sev_min_cycles"], 0.0),
+        ("S1 Severson filter order",
+         find(s, r"polynomial order \$([0-9]+)\$ and window \$\\min"),
+         _pc["sev_order"], 0.0),
+        ("S1 Severson grid points",
+         find(s, r"is interpolated onto \$([0-9]+)\$ points"),
+         _pc["sev_points"], 0.0),
+        ("S1 Severson grid start",
+         find(s, r"is interpolated onto \$[0-9]+\$ points of "
+                 r"\$\\tau\\in\[([0-9.]+),"), _pc["sev_lo"], 0.0),
+        ("S1 Severson grid end",
+         find(s, r"is interpolated onto \$[0-9]+\$ points of "
+                 r"\$\\tau\\in\[[0-9.]+,([0-9.]+)\]"), _pc["sev_hi"], 0.0),
+        ("S1 C-MAPSS grid points",
+         find(s, r"and interpolated onto \$([0-9]+)\$ points"),
+         _pc["cm_points"], 0.0),
+        ("S1 C-MAPSS grid start",
+         find(s, r"and interpolated onto \$[0-9]+\$ points of "
+                 r"\$\\tau\\in\[([0-9.]+),"), _pc["cm_lo"], 0.0),
+        ("S1 C-MAPSS grid end",
+         find(s, r"and interpolated onto \$[0-9]+\$ points of "
+                 r"\$\\tau\\in\[[0-9.]+,([0-9.]+)\]"), _pc["cm_hi"], 0.0),
+        ("S1 C-MAPSS reported window",
+         find(s, r"at \$w=([0-9]+)\$; at \$w="), _pc["cm_w0"], 0.0),
+        ("S1 C-MAPSS stability window, first",
+         find(s, r"; at \$w=([0-9]+)\$ and \$w="), _pc["cm_w1"], 0.0),
+        ("S1 C-MAPSS stability window, second",
+         find(s, r"; at \$w=[0-9]+\$ and \$w=([0-9]+)\$"), _pc["cm_w2"], 0.0),
+        ("S1 N-CMAPSS clusters",
+         find(s, r"\$k\$-means with \$([0-9]+)\$ clusters"),
+         _pc["nc_clusters"], 0.0),
+        ("S1 N-CMAPSS stages",
+         find(s, r"divided into \$([0-9]+)\$ stages"), _pc["nc_stages"], 0.0),
+        ("S1 N-CMAPSS minimum points per cell",
+         find(s, r"enters only with at least \$([0-9]+)\$ points"),
+         _pc["nc_minpts"], 0.0),
+        ("S1 N-CMAPSS sweep minimum points",
+         find(s, r"with at least \$([0-9]+)\$ points per cell;"),
+         _pc["nc_sweep_minpts"], 0.0),
+        ("S1 N-CMAPSS DS02 units as run", 1.0,
+         float(_units is not None and tuple(int(x) for x in _units.groups())
+               == _pc["nc_units"]), 0.0),
+    ]
     rows.append(("sections the roadmap forgets",
                  0.0, roadmap_gap(args.tex), 0.0))
     rows.append(("longest sentence the prose says twice (words)",
@@ -833,32 +1070,113 @@ def main():
             ("6.7 Spearman rho vs gain",
              find(s, r"between \$\\rho\$ and the gain is \$(-?[0-9.]+)\$"),
              _rs["sp"], 0.02),
-            ("6.7 share repaying at rho<1",
-             find(s, r"\$([0-9]+)\\%\$ repay steering"),
-             _rs["share_low"], 0.02),
+            ("6.7 Spearman interval, lower",
+             find(s, r"interval from \$(-?[0-9.]+)\$ to \$-?[0-9.]+\$, and it keeps"),
+             _rs["sp_lo"], 0.02),
+            ("6.7 Spearman interval, upper",
+             find(s, r"interval from \$-?[0-9.]+\$ to \$(-?[0-9.]+)\$, and it keeps"),
+             _rs["sp_hi"], 0.02),
             ("6.7 base rate repaying",
-             find(s, r"against \$([0-9]+)\\%\$ over the"),
+             find(s, r"which \$([0-9]+)\\%\$ of the plants do"),
              _rs["base"], 0.02),
+            # AUC, threshold-free: how often acting on the index is right
+            ("6.7 AUC of rho",
+             find(s, r"receiver-operating curve of \$([0-9.]+)\$, with interval"),
+             _rs["auc_rho"], 0.02),
+            ("6.7 AUC of rho, lower",
+             find(s, r"curve of \$[0-9.]+\$, with interval \$([0-9.]+)\$ to"),
+             _rs["auc_rho_lo"], 0.02),
+            ("6.7 AUC of rho, upper",
+             find(s, r"curve of \$[0-9.]+\$, with interval \$[0-9.]+\$ to \$([0-9.]+)\$"),
+             _rs["auc_rho_hi"], 0.02),
+            ("6.7 AUC of the arc alone",
+             find(s, r"arc alone scores \$([0-9.]+)\$ as well"),
+             _rs["auc_arc"], 0.02),
+            ("6.7 AUC of the drift alone",
+             find(s, r"drift alone \$([0-9.]+)\$, with interval"),
+             _rs["auc_drift"], 0.02),
+            ("6.7 AUC of the drift, lower",
+             find(s, r"drift alone \$[0-9.]+\$, with interval \$([0-9.]+)\$"),
+             _rs["auc_drift_lo"], 0.02),
+            ("6.7 AUC of the drift, upper",
+             find(s, r"drift alone \$[0-9.]+\$, with interval \$[0-9.]+\$ to \$([0-9.]+)\$"),
+             _rs["auc_drift_hi"], 0.02),
+            # the sentence says the drift's interval includes a coin toss
+            ("6.7 drift AUC interval contains 0.5", 1.0,
+             float(_rs["auc_drift_lo"] < 0.5 < _rs["auc_drift_hi"]), 0.0),
+            ("6.7 repaying below rho = 2.6",
+             find(s, r"below \$\\rho=2.6\$, \$([0-9]+)\\%\$ repay"),
+             _rs["p_below"], 0.02),
+            ("6.7 repaying above rho = 2.6",
+             find(s, r"fivefold, against \$([0-9]+)\\%\$ above it"),
+             _rs["p_above"], 0.02),
             ("6.7 veto miss rate",
              find(s, r"would also reject \$([0-9]+)\\%\$"),
              _rs["miss"], 0.02),
-            # The manuscript quotes a MAGNITUDE here, because the arc
-            # correlates positively with the gain (a wider reachable set is
-            # more authority) while rho correlates negatively. Quoting the
-            # arc as -0.47 to make the comparison look tidy would have been a
-            # sign error in the paper, hidden by a negation in the gate.
-            ("6.7 arc alone, magnitude",
-             find(s, r"at \$([0-9.]+)\$ in magnitude"),
-             abs(_rs["sp_arc"]), 0.02),
+            ("6.7 lowest decile repaying",
+             find(s, r"lowest tenth of \$\\rho\$ only \$([0-9]+)\\%\$"),
+             _rs["p_lowest_decile"], 0.02),
+            ("6.7 lowest decile drift (deg)",
+             find(s, r"a median of \$([0-9.]+)\^\{\\circ\}\$ against"),
+             _rs["drift_lowest_decile"], 0.02),
+            ("6.7 median drift, all plants (deg)",
+             find(s, r"against \$([0-9]+)\^\{\\circ\}\$ over the sample"),
+             _rs["drift_all"], 0.03),
             ("6.7 median gain at Table II's rho",
              find(s, r"the median gain is \$([0-9.]+)\$ rather"),
              _rs["med_near"], 0.02),
-            # stated as a bound, not a value: 0.045 against a quoted 0.04
-            # would fail a 2 per cent relative tolerance while agreeing
-            # perfectly with what the sentence says.
-            ("6.7 drift alone, magnitude bound",
-             find(s, r"at below \$([0-9.]+)\$ in magnitude"),
-             abs(_rs["sp_drift"]), "<"),
+            # the abstract quotes the same AUC and the same sample size
+            ("abstract: AUC of rho",
+             find(s, r"receiver-operating curve of \$([0-9.]+)\$ over"),
+             _rs["auc_rho"], 0.02),
+            ("abstract: sweep plants",
+             find(s, r"curve of \$[0-9.]+\$ over \$([0-9]+)\$ random plants"),
+             _rs["n"], 0.0),
+        ]
+
+    _ds = downstream_sweep_stats()
+    if _ds is None:
+        skip("  SKIPPED Section 6.8 repeat: downstream_sweep.json not found")
+    else:
+        _pp = _ds["paper"]
+        rows += [
+            ("6.8 Spearman interval, lower",
+             find(s, r"\$([0-9.]+)\$ to \$[0-9.]+\$ for the correlation"),
+             _pp["sp_lo"], 0.02),
+            ("6.8 Spearman interval, upper",
+             find(s, r"\$[0-9.]+\$ to \$([0-9.]+)\$ for the correlation"),
+             _pp["sp_hi"], 0.02),
+            ("6.8 error-ratio interval, lower",
+             find(s, r"\$([0-9.]+)\$ to \$[0-9.]+\$ for the factor"),
+             _pp["ratio_lo"], 0.02),
+            ("6.8 error-ratio interval, upper",
+             find(s, r"\$[0-9.]+\$ to \$([0-9.]+)\$ for the factor"),
+             _pp["ratio_hi"], 0.02),
+            ("6.8 permutation p (x1e-4)",
+             find(s, r"gives \$p=([0-9.]+)\\times10\^\{-4\}\$"),
+             _pp["perm_p"] * 1e4, 0.05),
+            # "sits near the top of its own interval"
+            ("6.8 point estimate in top tenth of interval", 1.0,
+             float(_pp["sp"] > _pp["sp_hi"]
+                   - 0.1 * (_pp["sp_hi"] - _pp["sp_lo"])), 0.0),
+            ("6.8 repeat: plants",
+             find(s, r"same protocol on \$([0-9]+)\$ further plants"),
+             _ds["n"], 0.0),
+            ("6.8 repeat: lowest correlation",
+             find(s, r"correlations between \$([0-9.]+)\$ and"),
+             _ds["sp_min"], 0.02),
+            ("6.8 repeat: highest correlation",
+             find(s, r"correlations between \$[0-9.]+\$ and \$([0-9.]+)\$"),
+             _ds["sp_max"], 0.02),
+            ("6.8 random tilts: median correlation",
+             find(s, r"median correlation to \$([0-9.]+)\$"),
+             _ds["rand_median"], 0.02),
+            ("6.8 random tilts: interval excludes zero (%)",
+             find(s, r"excluding zero on \$([0-9]+)\\%\$"),
+             _ds["rand_excl"], 0.02),
+            ("6.8 random tilts: identical ranking (%)",
+             find(s, r"identically to the loss on \$([0-9]+)\\%\$"),
+             _ds["identical"], 0.02),
         ]
 
     if args.regime or args.full:
@@ -1024,6 +1342,8 @@ def main():
                  st["e2e"], 0.03),
                 ("Severson positivity at win 301",
                  1.0, st["allpos"], 0.0),
+                ("S1 Severson cells qualifying",
+                 find(s, r"\$([0-9]+)\$ cells qualify"), st["n"], 0.0),
             ]
 
         print("[Sec 7] XJTU-SY ...", flush=True)
@@ -1106,6 +1426,14 @@ def main():
                 # the sentence that the sweep exists to support
                 ("Sec 7 NC interaction always exceeds the main effect",
                  1.0, float(_minr > 1.0), 0.0),
+                # the first review asked whether the interaction is more
+                # than noise; its own measured floor is the answer
+                ("S1 NC DS02 interaction over its noise floor",
+                 find(s, r"interaction is \$([0-9.]+)\$ times larger on DS02"),
+                 _i, 0.02),
+                ("S1 NC sweep: smallest interaction over main",
+                 find(s, r"by a factor of at least \$([0-9.]+)\$"),
+                 _minr, 0.02),
             ]
 
             _o1, _l1, _i1, _r1, _n1 = ncmapss_sep(
@@ -1118,6 +1446,8 @@ def main():
                 # inequality must hold there
                 ("Sec 7 NC DS01 interaction exceeds the main effect",
                  1.0, float(_r1 > 1.0), 0.0),
+                ("S1 NC DS01 interaction over its noise floor",
+                 find(s, r"and \$([0-9.]+)\$ times on DS01"), _i1, 0.02),
             ]
         except Exception as exc:
             skip("  SKIPPED N-CMAPSS:", exc)
@@ -1165,6 +1495,15 @@ def main():
                  worst_ctrl, "<"),
                 ("C-MAPSS control p, at chance",
                  0.05, weakest_p, ">"),
+                ("S1 C-MAPSS smallest control p",
+                 find(s, r"the smallest \$p\$ being \$([0-9.]+)\$"),
+                 weakest_p, 0.03),
+                ("S1 C-MAPSS control bias bound (deg)",
+                 find(s, r"stays within \$([0-9.]+)\^\{\\circ\}\$ of zero"),
+                 worst_ctrl, "<"),
+                ("S1 C-MAPSS regimes per file", find(s,
+                 r"each file has \$([0-9]+)\$ regimes"),
+                 float(c4["nregime"]), 0.0),
             ]
 
     if args.full:

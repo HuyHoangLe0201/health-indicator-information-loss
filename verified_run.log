@@ -1,6 +1,9 @@
 md5 BEFORE
-  fe5366df95db02c5bde984b87da2ca65  theory.tex
-  aa3e6a450ebf20ef22cbdc1585a9bda0  verify_numbers.py
+  8756cb229b1d316471079a53face0dbe  theory.tex
+  5137adb46edb4eb1cfe0de6e6edb2ca1  supplement.tex
+  710daaf500ce7459e43aabb0f70a1737  verify_numbers.py
+  c0db59819961d0f743f9c0fc5d58cac5  rho_sweep.json
+  506f77029478c7d27b65de63b294c58f  downstream_sweep.json
   2fca511bba69262b0645136c0078246c  fig4.pdf
   cc7ba4d06914e3fcd800c98f13f6bdd5  make_fig4.py
 CONFIG: {'a': [0.0, 0.3, -0.2], 'E': [0.6, 1.1, 0.8], 'c': [-0.5, 2.0, 0.8], 'U': (0.0, 3.0), 'w': 0.9, 'xfail': 0.9, 'x0': 0.005, 'tmax': 200.0, 'NU': 41, 'Ngrid': (25, 29, 35), 'qstar': [0.466109, 0.770508, 0.434809], 'gain': 1000.0}
@@ -53,6 +56,24 @@ figure panels the text never points at                          0            0  
 unscoped six-regime claims about C-MAPSS                        0            0  ok
 unqualified consequences of $m<d-1$                             0            0  ok
 sub.tex matches theory.tex                                      1            1  ok
+supplement pointers that do not resolve                         0            0  ok
+S1 Severson window (cycles)                                   301          301  ok
+S1 Severson minimum cycles                                    400          400  ok
+S1 Severson filter order                                        3            3  ok
+S1 Severson grid points                                        40           40  ok
+S1 Severson grid start                                       0.15         0.15  ok
+S1 Severson grid end                                          0.9          0.9  ok
+S1 C-MAPSS grid points                                         10           10  ok
+S1 C-MAPSS grid start                                         0.3          0.3  ok
+S1 C-MAPSS grid end                                          0.85         0.85  ok
+S1 C-MAPSS reported window                                      7            7  ok
+S1 C-MAPSS stability window, first                              9            9  ok
+S1 C-MAPSS stability window, second                            11           11  ok
+S1 N-CMAPSS clusters                                            6            6  ok
+S1 N-CMAPSS stages                                              2            2  ok
+S1 N-CMAPSS minimum points per cell                           400          400  ok
+S1 N-CMAPSS sweep minimum points                              300          300  ok
+S1 N-CMAPSS DS02 units as run                                   1            1  ok
 sections the roadmap forgets                                    0            0  ok
 longest sentence the prose says twice (words)                  16           10  ok (bound)
 reproducibility exceptions announced vs listed                  0            0  ok
@@ -77,12 +98,38 @@ Table I u=3.0: rms beta                                      6.57      6.57367  
 Table I u=3.0: loss                                        0.1161     0.116105  ok
 6.7 sweep plants                                              299          299  ok
 6.7 Spearman rho vs gain                                    -0.36    -0.355179  ok
-6.7 share repaying at rho<1                                    53       53.125  ok
+6.7 Spearman interval, lower                                -0.46    -0.463969  ok
+6.7 Spearman interval, upper                                -0.24    -0.237911  ok
 6.7 base rate repaying                                         32      32.4415  ok
+6.7 AUC of rho                                               0.73     0.733898  ok
+6.7 AUC of rho, lower                                        0.67     0.671769  ok
+6.7 AUC of rho, upper                                        0.79     0.791432  ok
+6.7 AUC of the arc alone                                     0.73     0.731346  ok
+6.7 AUC of the drift alone                                   0.53     0.533531  ok
+6.7 AUC of the drift, lower                                  0.46      0.46171  ok
+6.7 AUC of the drift, upper                                   0.6     0.603063  ok
+6.7 drift AUC interval contains 0.5                             1            1  ok
+6.7 repaying below rho = 2.6                                   52      51.7007  ok
+6.7 repaying above rho = 2.6                                   14      13.8158  ok
 6.7 veto miss rate                                             23      22.6601  ok
-6.7 arc alone, magnitude                                     0.35     0.348676  ok
+6.7 lowest decile repaying                                     43      43.3333  ok
+6.7 lowest decile drift (deg)                                 2.7      2.68688  ok
+6.7 median drift, all plants (deg)                             14      14.3627  ok
 6.7 median gain at Table II's rho                             5.2      5.19632  ok
-6.7 drift alone, magnitude bound                             0.05    0.0450257  ok (bound)
+abstract: AUC of rho                                         0.73     0.733898  ok
+abstract: sweep plants                                        299          299  ok
+6.8 Spearman interval, lower                                 0.34     0.342657  ok
+6.8 Spearman interval, upper                                  0.9     0.902098  ok
+6.8 error-ratio interval, lower                               1.4      1.39618  ok
+6.8 error-ratio interval, upper                              2.03      2.02547  ok
+6.8 permutation p (x1e-4)                                     1.5      1.49999  ok
+6.8 point estimate in top tenth of interval                     1            1  ok
+6.8 repeat: plants                                            120          120  ok
+6.8 repeat: lowest correlation                               0.87     0.867133  ok
+6.8 repeat: highest correlation                              0.99     0.993007  ok
+6.8 random tilts: median correlation                         0.74     0.741259  ok
+6.8 random tilts: interval excludes zero (%)                   84      84.1667  ok
+6.8 random tilts: identical ranking (%)                        82      81.6667  ok
 4.1 family misalignment (deg)                                 1.5      1.47878  ok (bound)
 4.1 family mean loss                                           15      15.9683  ok (bound)
 4.1 best constant, low                                        1.2      1.23007  ok
@@ -131,6 +178,7 @@ Severson cells used                                           129          129  
 Severson arc travel (deg)                                    30.7      30.6575  ok
 Severson end-to-end (deg)                                      21      21.3423  ok
 Severson positivity at win 301                                  1            1  ok
+S1 Severson cells qualifying                                  129          129  ok
 XJTU conditions                                                 3            3  ok
 XJTU cells per condition                                        5            5  ok
 NASA cells                                                      4            4  ok
@@ -140,8 +188,11 @@ Sec 7 interaction exceeds regime effect                         1            1  
 Sec 7 fleets where regression is more accurate                  4            4  ok
 Sec 7 NC interaction / main                                  1.65      1.64906  ok
 Sec 7 NC interaction always exceeds the main effect             1            1  ok
+S1 NC DS02 interaction over its noise floor                   566       566.01  ok
+S1 NC sweep: smallest interaction over main                  1.42      1.42042  ok
 Sec 7 NC DS01 interaction / main                             1.84      1.84117  ok
 Sec 7 NC DS01 interaction exceeds the main effect               1            1  ok
+S1 NC DS01 interaction over its noise floor                   110      109.891  ok
 C-MAPSS regimes, FD004                                          6            6  ok
 C-MAPSS regimes, FD002                                          6            6  ok
 C-MAPSS B-W, FD004 (deg)                                      7.9      7.93736  ok
@@ -152,15 +203,21 @@ C-MAPSS engines total, conclusion                             439          439  
 C-MAPSS weakest B-W over w (deg)                         0.479033      7.93736  ok (bound)
 C-MAPSS control bias (deg)                                    0.5     0.479033  ok (bound)
 C-MAPSS control p, at chance                                 0.05     0.345795  ok (bound)
+S1 C-MAPSS smallest control p                                0.35     0.345795  ok
+S1 C-MAPSS control bias bound (deg)                           0.5     0.479033  ok (bound)
+S1 C-MAPSS regimes per file                                     6            6  ok
 lambda* extrapolated                                         1.63      1.63085  ok
 lambda* below realisable                              0.000167589  0.000163085  ok (bound)
 Sec 6.5 myopic gap at q* (%)                                  2.8      2.76179  ok
 
 ALL CHECKS PASS
 
-exit 0 after 31.0 min
+exit 0 after 28.8 min
 md5 AFTER
-  fe5366df95db02c5bde984b87da2ca65  theory.tex  [same]
-  aa3e6a450ebf20ef22cbdc1585a9bda0  verify_numbers.py  [same]
+  8756cb229b1d316471079a53face0dbe  theory.tex  [same]
+  5137adb46edb4eb1cfe0de6e6edb2ca1  supplement.tex  [same]
+  710daaf500ce7459e43aabb0f70a1737  verify_numbers.py  [same]
+  c0db59819961d0f743f9c0fc5d58cac5  rho_sweep.json  [same]
+  506f77029478c7d27b65de63b294c58f  downstream_sweep.json  [same]
   2fca511bba69262b0645136c0078246c  fig4.pdf  [same]
   cc7ba4d06914e3fcd800c98f13f6bdd5  make_fig4.py  [same]

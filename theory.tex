@@ -70,7 +70,7 @@ simplex geometry and reachability limits}
 \begin{abstract}
 A health indicator compresses several condition-monitoring channels into one
 scalar, and normally keeps the same weights for the life of the component.
-We take it to be a fixed linear map of the noise-whitened channels.
+We take it to be a fixed linear map of noise-whitened channels on which every mechanism acts positively, over a population whose units differ only in where they sit on one degradation path, with remaining life Gaussian across it.
 Because degradation runs through several mechanisms at differing rates, the
 channel combination carrying most information about remaining life rotates as
 the component ages, so a fixed indicator necessarily discards information. We
@@ -80,7 +80,7 @@ directions reachable at each instant share a common point, which for generic
 plants needs one fewer independently adjustable operating variable than there
 are mechanisms. Scaling every channel by the same factor leaves the loss
 unchanged, so no criterion built from the Fisher information about
-remaining life can detect it. On a representative three-mechanism synthetic plant, steering the operating point reduces the information-loss objective defined here by a factor of $68$ against the best constant operating point, and a dimensionless index, available before any indicator is chosen, indicates whether such a gain is plausible. Six public run-to-failure fleets test the premises separately: the informative direction does rotate on measured cells, and simulated turbofan records confirm against a negative control that the operating point moves it. The same fleets bound the theory: the highest-fidelity turbofan data reject the separable plant form under which the operator's authority becomes computable offline, so that branch describes a model class rather than measured machinery.
+remaining life can detect it. Steering the operating point reduces the loss substantially when the authority it offers is large beside the drift of the informative direction; on a representative three-mechanism synthetic plant the information-loss objective defined here falls by a factor of $68$ against the best constant operating point. A dimensionless index of that balance, available before any indicator is chosen, describes the regime rather than deciding it, with an area under the receiver-operating curve of $0.73$ over $299$ random plants. Six public run-to-failure fleets test the premises separately: an informative direction estimated from measured cells rotates, and simulated turbofan records confirm against a negative control that the operating point moves it. The same fleets bound the theory: the highest-fidelity turbofan data reject the separable plant form under which the operator's authority becomes computable offline, so that branch describes a model class rather than measured machinery.
 \end{abstract}
 
 \begin{keyword}
@@ -231,7 +231,7 @@ the loss they incur.
 
 \item The best achievable loss is the value of an optimal control problem
 whose objective is a ratio, and whose terminal time is itself controlled
-(Section~\ref{sec:limit}), and a dimensionless regime index, computable before any indicator is designed, indicates the regime in which steering can have substantial value, with its accuracy and the direction of its errors measured on $299$ randomly drawn plants (Section~\ref{sec:regime}).
+(Section~\ref{sec:limit}); we compute its value to two digits and do not certify it. A dimensionless regime index, computable before any indicator is designed, describes the regime in which steering can have substantial value, and its accuracy and the direction of its errors are measured on $299$ randomly drawn plants (Section~\ref{sec:regime}).
 
 \item The premises are separately testable on public run-to-failure
 data, and Section~\ref{sec:scope} tests three in turn: whether the informative
@@ -378,7 +378,7 @@ Equation~\eqref{eq:obs} pairs each mechanism with a channel of its own. Conditio
 
 Two assumptions carry the sensitivity, and both are stated here rather than left to be inferred.
 
-\paragraph{The prior on $R$} We take $R$ to be Gaussian over the population with variance $\Var[R]$. Linearising the record about the nominal trajectory, following~\cite{le2026jestech}, then makes the record and $R$ jointly Gaussian, and the mutual informations below are exact. Linearisation alone would not do it: with a non-Gaussian prior of the same variance the Gaussian value is an upper bound on what a channel carries, and Lemma~\ref{lem:exact} becomes an inequality rather than an identity.
+\paragraph{The prior on $R$} We take $R$ to be Gaussian over the population with variance $\Var[R]$. Linearising the record about the nominal trajectory, following~\cite{le2026jestech}, then makes the record and $R$ jointly Gaussian, and the mutual informations below are exact. Linearisation alone would not do it: with a non-Gaussian prior of the same variance the Gaussian value is an upper bound on what a channel carries, and Lemma~\ref{lem:exact} becomes an inequality rather than an identity. The information geometry that follows is exact under this Gaussian prior and the time-shift population described next; it is not a model of population variability in general.
 
 \paragraph{How units differ} We take the population spread to be a reparametrisation of a single degradation path: units differ in where they sit on the trajectory of \eqref{eq:plant}, not in its shape. This is what makes $R$ a coordinate along that path, and it is what the next display uses. Dispersion in the coefficients of \eqref{eq:plant} is a different matter, because it moves $\partial x/\partial\theta$ rather than sliding along $\partial x/\partial R$, and Remark~\ref{rem:shift} records what it costs.
 
@@ -594,12 +594,7 @@ Then the information about $R$ that the fixed indicator forfeits over the whole 
 \end{proposition}
 
 \begin{proof}
-In whitened coordinates the linearised record is $\tilde y_k=\dvec_k R+\epsilon_k$ with $\epsilon_k\sim N(0,I_d)$ independent, so the Fisher information it carries about $R$ is $\sum_k\dvec_k^{\top}\dvec_k=\sum_k\|\dvec_k\|^{2}$ and an oracle reading the whole record obtains $\tfrac12\log(1+G)$ nats. The fixed indicator returns the scalars $z_k=\mathbf v^{\top}\tilde y_k=(\mathbf v^{\top}\dvec_k)R+\mathbf v^{\top}\epsilon_k$, whose noise terms $\mathbf v^{\top}\epsilon_k$ are standard normal and independent because $\|\mathbf v\|=1$, so the compressed record carries Fisher information $\sum_k(\mathbf v^{\top}\dvec_k)^{2}$. Since $\mathbf v^{\top}\dvec_k=\|\dvec_k\|\cos\psi_k$,
-\[
-\Var[R]\sum_k(\mathbf v^{\top}\dvec_k)^{2}
-=\Var[R]\sum_k\|\dvec_k\|^{2}\cos^{2}\psi_k=G(1-S),
-\]
-and subtracting the two mutual informations gives $\tfrac12\log(1+G)-\tfrac12\log\big(1+G(1-S)\big)=-\tfrac12\log\frac{1+G-GS}{1+G}=-\tfrac12\log(1-WS)$.
+See Supplementary Section~S2.
 \end{proof}
 
 Equation \eqref{eq:record} is \eqref{eq:exact} again, with the instantaneous signal-to-noise ratio $\gamma$ replaced by its sum $G$ over the record, and $\sin^{2}\psi$ by the mean $S$ weighted by the signal energy $\|\dvec_k\|^{2}$. The reduction to one angle therefore survives the passage from an instant to a record. What does not survive is the averaging: $\bar\lloss$ averages the loss, whereas \eqref{eq:record} averages $\sin^{2}\psi$ inside it, and the two differ. They also select different indicators. Minimising \eqref{eq:record} over $\|\mathbf v\|=1$ maximises $\mathbf v^{\top}\big(\sum_k\dvec_k\dvec_k^{\top}\big)\mathbf v$, so the best fixed indicator for the record is the leading eigenvector of the integrated Fisher matrix, while the minimiser of $\bar\lloss$ is the barycentre of Proposition~\ref{prop:bary}. Every result below is stated for $\bar\lloss$.
@@ -730,22 +725,7 @@ $\mu$-weighted Fr\'echet variance of the curve.
 \end{proposition}
 
 \begin{proof}
-(i) As $\gamma\to\infty$ we have $w\to1$, and \eqref{eq:exact} gives
-\[
-\lloss\to-\tfrac12\log\cos^{2}\psi=-\log\sum_i\sqrt{p_iq_i}=\DB
-\]
-by Proposition~\ref{prop:bhat}. The convergence is uniform, which is what
-carries the minimisers with it. Positivity keeps $p_\tau$ interior, and
-$\sqrt{q_i}\ge q_i$ with $\sum_iq_i=1$ gives
-$\cos\psi=\sum_i\sqrt{p_iq_i}\ge\min_i\sqrt{p_i}$ for every $q$ in the
-simplex, so $\cos\psi$ is bounded away from zero uniformly in $q$ and in
-$\tau$ and $\DB$ stays finite. Both objectives are continuous on a compact set
-and uniformly close on it, so their minimisers converge. (ii) By
-\eqref{eq:expansion}, $\bar\lloss=\tfrac12\bar
-w\,\E_\mu[\psi^{2}]+O(\psi^{4})$ with $d\mu=w\,d\tau/\bar w$; minimising a
-$\mu$-weighted mean square of a geodesic distance is the definition of the
-weighted Fr\'echet mean, and $\psi=\tfrac12\dFR$ converts $\tfrac12\bar
-w\,\E_\mu[\psi^{2}]$ into $\tfrac18\bar w\,\E_\mu[\dFR^{2}]$.
+See Supplementary Section~S2.
 \end{proof}
 
 The two limits are taken in different parameters, signal-to-noise ratio in (i)
@@ -874,10 +854,7 @@ and it shrinks to a point when the mechanisms respond identically to the
 input.
 
 \begin{theorem}\label{thm:zero}
-Fix an admissible input and let $x(\cdot)$ be the trajectory it generates. Zero loss along that trajectory is attainable with the fixed indicator $q$ if and only if $q\in\bigcap_{t}\mathcal D(x_t)$. Solving $\dhat(x,u)=q$ for $u$ imposes $d-1$
-independent scalar equations on $m$ unknowns, so for generic data a common
-point exists only if $m\ge d-1$. If $m<d-1$, then for generic data
-$\beta_{\min}>0$ along the trajectory; Remark~\ref{rem:family} exhibits plants for which it fails. In every case
+Fix an admissible input and let $x(\cdot)$ be the trajectory it generates. Zero loss along that trajectory is attainable with the fixed indicator $q$ if and only if $q\in\bigcap_{t}\mathcal D(x_t)$. If $m<d-1$ and $u\mapsto\dhat(x,u)$ is continuously differentiable, the indicators that attain zero loss form a null subset of the unit sphere, so almost every $q$, and in fact every $q$ that does not attain it, has $\beta_{\min}>0$ on a set of times of positive measure. Whether any $q$ at all attains zero loss is a property of the plant, and Remark~\ref{rem:family} exhibits plants for which one does. In every case
 $\bar{\lloss}\ge\int\lloss(\beta_{\min}(x_t,q))\,dt/T_f$ for that trajectory.
 \end{theorem}
 
@@ -886,14 +863,11 @@ By Lemma~\ref{lem:exact}, $\lloss(\beta)=0$ iff $\sin\beta=0$, so
 $\bar\lloss=0$ iff $\beta_t=0$ for almost every $t$, that is iff
 $\dhat(x_t,u_t)=q$, that is iff $q\in\mathcal D(x_t)$ for every $t$. Solving
 $\dhat(x,u)=q$ imposes $d-1$ independent scalar equations, both sides being
-unit vectors, on $m$ unknowns. If $m<d-1$ then $\mathcal D(x)$ is the image of
-an $m$-dimensional set, hence of dimension at most $m$, and is a null subset
-of the $(d-1)$-dimensional sphere that a generic $q$ misses; if $m\ge d-1$ the
+unit vectors, on $m$ unknowns. If $m<d-1$ then $\mathcal D(x)$, the image of an $m$-dimensional set under a continuously differentiable map, is a null subset of the $(d-1)$-dimensional sphere, which almost every $q$ misses; if $m\ge d-1$ the
 implicit function theorem supplies a solution wherever the Jacobian has full
 rank. The inequality $\beta_t\ge\beta_{\min}(x_t,q)$ holds for every
 admissible input by definition of $\beta_{\min}$ as a minimum over $\mathcal
-U$, and is strict exactly where $q\notin\mathcal D(x_t)$, which for $m<d-1$ is
-generic. Since $\lloss$ is increasing on $[0,\pi/2]$, the bound follows on
+U$, and is strict exactly where $q\notin\mathcal D(x_t)$. Since $\mathcal U$ is compact and $\dhat$ continuous, each $\mathcal D(x_t)$ is compact and varies continuously with $t$, so the set of times at which $q\notin\mathcal D(x_t)$ is open. It is non-empty for every $q$ that does not attain zero loss, in particular for every $q$ outside the null set $\mathcal D(x_0)$, and so has positive measure. Since $\lloss$ is increasing on $[0,\pi/2]$, the bound follows on
 dividing by $T_f$.
 \end{proof}
 
@@ -902,8 +876,7 @@ This is a state-conditioned result. The bound is genuine, in the sense that no i
 The practical reading of Theorem~\ref{thm:zero} is a counting rule: a
 component degrading through $d$ mechanisms generically needs $d-1$
 independently adjustable operating variables before a fixed indicator can be
-kept perfectly aligned. Section~\ref{sec:translate} says what the qualifier
-covers. Three mechanisms and a single temperature setpoint will not do it. The three results of this section answer different questions, and it is worth separating them. Theorem~\ref{thm:zero} characterises zero loss exactly, as membership of every reachable set, and then counts dimensions to say when a generic plant can meet it; the count is necessary for generic data and is not by itself a construction. Proposition~\ref{prop:contain} gives an exact criterion, necessary and sufficient, on the separable subclass alone. Remark~\ref{rem:family} exhibits plants outside that subclass which attain zero loss with fewer inputs than the count asks, so the count is not necessary in general. But a weaker and much cheaper objective is available.
+kept perfectly aligned. Here \emph{generically} is a count of dimensions over the plant's data, not a statement of measure: the theorem proves the measure statement over indicators, Remark~\ref{rem:family} constructs plants that escape the count, and we do not prove those plants rare. Section~\ref{sec:translate} says what the qualifier covers. For a generic plant under this model, three mechanisms and a single temperature setpoint will not do it. The three results of this section answer different questions, and it is worth separating them. Theorem~\ref{thm:zero} characterises zero loss exactly, as membership of every reachable set, and then counts dimensions to say when a generic plant can meet it; the count is necessary for generic data and is not by itself a construction. Proposition~\ref{prop:contain} gives an exact criterion, necessary and sufficient, on the separable subclass alone. Remark~\ref{rem:family} exhibits plants outside that subclass which attain zero loss with fewer inputs than the count asks, so the count is not necessary in general. But a weaker and much cheaper objective is available.
 
 \begin{corollary}[what actuation is actually required]\label{cor:tri}
 Two objectives that are easily conflated carry different requirements.
@@ -1087,21 +1060,11 @@ are constant, $x_i(t)=x_i^0+\varphi_i^0t$ with $\varphi_i^0=\varphi_i(u_0)$,
 so $a(x_t)$ moves at constant velocity $\nu_i\varphi_i^0$. Choosing
 $\nu_i=rE_i/\varphi_i^0$ makes that velocity parallel to $E$, which is the
 direction of $\mathcal B$, and $b(u_t)$ retreats along $\mathcal B$ at the
-same rate. The two cancel and $\dhat$ is frozen. Integrating the construction
-for $d=2$ to $8$ with one input holds the misalignment below
-$1.5\times10^{-6}$ degrees and the mean loss below $10^{-15}$. These families carry no prior variance of their own, so their losses are evaluated at a fixed $w=0.9$ rather than at a $\gamma$ the plant supplies; the bound has fifteen orders of magnitude of headroom and does not turn on the choice. That is against
-$1.2\times10^{-5}$ to $5.4\times10^{-4}$ for the best constant input on the
-same plant.
+same rate. The two cancel and $\dhat$ is frozen. Supplementary Section~S4 integrates the construction for $d=2$ to $8$.
 \end{remark}
 
 This bears on the sharpness of Theorem~\ref{thm:zero}. The family of Remark~\ref{rem:family} is a knife
-edge. Perturbing the shape coefficients $\nu$ by $1\%$ raises the mean loss to
-$3.2\times10^{-4}$ under the myopic policy, against $1.8\times10^{-4}$ for the
-best constant input on the same perturbed plant. At one percent of shape
-error, steering is already worse than not steering. Closing the loop halves
-the damage but does not repair it, so the fragility belongs to the
-construction and not to the open-loop schedule. Mistuning the activation
-energies instead is tolerated to about two percent. A designer should read
+edge. At one percent of error in its shape coefficients, steering is already worse than not steering (Supplementary Section~S4). A designer should read
 Proposition~\ref{prop:contain} as an explanation of when the counting rule
 binds, and Theorem~\ref{thm:zero} as the rule to design against.
 
@@ -1137,8 +1100,7 @@ $9.4$.
 \label{sec:limit}
 
 Theorem~\ref{thm:zero} bounds the loss along a given trajectory. But the input
-steers the trajectory as well as the misalignment on it, so a fundamental
-limit requires optimising over both at once. This changes the structure of the
+steers the trajectory as well as the misalignment on it, so the best achievable loss requires optimising over both at once. This changes the structure of the
 problem.
 
 The objective is a time average over a lifetime that the input itself
@@ -1169,8 +1131,7 @@ and discarded (Section~\ref{sec:steer}).
 Before computing anything we record a certificate that removes the
 conditioning. Theorem~\ref{thm:zero} bounds the loss along a trajectory the
 input has already chosen; the following proposition bounds it over all of them
-at once, and it is what makes the number computed below a limit rather than an
-observation.
+at once, and it is what would make the number computed below a limit rather than an observation, were a function satisfying it exhibited; none is, for reasons given below.
 
 \begin{proposition}[verification certificate]\label{prop:converse}
 Fix an indicator $q$ and a constant $\lambda\ge0$. Suppose there is a
@@ -1212,41 +1173,14 @@ admissible input, and mentions no trajectory. Any $V$ one can exhibit
 therefore certifies a limit, and the search for a converse becomes the search
 for a verification function.
 
-The $C^{1}$ hypothesis cannot be weakened to Lipschitz continuity. A Lipschitz
-$V$ is differentiable almost everywhere in the state by Rademacher's theorem,
-but a single trajectory is a null set and could in principle run inside the
-exceptional set, so the chain rule step would be unavailable; recovering the
-argument at that generality needs the Clarke generalised gradient in place of
-$\nabla V$. Smoothness is also, as it turns out, exactly what the natural
-candidates lack.
-
-We tried two. The value function of the Dinkelbach problem below satisfies
-\eqref{eq:cert} with equality in the viscosity sense~\cite{bardi1997}, but
-value functions of this class are only Lipschitz. Computed on a $41^{3}$ grid
-and tested on a $61^{3}$ one, \eqref{eq:cert} fails at about $45\%$ of test
-points by up to $2.9\times10^{-3}$. Halving $\lambda$ moves that violation by
-$0.6\%$, so the fault lies in the candidate and not in the bound. At the
-opposite extreme an affine $V(x)=c_0-a_0^{\top}x$ has an exactly constant
-gradient and makes every requirement linear, so the best certifiable $\lambda$
-is a linear program; over $167{,}936$ constraints it returns $V\equiv0$ and
-only the pointwise bound $\min_{x,u}\lloss$, which is vacuous here because the
-reachable floor falls to within sampling resolution of zero at mid-life.
-Deleting the two boundary requirements lets that program run to any cap
-imposed on it, which identifies them as what binds: trajectories of
-\eqref{eq:plant} increase in every coordinate, so an affine $V$ is monotone
-along all of them at once and $V(x_0)\ge0\ge V|_{\text{failure}}$ forces it to
-decrease, while the near-aligned states, where the running cost vanishes,
-demand a local increase.
-
-The two failures are complementary, and together they say what a certificate
-needs. The value function varies its gradient exactly as the two demands
-require but is not differentiable where that matters; affine functions are
-perfectly smooth but cannot vary their gradient at all. A certificate must
-therefore be both smooth and non-constant in its gradient, which points at a
-smooth under-approximation of the value function, obtained by sum-of-squares
-programming when the plant data are polynomial, or by interval arithmetic with
-an explicit Lipschitz constant. We do not claim a certified converse here, and
-the limit below remains a computation; what Proposition~\ref{prop:converse}
+The $C^{1}$ hypothesis is not a formality, and it is exactly what the
+natural candidates lack: the value function of the Dinkelbach problem below is
+only Lipschitz and violates \eqref{eq:cert} pointwise, while affine functions
+are smooth but certify only a vacuous pointwise bound. Supplementary
+Section~S3 records both attempts and what they imply, that a certificate must
+be smooth and must have a gradient that varies, which points at a smooth
+under-approximation of the value function by sum-of-squares programming or
+interval arithmetic. We do not claim a certified converse here, and the optimum computed below remains a computation; what Proposition~\ref{prop:converse}
 buys is the replacement of an open problem without shape by a concrete object
 with a checkable property.
 
@@ -1296,12 +1230,7 @@ and Theorem~\ref{thm:zero} puts zero loss out of reach unless this plant is
 one of the exceptions of Remark~\ref{rem:family}; Section~\ref{sec:floor}
 computes the floor and finds that it is not. Noise is unit and the prior variance is $\Var[R]=10^{3}$, so the weight $w=\gamma/(1+\gamma)$ of Lemma~\ref{lem:exact} is evaluated at the plant's own $\gamma=\|\dvec\|^{2}\Var[R]$ at each state rather than held fixed; $\gamma$ varies along a trajectory because $\|\dvec\|$ does. Every trajectory starts from $x_i(0)=5\times10^{-3}$ and runs to the condemnation limit $x_f=0.9$ of \eqref{eq:tf}. Raising $x_f$ to unity leaves every qualitative conclusion below intact and moves the constants: the peak floor of Section~\ref{sec:floor} rises from $4.52^{\circ}$ to $5.41^{\circ}$, and the gain of Section~\ref{sec:steer} falls from $68$ to $58$. No constant reported below should be read across thresholds.
 
-\paragraph{Verification of the identities} Before using them we checked the
-analytical results numerically. The rotation identity \eqref{eq:repl} holds to
-relative error below $1.1\times10^{-7}$ over the five input--channel pairs
-$(d,m)=(2,1)$, $(3,2)$, $(3,1)$, $(4,2)$ and $(5,3)$; the replicator form to
-$6.9\times10^{-8}$; Theorem~\ref{thm:beta} to $5.1\times10^{-6}$, limited by
-finite differencing; and \eqref{eq:bhat} to $1.1\times10^{-16}$.
+\paragraph{Verification of the identities} The analytical identities were checked numerically before use, and the residuals are reported in Supplementary Section~S4.
 
 \subsection{A Fisher level set of varying loss}
 
@@ -1417,7 +1346,7 @@ alignment buys in the numerator is paid for in the denominator. This is the
 tension anticipated in Section~\ref{sec:limit}, and it is why the horizon
 cannot be fixed in advance.
 
-\subsection{The fractional limit}
+\subsection{The computed fractional optimum}
 \label{sec:frac}
 
 Dinkelbach bisection with the control grid matched to the policy gives, over
@@ -1455,24 +1384,28 @@ Three plants differing only in their activation energies are not a screening
 law, so the index was tested on $299$ further plants drawn at random: two to
 five mechanisms, one or two independently adjustable inputs, and the
 pre-exponentials, activation energies, shape coefficients, input envelope,
-initial state and signal-to-noise ratio varied together. The rank correlation
-between $\rho$ and the gain is $-0.36$, and it keeps its sign inside every
-stratum of the mechanism count and of the input count, so it is not an
+initial state and signal-to-noise ratio varied together. The rank correlation between $\rho$ and the gain is $-0.36$, with a
+bootstrap $95\%$ interval from $-0.46$ to $-0.24$, and it keeps its sign inside
+every stratum of the mechanism count and of the input count, so it is not an
 artefact of either.
 
-Its useful direction is the optimistic one. Of the plants with $\rho<1$,
-$53\%$ repay steering by a factor of five or more, against $32\%$ over the
-whole sample. As a veto it is weaker: rejecting every plant with $\rho\ge1$
-would also reject $23\%$ of plants that would in fact have repaid a factor of
-five, and that is the expensive error rather than the cheap one. Most of the
-index's discriminating power is in its denominator: the reachable arc alone
-ranks the plants almost as well, at $0.35$ in magnitude against the ratio's
-$0.36$, while the drift on its own ranks them at below $0.05$ in magnitude,
-which is nothing. The drift earns its place
-only when plants of equal arc are compared. The first row of
-Table~\ref{tab:regime} is also not typical of its own regime: among sampled
+Read as a classifier of whether steering repays a factor of five, which
+$32\%$ of the plants do, $\rho$ has an area under the receiver-operating curve
+of $0.73$, with interval $0.67$ to $0.79$. The reachable arc alone scores
+$0.73$ as well, and the drift alone $0.53$, with interval $0.46$ to $0.60$,
+which includes the $0.5$ of a coin toss: most of the index's discriminating
+power is in its denominator, and the drift earns its place only among plants
+of equal arc. Of the plants below $\rho=2.6$, $52\%$ repay steering fivefold,
+against $14\%$ above it, a split read off this same sample and so optimistic. As a veto the index is weaker than that suggests:
+rejecting every plant with $\rho\ge1$ would also reject $23\%$ of plants that
+would in fact have repaid a factor of five, and that is the expensive error
+rather than the cheap one. Nor is lower always better. In the lowest tenth of
+$\rho$ only $43\%$ repay fivefold, because there the drift itself is small, a
+median of $2.7^{\circ}$ against $14^{\circ}$ over the sample: steering needs
+authority, and it also needs something to chase. The first row of
+Table~\ref{tab:regime} is not typical of its own regime either: among sampled
 plants within a factor $1.4$ of its $\rho$, the median gain is $5.2$ rather
-than $68$. $\rho$ indicates a regime; it does not decide a design.
+than $68$. $\rho$ describes a regime; it does not decide a design.
 
 \begin{table}[t]
 \caption{The regime index. The activation energies $E$ set the actuation authority; $c$, the noise and $\mathcal U$ are held fixed. $L^{\star}$ is the loss under adaptive control, and the gain its ratio to the best constant input.}
@@ -1494,7 +1427,25 @@ $(0.80,0.805,0.798)$ & $0.45^{\circ}$ & $53.1$ & $4.2\times10^{-3}$ & $2.7\times
 
 Corollary~\ref{cor:mmse} prices the loss in the error of the estimate the model itself prescribes. A practitioner does not use that estimate, so the ordering is worth checking against a procedure that uses none of the construction: sample the indicator over the last $40\%$ of life, match the observed history against the indicator's own reference curve, and read remaining life off the best-fitting time offset. That estimator sees a scalar signal and nothing else --- not $\dhat$, not $\gamma$, not the loss.
 
-Over twelve indicators spanning $\bar\lloss$ from $0.012$ to $0.37$, its median absolute error --- one of the standard prognostic accuracy measures~\cite{saxena2008metrics} --- rises with the loss, at Spearman correlation $0.89$, and the best-aligned indicator beats the worst by a factor $1.5$. The factor is far smaller than the $31$-fold spread in $\bar\lloss$, and it should be: the loss is a logarithmic information quantity, the error is a time, and an estimator with the whole history recovers much of what any one instant discards.
+Over twelve indicators spanning $\bar\lloss$ from $0.012$ to $0.37$, its median absolute error --- one of the standard prognostic accuracy measures~\cite{saxena2008metrics} --- rises with the loss, at Spearman correlation $0.89$, and the best-aligned indicator beats the worst by a factor $1.5$. Twelve indicators is a small sample, so both are given with intervals obtained by resampling the $160$ units behind each median: $0.34$ to $0.90$ for the correlation, and $1.40$ to $2.03$ for the factor. The ordering is not in doubt --- a one-sided permutation test gives $p=1.5\times10^{-4}$ --- but its strength is, and the point estimate sits near the top of its own interval. The factor is far smaller than the $31$-fold spread in $\bar\lloss$, and it should be: the loss is a logarithmic information quantity, the error is a time, and an estimator with the whole history recovers much of what any one
+instant discards.
+
+The same protocol on $120$ further plants, drawn at random as in
+Section~\ref{sec:regime}, gives correlations between $0.87$ and $0.99$, with
+the plant above among the weaker. That design tilts every indicator toward the
+same direction, however, so loss and error both grow with one parameter and
+their agreement is close to structural. Tilting instead by a random amount of
+up to $60^{\circ}$ in a random direction weakens the median correlation to
+$0.74$, with the interval excluding zero on $84\%$ of plants. It also exposes
+what the experiment cannot show. On these plants the angle between an
+indicator and the mid-life informative direction ranks the indicators
+identically to the loss on $82\%$ of plants, with neither consistently better
+on the rest, because the direction rotates little beside how far the
+indicators differ. The experiment is therefore evidence that the ordering of
+the loss carries over to an estimator built from none of this construction; it
+is not evidence that the time-averaged loss improves on a mid-life snapshot of
+the misalignment, which would need a plant whose direction rotates by more
+than its candidate indicators differ.
 
 \section{What public data can say about the premises}
 \label{sec:scope}
@@ -1505,8 +1456,7 @@ what depends on which. Two are premises about the plant: that the informative
 direction rotates along the trajectory, and that the input moves it. The third
 is the separability of Lemma~\ref{lem:sep}, which is what makes the operator's
 authority computable offline. Table~\ref{tab:fleets} summarises what six public run-to-failure
-fleets currently settle. The protocols are not reproduced here; the datasets
-are named so that each test can be located and repeated.
+fleets currently settle. Supplementary Section~S1 gives the protocol behind every row, with the parameters of the code that produced it.
 
 
 \begin{figure*}[tb]
@@ -1568,11 +1518,6 @@ are named so that each test can be located and repeated.
 \draw[e] (zer) -- node[above, font=\scriptsize, align=center] {and\\additionally} (sep);
 \draw[e] (sep) -- (cnt);
 
-\node[lbl, anchor=north west, align=left, text width=110mm] at (0mm,-86mm)
-      {Every result on the spine needs only the positivity of the degradation
-       model. Only the dashed branch needs separability, and it is that
-       hypothesis, not the geometry, that Section~\ref{sec:scope} reports as
-       rejected on the best public turbofan data.};
 \end{tikzpicture}
 \caption{What rests on what. The spine needs only the positivity of the degradation model. Only the dashed branch adds separability, which Section~\ref{sec:scope} reports as rejected on the best public turbofan data.}
 \label{fig:scope}
@@ -1591,7 +1536,7 @@ actuation premise is confirmed in simulation and open on measured hardware.}
 fleet & premise & what is measured & reading\\
 \hline
 Severson lithium-ion~\cite{severson2019} & rotation &
-arc of the fleet-mean informative direction over $\tau\in[0.15,0.9]$, on
+arc of an empirically constructed informative direction, the fleet mean, over $\tau\in[0.15,0.9]$, on
 $129$ Severson lithium-ion cells &
 travels $30.7^{\circ}$ of arc and ends $21^{\circ}$ from its start
 (Fig.~\ref{fig:mech}(c)); stays in the open positive orthant once the
@@ -1619,8 +1564,7 @@ rotation of a direction formed from three measured series, which is what the
 premise asserts, and does not need \eqref{eq:obs}'s pairing of channels with
 mechanisms. On the four measured fleets the obstacle to testing actuation is
 the estimator and not the physics, so the premise is confirmed in simulation
-and open on hardware. And the C-MAPSS contrast is reported against a negative
-control --- fake regimes cut from a single real one, where no contrast exists
+and open on hardware. Both the Severson and the C-MAPSS rows estimate the direction by differentiating each channel along normalised life, which reads a time derivative as the sensitivity of Eq.~\eqref{eq:sens} and so presumes the time-shift population of Section~\ref{sec:prelim}. And the C-MAPSS contrast is reported against a negative control --- fake regimes cut from a single real one, where no contrast exists
 by construction --- because a procedure that returned a positive contrast
 regardless would produce the same table entry.
 
@@ -1681,8 +1625,7 @@ separable form of \eqref{eq:plant} is not only an idealisation but one the
 data reject: Section~\ref{sec:scope} finds the interaction between operating
 point and state larger than either main effect on two N-CMAPSS datasets, so
 computing the operator's authority offline is available only where that form
-holds. The fundamental limit of Section~\ref{sec:limit} is computed rather
-than proved, to two digits. The actuation premise is confirmed on simulated rather than measured data, for the reasons set out in Section~\ref{sec:scope}. And the population is taken to slide along one degradation path, which is what makes remaining life a coordinate on it; under dispersion in the coefficients of \eqref{eq:plant} the sensitivity that Remark~\ref{rem:shift} measures stands some $45^{\circ}$ from \eqref{eq:sens}, so the construction describes fleets that vary in when they fail rather than in how they degrade.
+holds. The optimum of Section~\ref{sec:limit} is computed rather than certified, to two digits. The actuation premise is confirmed on simulated rather than measured data, for the reasons set out in Section~\ref{sec:scope}. And the population is taken to slide along one degradation path, which is what makes remaining life a coordinate on it; under dispersion in the coefficients of \eqref{eq:plant} the sensitivity that Remark~\ref{rem:shift} measures stands some $45^{\circ}$ from \eqref{eq:sens}, so the construction describes fleets that vary in when they fail rather than in how they degrade.
 
 \section{Conclusion}
 \label{sec:conclusion}
@@ -1714,12 +1657,24 @@ differentiable verification function; the value function is the natural
 candidate and fails the differential test for a structural reason, so what is
 required is a smooth under-approximation of it, by sum-of-squares programming
 or by interval arithmetic with an explicit Lipschitz constant. The other is
-unchanged: the fractional limit to better than two digits, which requires a
+unchanged: the computed optimum to better than two digits, which requires a
 scheme of higher order than the semi-Lagrangian one used here.
 
 \section*{Data availability and reproducibility}
-The six fleets named in Section~\ref{sec:scope} are publicly available. One script regenerates every computed result from a single configuration, and a companion check recomputes each reported number and compares it with the value written in the text, covering the tables and the quantities reported alongside them. Those checks are maintained against the full manuscript from which this paper is drawn, and all of them pass; the numbers reported here are carried over from it unchanged. Three groups of numbers lie outside it: the residuals of the identity checks in Section~\ref{sec:num}, the barycentre comparison in Section~\ref{sec:bary}, and the diagnostics of the two discarded formulations in Section~\ref{sec:limit}. The plots are produced by three further scripts. All of these are
-available at \url{https://github.com/HuyHoangLe0201/health-indicator-information-loss}.
+The six fleets named in Section~\ref{sec:scope} are publicly available. One
+script recomputes every reported number from a single configuration and
+compares it with the value written in this manuscript and in its
+supplementary material, covering the tables and the quantities reported
+alongside them; all of its checks pass, and the output of the run that
+verified this version is included. The regime-index sweep of
+Section~\ref{sec:regime} takes hours, so it and the downstream repeat of
+Section~\ref{sec:downstream} are recorded by two further scripts, and the
+checks read the records. Three groups of numbers lie outside the checks: the
+residuals of the identity checks in Supplementary Section~S4, the barycentre
+comparison in Section~\ref{sec:bary}, and the diagnostics of the two candidate
+certificates in Supplementary Section~S3. The plots are produced by three
+further scripts. All of these are available at
+\url{https://github.com/HuyHoangLe0201/health-indicator-information-loss}.
 
 \section*{Declaration of competing interest}
 The authors declare that they have no known competing financial interests or personal relationships that could have appeared to influence the work reported in this paper.
