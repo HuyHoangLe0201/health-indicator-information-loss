@@ -49,9 +49,9 @@ The other three figures are TikZ and live inside `theory.tex`.
 
 The bundle sent to the journal -- cover letter, highlights and the
 declarations -- is deliberately not published here. The cover letter is
-correspondence with an editor and names manuscripts still under review
-elsewhere; everything else in it duplicates the files listed above. Nothing
-needed to reproduce a number in the paper is missing.
+correspondence with an editor, and everything else in the bundle duplicates
+the files listed above. Nothing needed to reproduce a number in the paper is
+missing.
 
 ### The figure files are not numbered like the figures
 
@@ -133,7 +133,7 @@ manuscript, the supplement, `verify_numbers.py`, both sweep records, and
 `fig4.pdf` with its script. That bracket is the point: it says the checks and
 the manuscript were the same files throughout, so a run that passed against an edited copy cannot
 be presented as a run that passed against this one. `theory.tex` here is
-`3104e1a23f74`, which is the hash the log records.
+`edde726d74cd`, which is the hash the log records.
 
 The row count depends on the data you have. Without the fleets a subset
 runs and the total is smaller; 187 is the number with all six present.
@@ -166,8 +166,8 @@ These are in the manuscript's own words and are not defects in the code:
   naming which.
 - The fractional limit in Section 5 is computed, not certified. The manuscript
   says so: "we do not claim a certified converse here".
-- The actuation premise is confirmed on simulation and remains open on measured
-  hardware, for the reason Section 7 gives — only the turbofan fleets vary the
+- The actuation premise is supported in simulation and remains untested on
+  measured hardware, for the reason Section 7 gives — only the turbofan fleets vary the
   operating point within a unit.
 - Section 4.1, with Lemma 4.3 and Proposition 4.4, holds on a separable
   subclass that the highest-fidelity turbofan data reject. Figure 6 marks which branch of the

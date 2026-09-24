@@ -61,6 +61,6 @@ contributes no check.
 Section 7 of the manuscript is explicit that only the two turbofan fleets vary
 the operating point within a unit, so only they can separate an operating-point
 effect from a unit effect. The rotation premise is testable on all six; the
-actuation premise is confirmed on simulation and remains open on measured
+actuation premise is supported in simulation and remains untested on measured
 hardware. Reproducing the numbers here will not change that, and the paper does
 not claim otherwise.

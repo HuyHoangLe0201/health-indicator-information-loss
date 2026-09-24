@@ -70,22 +70,23 @@ simplex geometry and reachability limits}
 \begin{abstract}
 Fixed-weight health indicators discard information: the channel combination
 most informative about remaining life rotates as degradation mechanisms
-progress at different rates. We show that the operating point controls how
-much is lost. For a linear indicator, positive mechanism effects and Gaussian
-remaining life along one degradation path, the loss is one angle on a
-statistical simplex. Zero loss is attainable exactly when the informative
-directions reachable at each instant share a common point, which generically
-needs one fewer independent operating variable than there are mechanisms.
-Invariant to common channel scaling, the loss is invisible to every criterion
-built from the Fisher information about remaining life. On a representative
-synthetic plant, steering lowers the information-loss objective $68$-fold
-against the best constant operating point. Over $299$ random plants, the width
-of the reachable set, known before design, provides a moderate screening
-signal for when steering pays (area under the receiver-operating curve
-$0.73$). In six public fleets, measured battery cells show the rotation and
-simulated turbofan records, checked against a negative control, support its
-dependence on the operating point; the highest-fidelity turbofan data reject
-the separable form under which the reachable set is computable offline.
+progress at different rates. We show the operating point controls how
+much is lost. For a linear indicator, positive degradation rates and Gaussian
+remaining life over a time-shift population, the loss depends on the
+indicator only through one misalignment angle, a distance on a statistical
+simplex. Zero loss is attainable exactly when the informative directions
+reachable at each instant share a common point, which generically needs one
+fewer independent operating variable than there are mechanisms. Invariant to
+common channel scaling, the loss is invisible to every criterion built from
+the Fisher information about remaining life. On a representative synthetic
+plant, steering lowers the information-loss objective $68$-fold against the
+best constant operating point. Across $299$ random plants of the separable
+model, the reachable-set width, known before design, provides a
+moderate screening signal for when steering pays (area under the
+receiver-operating curve $0.73$). In six public fleets, measured battery
+cells show the rotation and simulated turbofan records, checked against a
+negative control, support its dependence on the operating point; the
+highest-fidelity turbofan data reject that separable form.
 \end{abstract}
 
 \begin{keyword}
@@ -1541,7 +1542,7 @@ fleets currently settle. Supplementary Section~S1 gives the protocol behind ever
 \begin{table*}[tb]
 \caption{What the six public fleets settle, and what they cannot. Only the two
 turbofan simulations vary the operating point within a unit, which is why the
-actuation premise is confirmed in simulation and open on measured hardware.}
+actuation premise is supported in simulation and untested on measured hardware.}
 \label{tab:fleets}
 \centering
 \footnotesize
@@ -1578,8 +1579,7 @@ the Arrhenius form of Section~\ref{sec:prelim}. That row therefore reads the
 rotation of a direction formed from three measured series, which is what the
 premise asserts, and does not need \eqref{eq:obs}'s pairing of channels with
 mechanisms. On the four measured fleets the obstacle to testing actuation is
-the estimator and not the physics, so the premise is confirmed in simulation
-and open on hardware. Both the Severson and the C-MAPSS rows estimate the direction by differentiating each channel along normalised life, which reads a time derivative as the sensitivity of Eq.~\eqref{eq:sens} and so presumes the time-shift population of Section~\ref{sec:prelim}. And the C-MAPSS contrast is reported against a negative control --- fake regimes cut from a single real one, where no contrast exists
+the estimator and not the physics, so the premise is supported in simulation and untested on hardware. Both the Severson and the C-MAPSS rows estimate the direction by differentiating each channel along normalised life, which reads a time derivative as the sensitivity of Eq.~\eqref{eq:sens} and so presumes the time-shift population of Section~\ref{sec:prelim}. And the C-MAPSS contrast is reported against a negative control --- fake regimes cut from a single real one, where no contrast exists
 by construction --- because a procedure that returned a positive contrast
 regardless would produce the same table entry.
 
@@ -1641,7 +1641,7 @@ separable form of \eqref{eq:plant} is not only an idealisation but one the
 data reject: Section~\ref{sec:scope} finds the interaction between operating
 point and state larger than either main effect on two N-CMAPSS datasets, so
 computing the operator's authority offline is available only where that form
-holds. The optimum of Section~\ref{sec:limit} is computed rather than certified, to two digits. The actuation premise is confirmed on simulated rather than measured data, for the reasons set out in Section~\ref{sec:scope}. And the population is taken to slide along one degradation path, which is what makes remaining life a coordinate on it; under dispersion in the coefficients of \eqref{eq:plant} the sensitivity that Remark~\ref{rem:shift} measures stands some $45^{\circ}$ from \eqref{eq:sens}, so the construction describes fleets that vary in when they fail rather than in how they degrade.
+holds. The optimum of Section~\ref{sec:limit} is computed rather than certified, to two digits. The actuation premise is supported by simulated rather than measured data, for the reasons set out in Section~\ref{sec:scope}. And the population is taken to slide along one degradation path, which is what makes remaining life a coordinate on it; under dispersion in the coefficients of \eqref{eq:plant} the sensitivity that Remark~\ref{rem:shift} measures stands some $45^{\circ}$ from \eqref{eq:sens}, so the construction describes fleets that vary in when they fail rather than in how they degrade.
 
 \section{Conclusion}
 \label{sec:conclusion}

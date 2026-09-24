@@ -1258,7 +1258,7 @@ def main():
              find(s, r"\(area under the receiver-operating curve \$([0-9.]+)\$\)"),
              _rs["auc_arc"], 0.02),
             ("abstract: sweep plants",
-             find(s, r"Over \$([0-9]+)\$ random plants, the width of the reachable set"),
+             find(s, r"Across \$([0-9]+)\$ random plants of the separable model, the reachable-set width"),
              _rs["n"], 0.0),
         ]
 
