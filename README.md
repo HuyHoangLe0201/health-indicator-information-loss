@@ -133,7 +133,7 @@ manuscript, the supplement, `verify_numbers.py`, both sweep records, and
 `fig4.pdf` with its script. That bracket is the point: it says the checks and
 the manuscript were the same files throughout, so a run that passed against an edited copy cannot
 be presented as a run that passed against this one. `theory.tex` here is
-`edde726d74cd`, which is the hash the log records.
+`caedee7a5cf8`, which is the hash the log records.
 
 The row count depends on the data you have. Without the fleets a subset
 runs and the total is smaller; 187 is the number with all six present.
