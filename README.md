@@ -1,9 +1,9 @@
-# Information loss of fixed health indicators as a control problem
+# Information loss of fixed linear health indicators as a control problem
 
 Reproducibility repository for the manuscript
 
-> **Information loss of fixed health indicators as a control problem: simplex
-> geometry and reachability limits**
+> **Information loss of fixed linear health indicators as a control problem:
+> simplex geometry and reachability limits**
 > Huy Hoang Le, Kim-Anh Nguyen
 > Submitted to *Reliability Engineering & System Safety*
 
@@ -38,7 +38,7 @@ python verify_numbers.py --full        # about 30 minutes
 | `fig1.pdf`, `fig2.pdf`, `fig4.pdf` | the three plotted figures |
 | `make_fig1.py`, `make_fig2.py`, `make_fig4.py` | the scripts that draw them |
 | `verify_numbers.py` | the 187 checks |
-| `rho_sweep.py`, `rho_sweep.json` | the regime-index sweep of Section 6.7, and what it produced |
+| `rho_sweep.py`, `rho_sweep.json` | the random-plant sweep of Section 6.7, and what it produced |
 | `downstream_sweep.py`, `downstream_sweep.json` | Section 6.8 repeated on 120 random plants, and what it produced |
 | `verified_run.log` | the output of the run that checked the shipped PDF |
 | `make_sub.py` | renders `sub.tex` from `theory.tex` |
@@ -128,11 +128,12 @@ this repository: 187 rows, each with the value the manuscript states
 beside the value recomputed from the model, and `ALL CHECKS PASS` at the
 end. Compare your own run against it line by line.
 
-It opens and closes with the md5 of `theory.tex` and `verify_numbers.py`.
-That bracket is the point: it says the checks and the manuscript were the
-same files throughout, so a run that passed against an edited copy cannot
+It opens and closes with the md5 of every file the checks read: the
+manuscript, the supplement, `verify_numbers.py`, both sweep records, and
+`fig4.pdf` with its script. That bracket is the point: it says the checks and
+the manuscript were the same files throughout, so a run that passed against an edited copy cannot
 be presented as a run that passed against this one. `theory.tex` here is
-`0b39cb6fba27`, which is the hash the log records.
+`3104e1a23f74`, which is the hash the log records.
 
 The row count depends on the data you have. Without the fleets a subset
 runs and the total is smaller; 187 is the number with all six present.
@@ -168,8 +169,8 @@ These are in the manuscript's own words and are not defects in the code:
 - The actuation premise is confirmed on simulation and remains open on measured
   hardware, for the reason Section 7 gives — only the turbofan fleets vary the
   operating point within a unit.
-- Section 4.2 and Proposition 4.4 hold on a separable subclass that the
-  highest-fidelity turbofan data reject. Figure 6 marks which branch of the
+- Section 4.1, with Lemma 4.3 and Proposition 4.4, holds on a separable
+  subclass that the highest-fidelity turbofan data reject. Figure 6 marks which branch of the
   development depends on it; nothing before that subsection does.
 
 ## Requirements

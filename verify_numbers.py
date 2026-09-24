@@ -627,7 +627,7 @@ def limitation_count(path):
 
 
 def rho_sweep_stats():
-    """The recorded regime-index sweep, recomputed from what it produced.
+    """The recorded random-plant sweep, recomputed from what it produced.
 
     rho_sweep.py draws 300 plants from a fixed seed -- two to five mechanisms,
     one or two inputs, and every other parameter varied with them -- and for
@@ -1032,7 +1032,7 @@ def main():
          ratio, 0.01),
         # a fifth copy, in the abstract, which no pattern above reaches
         ("headline ratio, restated in the abstract",
-         find(s, r"objective defined here falls by a factor of \$([0-9]+)\$"), ratio, 0.01),
+         find(s, r"lowers the information-loss objective \$([0-9]+)\$-fold"), ratio, 0.01),
         ("beta_min upper, restated in Sec 6.4",
          find(s, r"peak floor moves from \$([0-9.]+)\^\{\\circ\}\$"),
          bmin_hi, 0.01),
@@ -1255,10 +1255,10 @@ def main():
             # the abstract quotes the same AUC and the same sample size
             # the abstract now quotes the ARC's area, not rho's
             ("abstract: AUC of the arc",
-             find(s, r"receiver-operating curve of \$([0-9.]+)\$ over"),
+             find(s, r"\(area under the receiver-operating curve \$([0-9.]+)\$\)"),
              _rs["auc_arc"], 0.02),
             ("abstract: sweep plants",
-             find(s, r"curve of \$[0-9.]+\$ over \$([0-9]+)\$ random plants"),
+             find(s, r"Over \$([0-9]+)\$ random plants, the width of the reachable set"),
              _rs["n"], 0.0),
         ]
 

@@ -3,8 +3,8 @@ message: >-
   If you use this software, please cite both the software and the paper it
   accompanies.
 title: >-
-  Information loss of fixed health indicators as a control problem: code and
-  verification suite
+  Information loss of fixed linear health indicators as a control problem:
+  code and verification suite
 type: software
 authors:
   - family-names: Le
@@ -24,8 +24,8 @@ keywords:
 preferred-citation:
   type: unpublished
   title: >-
-    Information loss of fixed health indicators as a control problem: simplex
-    geometry and reachability limits
+    Information loss of fixed linear health indicators as a control problem:
+    simplex geometry and reachability limits
   authors:
     - family-names: Le
       given-names: Huy Hoang

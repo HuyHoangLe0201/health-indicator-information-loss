@@ -68,19 +68,24 @@ simplex geometry and reachability limits}
   city={Da Nang}, postcode={550000}, country={Viet Nam}}
 
 \begin{abstract}
-A health indicator compresses several condition-monitoring channels into one
-scalar, and normally keeps the same weights for the life of the component.
-We take it to be a fixed linear map of noise-whitened channels on which every mechanism acts positively, over a population whose units differ only in where they sit on one degradation path, with remaining life Gaussian across it.
-Because degradation runs through several mechanisms at differing rates, the
-channel combination carrying most information about remaining life rotates as
-the component ages, so a fixed indicator necessarily discards information. We
-show that the operating point sets how much it discards, which makes that loss
-a control variable. The loss reduces to a single angle, between the indicator and the direction along which information currently arrives, and writing each channel's share of that information as a probability vector places that angle on a statistical simplex. Zero loss is attainable exactly when the
-directions reachable at each instant share a common point, which for generic
-plants needs one fewer independently adjustable operating variable than there
-are mechanisms. Scaling every channel by the same factor leaves the loss
-unchanged, so no criterion built from the Fisher information about
-remaining life can detect it. Steering the operating point reduces the loss substantially when the authority it offers is large beside the drift of the informative direction; on a representative three-mechanism synthetic plant the information-loss objective defined here falls by a factor of $68$ against the best constant operating point. The width of the reachable set of informative directions measures that authority before any indicator is chosen, and screens for the regime with an area under the receiver-operating curve of $0.73$ over $299$ random plants; the drift refines the screen only in combination with it, hurting where the authority is small and helping where it is large. Six public run-to-failure fleets test the premises separately: an informative direction estimated from measured cells rotates, and simulated turbofan records, checked against a negative control, support the premise that the operating point moves it. The same fleets bound the theory: the highest-fidelity turbofan data reject the separable plant form under which the operator's authority becomes computable offline, so that branch describes a model class rather than measured machinery.
+Fixed-weight health indicators discard information: the channel combination
+most informative about remaining life rotates as degradation mechanisms
+progress at different rates. We show that the operating point controls how
+much is lost. For a linear indicator, positive mechanism effects and Gaussian
+remaining life along one degradation path, the loss is one angle on a
+statistical simplex. Zero loss is attainable exactly when the informative
+directions reachable at each instant share a common point, which generically
+needs one fewer independent operating variable than there are mechanisms.
+Invariant to common channel scaling, the loss is invisible to every criterion
+built from the Fisher information about remaining life. On a representative
+synthetic plant, steering lowers the information-loss objective $68$-fold
+against the best constant operating point. Over $299$ random plants, the width
+of the reachable set, known before design, provides a moderate screening
+signal for when steering pays (area under the receiver-operating curve
+$0.73$). In six public fleets, measured battery cells show the rotation and
+simulated turbofan records, checked against a negative control, support its
+dependence on the operating point; the highest-fidelity turbofan data reject
+the separable form under which the reachable set is computable offline.
 \end{abstract}
 
 \begin{keyword}
@@ -231,7 +236,7 @@ the loss they incur.
 
 \item The best achievable loss is the value of an optimal control problem
 whose objective is a ratio, and whose terminal time is itself controlled
-(Section~\ref{sec:limit}); we compute its value to two digits and do not certify it. The actuation authority, measured by the width of the reachable set and computable before any indicator is designed, screens for the regime in which steering can have substantial value; on $299$ randomly drawn plants it ranks them as well as its ratio to the drift of the informative direction and fits them better, and the drift matters only in combination with it (Section~\ref{sec:regime}).
+(Section~\ref{sec:limit}); we compute its value to two digits and do not certify it. The actuation authority, measured by the width of the reachable set and computable before any indicator is designed, provides a moderate screening signal for the regime in which steering can have substantial value; on $299$ randomly drawn plants it ranks them as well as its ratio to the drift of the informative direction and fits them better, and the drift matters only in combination with it (Section~\ref{sec:regime}).
 
 \item The premises are separately testable on public run-to-failure
 data, and Section~\ref{sec:scope} tests three in turn: whether the informative
@@ -1672,7 +1677,7 @@ script recomputes every reported number from a single configuration and
 compares it with the value written in this manuscript and in its
 supplementary material, covering the tables and the quantities reported
 alongside them; all of its checks pass, and the output of the run that
-verified this version is included. The regime-index sweep of
+verified this version is included. The random-plant sweep of
 Section~\ref{sec:regime} takes hours, so it and the downstream repeat of
 Section~\ref{sec:downstream} are recorded by two further scripts, and the
 checks read the records. Three groups of numbers lie outside the checks: the
