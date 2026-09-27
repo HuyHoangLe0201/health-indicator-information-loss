@@ -23,7 +23,7 @@ text itself, so the paper and the code cannot drift apart quietly. It ends with
 For all 187 checks you need the fleets; see [DATA.md](DATA.md).
 
 ```bash
-export RESS_DATA=/path/to/data
+export HI_DATA=/path/to/data
 python verify_numbers.py --full        # about 30 minutes
 ```
 
@@ -140,7 +140,7 @@ runs and the total is smaller; 187 is the number with all six present.
 
 ## Reproducing on another machine
 
-Every path resolves relative to the script or to `$RESS_DATA`; nothing points
+Every path resolves relative to the script or to `$HI_DATA`; nothing points
 into the authors' working directory. The three figure scripts were re-run in a
 clean copy of this repo and produce PDFs whose page content streams and text
 spans are identical to the ones shipped here.

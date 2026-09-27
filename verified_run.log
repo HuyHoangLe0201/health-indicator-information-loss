@@ -1,7 +1,7 @@
 md5 BEFORE
   0f44f9b4c309ad302db2066cde48b41f  theory.tex
   498af098163cf57c7aa3f9a9620bedb5  supplement.tex
-  be9b7451f33cdd4a1385bc874238b7ac  verify_numbers.py
+  8d29328e5abfd246305406d79120370a  verify_numbers.py
   c0db59819961d0f743f9c0fc5d58cac5  rho_sweep.json
   506f77029478c7d27b65de63b294c58f  downstream_sweep.json
   2fca511bba69262b0645136c0078246c  fig4.pdf
@@ -226,11 +226,11 @@ Sec 6.5 myopic gap at q* (%)                                  2.8      2.76179  
 
 ALL CHECKS PASS
 
-exit 0 after 55.8 min
+exit 0 after 46.5 min
 md5 AFTER
   0f44f9b4c309ad302db2066cde48b41f  theory.tex  [same]
   498af098163cf57c7aa3f9a9620bedb5  supplement.tex  [same]
-  be9b7451f33cdd4a1385bc874238b7ac  verify_numbers.py  [same]
+  8d29328e5abfd246305406d79120370a  verify_numbers.py  [same]
   c0db59819961d0f743f9c0fc5d58cac5  rho_sweep.json  [same]
   506f77029478c7d27b65de63b294c58f  downstream_sweep.json  [same]
   2fca511bba69262b0645136c0078246c  fig4.pdf  [same]

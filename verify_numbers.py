@@ -641,7 +641,7 @@ def rho_sweep_stats():
     """
     # os is imported here rather than at the top because the source copy of
     # this script does not import it; the repository copy does, added by the
-    # $RESS_DATA patch. Importing locally keeps the two copies differing by
+    # $HI_DATA patch. Importing locally keeps the two copies differing by
     # that patch alone, which is what the packaging audit checks.
     import json
     import os
@@ -3030,9 +3030,9 @@ def regime_row(Ev, restarts=8, seed=7):
 # ----------------------------------------------------------- Section 7 ---
 # Data lives outside the repo: the six fleets are public but total about
 # 8.5 GB, and redistributing derived features from someone else's dataset
-# is not ours to do. Point RESS_DATA at a directory laid out as in
+# is not ours to do. Point HI_DATA at a directory laid out as in
 # DATA.md, or edit the paths below. Anything missing is SKIPPED, loudly.
-_RD = os.environ.get("RESS_DATA",
+_RD = os.environ.get("HI_DATA",
                      os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                   "data"))
 DATA = dict(

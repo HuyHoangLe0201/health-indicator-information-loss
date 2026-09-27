@@ -16,7 +16,7 @@ import sys
 
 import os as _os
 _HERE = _os.path.dirname(_os.path.abspath(__file__))
-_DATA = _os.environ.get("RESS_DATA", _os.path.join(_HERE, "data"))
+_DATA = _os.environ.get("HI_DATA", _os.path.join(_HERE, "data"))
 
 D = _HERE + _os.sep
 

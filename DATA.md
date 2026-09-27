@@ -5,20 +5,20 @@ No dataset is included here. The six fleets are public, but they total about
 authors' licensing decision rather than something to bundle by default. Every
 fleet below is obtainable from its original source.
 
-The code looks for data in `$RESS_DATA`, and falls back to `./data` beside the
+The code looks for data in `$HI_DATA`, and falls back to `./data` beside the
 scripts. Anything missing is **skipped, and the skip is printed** — the run
 does not fail silently, but it also does not check what it could not read.
 
 ```bash
-export RESS_DATA=/path/to/data          # Windows: set RESS_DATA=C:\path\to\data
+export HI_DATA=/path/to/data          # Windows: set HI_DATA=C:\path\to\data
 python verify_numbers.py --full
 ```
 
 ## Expected layout
 
-`$RESS_DATA` should contain these names exactly:
+`$HI_DATA` should contain these names exactly:
 
-| name under `$RESS_DATA` | size | source |
+| name under `$HI_DATA` | size | source |
 |---|---|---|
 | `severson_cells.npz` | 5 MB | derived from Severson et al. 2019, *Data-driven prediction of battery cycle life before capacity degradation* |
 | `xjtu_features.npz` | 1 MB | derived from the XJTU-SY bearing fleet, Wang et al. 2020 |

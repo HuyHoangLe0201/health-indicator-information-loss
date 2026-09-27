@@ -18,7 +18,7 @@ from scipy.signal import savgol_filter
 
 import os as _os
 _HERE = _os.path.dirname(_os.path.abspath(__file__))
-_DATA = _os.environ.get("RESS_DATA", _os.path.join(_HERE, "data"))
+_DATA = _os.environ.get("HI_DATA", _os.path.join(_HERE, "data"))
 
 
 rng = np.random.default_rng(4)
@@ -108,7 +108,7 @@ _sev = _os.path.join(_DATA, "severson_cells.npz")
 if not _os.path.exists(_sev):
     raise SystemExit(
         f"severson_cells.npz not found at {_sev}.\n"
-        "Panel (c) needs the Severson fleet. Set RESS_DATA to the "
+        "Panel (c) needs the Severson fleet. Set HI_DATA to the "
         "directory holding it, or see DATA.md.")
 Z = np.load(_sev, allow_pickle=True)
 CH = [str(s) for s in Z["channels"]]
