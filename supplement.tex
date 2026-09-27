@@ -1,4 +1,4 @@
-\documentclass[preprint,12pt]{elsarticle}
+\documentclass[12pt]{article}
 
 % Same fonts and macros as the manuscript, so a symbol means the same thing
 % in both files. The supplement is uploaded as a PDF built here, not compiled
@@ -14,19 +14,41 @@
 % re-pointed its references at the manuscript. The move cannot be repeated
 % -- the blocks are no longer in theory.tex -- so this file is edited
 % directly from now on.
+
+% The journal asks for 12-point Times, Helvetica or Courier. Text is set in
+% Times and maths in Latin Modern, both with Type 1 outlines, so pdfTeX never
+% substitutes the Type 3 bitmaps that publisher PDF checks reject. (newtx and
+% mathptmx would give Times maths too, but need fonts this TeX Live lacks.)
 \usepackage{lmodern}
 \usepackage[T1]{fontenc}
+\usepackage{times}
+\usepackage[a4paper,margin=2.5cm]{geometry}
+
 \usepackage{amsmath,amssymb,amsfonts}
 \usepackage{amsthm}
-\usepackage{array}
-\usepackage{url}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,calc}
+\usepackage[numbers,sort&compress]{natbib}
 \usepackage{xr}
 \externaldocument[M-]{theory}
+\usepackage{array}         % >{\raggedright} column prefixes, so a
+                           % narrow table column breaks instead of
+                           % overfilling
+\newcolumntype{R}[1]{>{\raggedright\arraybackslash}p{#1\textwidth}}
+\usepackage{url}           % \url breaks the repository address,
+                           % \texttt would overfull it
+\usepackage{authblk}
 
+% sub.tex sets the same source in two columns, and a narrow measure full of
+% long technical words overflows. Let TeX stretch the inter-word space
+% instead; harmless in the wide layout, and it clears the overfull boxes in
+% the narrow one.
 \tolerance=1500
 \emergencystretch=2em
 \hyphenpenalty=100
 \hbadness=4000
+
 
 \newcommand{\R}{\mathbb{R}}
 \newcommand{\E}{\mathbb{E}}
@@ -42,25 +64,19 @@
 \renewcommand{\theequation}{S\arabic{equation}}
 \renewcommand{\thetable}{S\arabic{table}}
 
-\journal{Reliability Engineering \& System Safety}
-
-\begin{document}
-
-\begin{frontmatter}
 \title{Supplementary material for: Information loss of fixed linear health
 indicators as a control problem: simplex geometry and reachability limits}
 
-% copied verbatim from theory.tex; make_supplement.py checks they still agree
-\author[a]{Huy Hoang Le}
-\ead{lhhoang@powermore.vn}
-\author[b]{Kim-Anh Nguyen\corref{cor}}
-\ead{nkanh@dut.udn.vn}
-\cortext[cor]{Corresponding author}
-\affiliation[a]{organization={R\&D Department, PowerMore Ltd.},
-  city={Da Nang}, postcode={550000}, country={Viet Nam}}
-\affiliation[b]{organization={Faculty of Electrical Engineering, University
-  of Science and Technology, The University of Danang},
-  city={Da Nang}, postcode={550000}, country={Viet Nam}}
+\author[1]{Huy Hoang Le}
+\author[2]{Kim-Anh Nguyen}
+\affil[1]{R\&D Department, PowerMore Ltd., Da Nang 550000, Viet Nam}
+\affil[2]{Faculty of Electrical Engineering, University of Science and
+  Technology, The University of Danang, Da Nang 550000, Viet Nam}
+\date{}
+
+\begin{document}
+
+\maketitle
 
 \begin{abstract}
 Section~\ref{sec:protocols} gives the protocol behind every row of
@@ -72,7 +88,6 @@ and the numerical verification of the identities and of the exceptional
 family of Remark~\ref{M-rem:family}. Equation, section and proposition numbers
 without an S refer to the main text.
 \end{abstract}
-\end{frontmatter}
 
 \section{Protocols for the public-fleet tests}
 \label{sec:protocols}
@@ -306,7 +321,7 @@ the damage but does not repair it, so the fragility belongs to the
 construction and not to the open-loop schedule. Mistuning the activation
 energies instead is tolerated to about two percent.
 
-\bibliographystyle{elsarticle-num}
+\bibliographystyle{unsrtnat}
 \bibliography{Ref}
 
 \end{document}

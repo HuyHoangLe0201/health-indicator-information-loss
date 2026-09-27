@@ -1,30 +1,33 @@
-\documentclass[final,5p,times,twocolumn]{elsarticle}
+\documentclass[10pt,twocolumn]{article}
 
-% Latin Modern before anything else: elsarticle's default T1-encoded Computer
-% Modern has no Type 1 outlines on many installations, so pdfTeX silently
-% substitutes Type 3 bitmaps -- which publisher PDF-compliance checks reject.
-% lmodern supplies Type 1 outlines for the same design. Do not remove.
+% The journal asks for 12-point Times, Helvetica or Courier. Text is set in
+% Times and maths in Latin Modern, both with Type 1 outlines, so pdfTeX never
+% substitutes the Type 3 bitmaps that publisher PDF checks reject. (newtx and
+% mathptmx would give Times maths too, but need fonts this TeX Live lacks.)
 \usepackage{lmodern}
 \usepackage[T1]{fontenc}
+\usepackage{times}
+\usepackage[a4paper,margin=2.5cm]{geometry}
 
 \usepackage{amsmath,amssymb,amsfonts}
-\usepackage{amsthm}          % elsarticle provides no proof environment
+\usepackage{amsthm}
 \usepackage{graphicx}
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta,positioning,calc}
+\usepackage[numbers,sort&compress]{natbib}
 \usepackage{lineno}
 \usepackage{array}         % >{\raggedright} column prefixes, so a
                            % narrow table column breaks instead of
                            % overfilling
 \newcolumntype{R}[1]{>{\raggedright\arraybackslash}p{#1\textwidth}}
-\usepackage{url}           % elsarticle loads neither url nor
-                           % hyperref; \url breaks the repository
-                           % address, \texttt would overfull it
+\usepackage{url}           % \url breaks the repository address,
+                           % \texttt would overfull it
+\usepackage{authblk}
 
-% The submission layout is single-column, but the journal sets two columns, and
-% a narrow measure full of long technical words overflows. Let TeX stretch the
-% inter-word space instead; harmless in the wide layout, and it clears the
-% overfull boxes in the narrow one.
+% sub.tex sets the same source in two columns, and a narrow measure full of
+% long technical words overflows. Let TeX stretch the inter-word space
+% instead; harmless in the wide layout, and it clears the overfull boxes in
+% the narrow one.
 \tolerance=1500
 \emergencystretch=2em
 \hyphenpenalty=100
@@ -47,54 +50,54 @@
 \newcommand{\DB}{D_{\mathrm{B}}}
 \newcommand{\lloss}{\ell}
 
-\journal{Reliability Engineering \& System Safety}
-
-\begin{document}
-
-\begin{frontmatter}
-
 \title{Information loss of fixed linear health indicators as a control problem:
 simplex geometry and reachability limits}
 
-\author[a]{Huy Hoang Le}
-\ead{lhhoang@powermore.vn}
-\author[b]{Kim-Anh Nguyen\corref{cor}}
-\ead{nkanh@dut.udn.vn}
-\cortext[cor]{Corresponding author}
-\affiliation[a]{organization={R\&D Department, PowerMore Ltd.},
-  city={Da Nang}, postcode={550000}, country={Viet Nam}}
-\affiliation[b]{organization={Faculty of Electrical Engineering, University
-  of Science and Technology, The University of Danang},
-  city={Da Nang}, postcode={550000}, country={Viet Nam}}
+\author[1]{Huy Hoang Le}
+\author[2]{Kim-Anh Nguyen}
+\affil[1]{R\&D Department, PowerMore Ltd., Da Nang 550000, Viet Nam}
+\affil[2]{Faculty of Electrical Engineering, University of Science and
+  Technology, The University of Danang, Da Nang 550000, Viet Nam}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\noindent\textbf{Correspondence:} Kim-Anh Nguyen, Faculty of Electrical
+Engineering, University of Science and Technology, The University of Danang,
+Da Nang 550000, Viet Nam. Email: nkanh@dut.udn.vn\\
+\textbf{Email of the first author:} lhhoang@powermore.vn\\
+\textbf{Running title:} Health indicators as a control problem
 
 \begin{abstract}
-Fixed-weight health indicators discard information: the channel combination
-most informative about remaining life rotates as degradation mechanisms
-progress at different rates. We show the operating point controls how
-much is lost. For a linear indicator, positive degradation rates and Gaussian
+Health indicators combine condition-monitoring channels with fixed weights,
+yet the combination most informative about remaining life rotates as
+degradation mechanisms progress at different rates, so the indicator
+discards information. We treat that loss as a control problem: the operating
+point enters the nonlinear degradation dynamics and steers the informative
+direction. For a linear indicator, positive degradation rates and Gaussian
 remaining life over a time-shift population, the loss depends on the
 indicator only through one misalignment angle, a distance on a statistical
-simplex. Zero loss is attainable exactly when the informative directions
-reachable at each instant share a common point, which generically needs one
-fewer independent operating variable than there are mechanisms. Invariant to
-common channel scaling, the loss is invisible to every criterion built from
-the Fisher information about remaining life. On a representative synthetic
-plant, steering lowers the information-loss objective $68$-fold against the
-best constant operating point. Across $299$ random plants of the separable
-model, the reachable-set width, known before design, provides a
+simplex where degradation is an input-modulated replicator flow. Zero loss is
+attainable exactly when the informative directions reachable at each instant
+share a common point, which generically needs one fewer independent input
+than there are mechanisms. The best achievable loss is the value of a
+fractional optimal control problem whose terminal time, the failure time, is
+controlled, and certifying it reduces to one continuously
+differentiable verification function. No criterion built from the Fisher
+information about remaining life detects the loss. On a representative
+synthetic plant, steering lowers the information-loss objective $68$-fold
+against the best constant operating point. Across $299$ random plants of the
+separable model, the reachable-set width, known before design, provides a
 moderate screening signal for when steering pays (area under the
-receiver-operating curve $0.73$). In six public fleets, measured battery
-cells show the rotation and simulated turbofan records, checked against a
-negative control, support its dependence on the operating point; the
-highest-fidelity turbofan data reject that separable form.
+receiver-operating curve $0.73$). Public data show the rotation in measured
+battery cells and, against a negative control, support its dependence on the
+operating point in simulated turbofan records; the highest-fidelity turbofan
+data reject that separable form.
 \end{abstract}
 
-\begin{keyword}
-prognostics \sep health indicator \sep remaining useful life \sep
-information loss \sep optimal control \sep reachability
-\end{keyword}
-
-\end{frontmatter}
+\noindent\textbf{Keywords:} fractional optimal control; reachable sets; information geometry; health indicator; prognostics; remaining useful life
 
 \linenumbers
 
@@ -147,10 +150,14 @@ They sit against five bodies of work. Four address parts of the problem and
 the fifth supplies the geometry used in Section~\ref{sec:simplex}; to our knowledge none of them addresses the position taken here.
 
 The prognostics literature treats the compression as a design problem to be
-solved from data: searching genetically over candidate features against
-monotonicity and trendability criteria~\cite{coble2009}, learning it with a
-recurrent network~\cite{guo2017}, or surveying the resulting
-pipelines~\cite{lei2018,javed2017}. Two limits on that programme are known, information-theoretic bounds on what any fixed compression can retain~\cite{le2026jestech} and the number of run-to-failure units needed to learn one reliably~\cite{le2026mst}. The first is our own, and the boundary is worth drawing explicitly: it takes one degradation trajectory as given and asks how much information a fixed compression must lose along it. The question here is the complementary one, whether that trajectory can itself be steered so that the same fixed map loses less. Both prior limits hold the trajectory fixed; neither asks whether it can be changed.
+solved from data: searching genetically over candidate features against monotonicity and trendability criteria~\cite{coble2009}, fusing the
+sensors linearly into a composite health index whose weights are fitted
+once to a degradation model~\cite{liu2013fusion} and analysing that fusion
+statistically~\cite{song2018fusion}, learning it with a recurrent
+network~\cite{guo2017}, or surveying the resulting
+pipelines~\cite{lei2018,javed2017}. The composite indices
+of~\cite{liu2013fusion,song2018fusion} are fixed linear maps of exactly the
+kind studied here. Two limits on that programme are known, information-theoretic bounds on what any fixed compression can retain~\cite{le2026jestech} and the number of run-to-failure units needed to learn one reliably~\cite{le2026mst}. The first is our own, and the boundary is worth drawing explicitly: it takes one degradation trajectory as given and asks how much information a fixed compression must lose along it. The question here is the complementary one, whether that trajectory can itself be steered so that the same fixed map loses less. Both prior limits hold the trajectory fixed; neither asks whether it can be changed.
 
 The predictors downstream are overwhelmingly stochastic --- Wiener, gamma and
 inverse-Gaussian degradation processes with first-passage
@@ -195,7 +202,7 @@ informative direction of Section~\ref{sec:prelim} is itself an objective.}
  & input alters & lifetime is & direction is & indicator\\
  & degradation & an objective & an objective & fixed, scalar\\
 \hline
-Indicator design~\cite{coble2009,guo2017,lei2018} &
+Indicator design~\cite{coble2009,liu2013fusion,song2018fusion,guo2017} &
   --- & --- & --- & $\checkmark$\\
 Fixed-indicator limits~\cite{le2026jestech,le2026mst} &
   --- & --- & --- & $\checkmark$\\
@@ -1427,6 +1434,8 @@ $5.2$ rather than $68$.
 \caption{Authority and drift in a one-parameter family. The activation energies $E$ set the actuation authority; $c$, the noise and $\mathcal U$ are held fixed. $L^{\star}$ is the loss under adaptive control, and the gain its ratio to the best constant input.}
 \label{tab:regime}
 \centering
+\small
+\setlength{\tabcolsep}{4pt}
 \begin{tabular}{lcccc}
 \hline
 $E$ & arc & $\rho$ & $L^{\star}$ & gain\\
@@ -1689,12 +1698,30 @@ further scripts. All of these are available at
 and are also provided with this article as a supplementary archive, together
 with the Supplementary Material.
 
-\section*{Declaration of competing interest}
+\section*{Supporting information}
+Additional supporting information is found in the online version of this
+article.
+
+\noindent\textbf{Supplementary Material (PDF).} Supplementary Sections S1
+to S4: the protocols behind every row of Table~\ref{tab:fleets} with the
+parameters of the code that produced them, the proofs of
+Propositions~\ref{prop:record} and~\ref{prop:bary}, the two candidate
+certificates for Proposition~\ref{prop:converse} and why neither
+qualifies, and the numerical verification of the identities and of the
+exceptional family of Remark~\ref{rem:family}.
+
+\noindent\textbf{Supplementary archive (ZIP).} The Supplementary Material
+and a copy of the repository named in the Data availability section: the
+script that recomputes and checks every reported number, the records of
+the two sweeps it reads, the output of the run that verified this version,
+and the three figure scripts.
+
+\section*{Conflict of interest}
 The authors declare that they have no known competing financial interests or personal relationships that could have appeared to influence the work reported in this paper.
 
 \section*{Funding}
 This research did not receive any specific grant from funding agencies in the public, commercial, or not-for-profit sectors.
 
-\bibliographystyle{elsarticle-num} \bibliography{Ref}
+\bibliographystyle{unsrtnat} \bibliography{Ref}
 
 \end{document}

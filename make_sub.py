@@ -18,11 +18,10 @@ import os as _os
 _HERE = _os.path.dirname(_os.path.abspath(__file__))
 _DATA = _os.environ.get("RESS_DATA", _os.path.join(_HERE, "data"))
 
-
 D = _HERE + _os.sep
 
-MAIN_CLASS = "\\documentclass[preprint,12pt]{elsarticle}"
-SUB_CLASS = "\\documentclass[final,5p,times,twocolumn]{elsarticle}"
+MAIN_CLASS = "\\documentclass[12pt]{article}"
+SUB_CLASS = "\\documentclass[10pt,twocolumn]{article}"
 
 
 def render():

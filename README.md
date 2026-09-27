@@ -5,7 +5,7 @@ Reproducibility repository for the manuscript
 > **Information loss of fixed linear health indicators as a control problem:
 > simplex geometry and reachability limits**
 > Huy Hoang Le, Kim-Anh Nguyen
-> Submitted to *Reliability Engineering & System Safety*
+> Submitted to *International Journal of Robust and Nonlinear Control*
 
 ## Quick start
 
@@ -31,9 +31,9 @@ python verify_numbers.py --full        # about 30 minutes
 
 | | |
 |---|---|
-| `theory.tex`, `theory.pdf` | the manuscript, 41 pages |
+| `theory.tex`, `theory.pdf` | the manuscript, 30 pages |
 | `supplement.tex`, `supplement.pdf` | Supplementary Sections S1-S4: the Section 7 protocols, two proofs, the candidate certificates, the numerical checks |
-| `sub.tex`, `sub.pdf` | the same source in the journal's two-column layout |
+| `sub.tex`, `sub.pdf` | the same source set in two columns, which shows what overflows a narrow measure |
 | `Ref.bib`, `theory.bbl` | bibliography |
 | `fig1.pdf`, `fig2.pdf`, `fig4.pdf` | the three plotted figures |
 | `make_fig1.py`, `make_fig2.py`, `make_fig4.py` | the scripts that draw them |
@@ -133,7 +133,7 @@ manuscript, the supplement, `verify_numbers.py`, both sweep records, and
 `fig4.pdf` with its script. That bracket is the point: it says the checks and
 the manuscript were the same files throughout, so a run that passed against an edited copy cannot
 be presented as a run that passed against this one. `theory.tex` here is
-`caedee7a5cf8`, which is the hash the log records.
+`0f44f9b4c309`, which is the hash the log records.
 
 The row count depends on the data you have. Without the fleets a subset
 runs and the total is smaller; 187 is the number with all six present.
@@ -177,7 +177,8 @@ These are in the manuscript's own words and are not defects in the code:
 
 Python 3.10+, and `requirements.txt`. `h5py` is needed only for the N-CMAPSS
 files, `PyMuPDF` only for `check_fonts.py`. LaTeX is needed only to rebuild the
-PDFs; `elsarticle.cls` comes from your TeX distribution.
+PDFs; the `article` class and the `unsrtnat` style come with any TeX
+distribution.
 
 ## Licence and reuse
 
@@ -190,7 +191,6 @@ It does not cover the manuscript. `theory.tex`, `theory.pdf`, `sub.tex`,
 paper's own text rather than a stored copy of its numbers, so the code is
 not runnable without them. They remain the authors' copyright, and once the
 paper is published the publisher's terms apply to the typeset version.
-`elsarticle-num.bst` is Elsevier's, under the LaTeX Project Public Licence.
 
 The six fleets are not redistributed here; each is obtained from its own
 source under its own terms. See [DATA.md](DATA.md).
