@@ -83,7 +83,7 @@ Section~\ref{sec:protocols} gives the protocol behind every row of
 Table~\ref{M-tab:fleets} of the main text, with the parameters of the code
 that produced it. Sections~\ref{sec:proofs} to~\ref{sec:verification} hold
 material moved out of the main text: two proofs, the two candidate
-certificates for Proposition~\ref{M-prop:converse} and why neither qualifies,
+certificates for Proposition~\ref{M-prop:converse} and what each would need,
 and the numerical verification of the identities and of the exceptional
 family of Remark~\ref{M-rem:family}. Equation, section and proposition numbers
 without an S refer to the main text.
@@ -129,7 +129,7 @@ to its own bearings, so a difference between conditions cannot be told apart
 from a difference between groups of units. The NASA battery fleet has four
 cells. These fleets are therefore listed with the reason and no statistic.
 
-\subsection{The actuation test on C-MAPSS}
+\subsection{The regime contrast on C-MAPSS}
 
 The training files of FD004 and FD002 are used. Life is normalised per engine
 by its final cycle. Operating regimes are labelled by standardising the three
@@ -150,7 +150,12 @@ mean, over the engine's regimes, of the angle between the two halves of the
 same regime, and $B$ the mean, over pairs of different regimes, of the angle
 between a half of one and a half of the other. $B-W$ is positive when regimes
 differ by more than half-samples of one regime differ from each other, which
-is what an operating point that moves the direction predicts. The table
+is what an operating point that moves the observed direction predicts. It
+does not say how the direction is moved. C-MAPSS imposes its flow and
+efficiency losses as functions of time and lets the regime act only on the
+thermodynamic response of the sensors~\cite{saxena2008}, so a positive
+contrast there reads the observation map, not the stress factor of
+Eq.~\eqref{M-eq:plant}, and cannot test actuation. The table
 reports the mean of $B-W$ over engines, and the number of engines for which it
 is positive, at $w=7$; at $w=9$ and $w=11$ every value keeps its sign and
 exceeds the largest control bias.
@@ -163,7 +168,7 @@ construction. Over all three windows and both files the mean of $B-W$ stays
 within $0.5^{\circ}$ of zero, and a paired $t$ test of $B$ against $W$ does
 not reject equality at any window, the smallest $p$ being $0.35$.
 
-\subsection{The separability test on N-CMAPSS}
+\subsection{The separability test on N-CMAPSS, jointly with the channel pairing}
 
 The development sets of DS02, units $2$, $5$, $10$, $16$, $18$ and $20$, and of
 DS01, units $1$ to $6$, are used. The operating point is held fixed by
@@ -178,9 +183,19 @@ that the vector of slopes is the informative direction at a fixed operating
 point rather than a residual after standardisation. The vector is normalised,
 and the logarithms of the absolute values of its components, centred on
 their mean, are what the test compares. The logarithm is the point: under the
-separable form of Lemma~\ref{M-lem:sep} each component is a product of an
+separable form of Lemma~\ref{M-lem:sep}, read through the pairing of channels
+with mechanisms in Eq.~\eqref{M-eq:obs}, each component is a product of an
 operating-point factor and a state factor, so in logarithms the two act
-additively, and separability is the absence of interaction.
+additively, and the absence of interaction is what the two jointly predict. A
+sensor map that mixes mechanisms with weights depending on the operating point
+breaks that additivity as surely as a non-separable stress factor does. In
+N-CMAPSS the operating history enters the damage through the onset of
+abnormal degradation~\cite{arias2022fusing}, and the health parameters the
+files carry, which are the damage the simulator imposed, are constant within
+every one of the $446$ flights of DS02 and $553$ of DS01. The damage therefore
+does not respond to the operating point within a flight, and the sensor map
+is the only source of any dependence on the operating point that the test
+finds.
 
 Each cell is estimated twice, from its even and from its odd points. The mean
 of the two is the signal; their half-difference measures noise, and applying
@@ -213,11 +228,11 @@ test & parameters\\
 Severson rotation & $129$ cells with at least $400$ cycles; Savitzky--Golay
 order $3$, window $301$ cycles or $2\lfloor n/4\rfloor+1$ if smaller; $40$
 points on $\tau\in[0.15,0.90]$\\[2pt]
-C-MAPSS actuation & FD004 and FD002 training sets; $6$ regimes each; order
+C-MAPSS regime contrast & FD004 and FD002 training sets; $6$ regimes each; order
 $2$, window $w=7$, stability at $w=9,11$; $10$ points on
 $\tau\in[0.30,0.85]$; engine enters if $m\ge2(w+3)$; control needs
 $4(w+3)$ cycles in one regime\\[2pt]
-N-CMAPSS separability & DS02 units $2,5,10,16,18,20$ and DS01 units $1$--$6$;
+N-CMAPSS separability with the pairing & DS02 units $2,5,10,16,18,20$ and DS01 units $1$--$6$;
 $6$ clusters, $2$ stages, at least $400$ points per cell; sweep over seven
 (cluster, stage) settings with at least $300$ points\\
 \hline
@@ -258,20 +273,28 @@ w\,\E_\mu[\psi^{2}]$ into $\tfrac18\bar w\,\E_\mu[\dFR^{2}]$.
 \section{Two candidate certificates for Proposition~\ref{M-prop:converse}}
 \label{sec:certificates}
 
-The $C^{1}$ hypothesis cannot be weakened to Lipschitz continuity. A Lipschitz
-$V$ is differentiable almost everywhere in the state by Rademacher's theorem,
-but a single trajectory is a null set and could in principle run inside the
-exceptional set, so the chain rule step would be unavailable; recovering the
-argument at that generality needs the Clarke generalised gradient in place of
-$\nabla V$. Smoothness is also, as it turns out, exactly what the natural
-candidates lack.
+Continuous differentiability is a convenience of the proof in the main text,
+not a requirement of the argument. A continuous viscosity subsolution of the
+Hamilton--Jacobi--Bellman equation of the Dinkelbach problem that is
+non-positive on the condemnation surface lies below the value function by the
+comparison principle, because the drift points out of the state region across
+that surface, and a Lipschitz $V$ satisfying \eqref{M-eq:cert} with Clarke's
+generalised gradient in place of $\nabla V$ certifies in the same
+way~\cite{bardi1997}. The obstacle is therefore not smoothness but exhibiting
+a candidate whose inequality can be checked.
 
 We tried two. The value function of the Dinkelbach problem of Section~\ref{M-sec:limit} satisfies
-\eqref{M-eq:cert} with equality in the viscosity sense~\cite{bardi1997}, but
-value functions of this class are only Lipschitz. Computed on a $41^{3}$ grid
-and tested on a $61^{3}$ one, \eqref{M-eq:cert} fails at about $45\%$ of test
-points by up to $2.9\times10^{-3}$. Halving $\lambda$ moves that violation by
-$0.6\%$, so the fault lies in the candidate and not in the bound. At the
+\eqref{M-eq:cert} with equality in the viscosity sense~\cite{bardi1997}, so it
+is the natural candidate, but only a grid approximation of it is available.
+Computed on a $41^{3}$ grid and tested by finite differences on a $61^{3}$
+one, \eqref{M-eq:cert} fails at about $45\%$ of test points by up to
+$2.9\times10^{-3}$. Halving $\lambda$ moves that violation by $0.6\%$, so it
+does not come from asking too much of the bound. It is the error of a
+first-order scheme on a coarse grid, differentiated on a finer one, and
+Section~\ref{M-sec:frac} shows how large that error still is on grids of this
+size. A certificate from this route needs the discrete value function shifted
+by a certified bound on its own residual, or an error estimate for the
+monotone scheme that produced it. At the
 opposite extreme an affine $V(x)=c_0-a_0^{\top}x$ has an exactly constant
 gradient and makes every requirement linear, so the best certifiable $\lambda$
 is a linear program; over $167{,}936$ constraints it returns $V\equiv0$ and
@@ -285,13 +308,13 @@ decrease, while the near-aligned states, where the running cost vanishes,
 demand a local increase.
 
 The two failures are complementary, and together they say what a certificate
-needs. The value function varies its gradient exactly as the two demands
-require but is not differentiable where that matters; affine functions are
-perfectly smooth but cannot vary their gradient at all. A certificate must
-therefore be both smooth and non-constant in its gradient, which points at a
-smooth under-approximation of the value function, obtained by sum-of-squares
-programming when the plant data are polynomial, or by interval arithmetic with
-an explicit Lipschitz constant.
+needs. The value function varies its gradient as the two demands require, but
+its computable approximations carry an error of the size of the effect; affine
+functions are exact but cannot vary their gradient at all. A certificate
+therefore needs a gradient that varies and an error that is controlled, which
+points at a discrete value function with a certified residual bound, or at a
+smooth under-approximation of the value function obtained by sum-of-squares
+programming when the plant data are polynomial.
 
 \section{Numerical verification}
 \label{sec:verification}

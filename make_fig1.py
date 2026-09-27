@@ -120,7 +120,7 @@ L_co = L_ad * np.array([68.628, 2.940, 2.690])
 b.plot(rho, L_co, "s--", color="#D55E00", ms=5, lw=1.2,
        label="best constant input")
 b.plot(rho, L_ad, "o-", color="#0072B2", ms=5, lw=1.4,
-       label="adaptive control")
+       label="myopic policy")
 for r, la, lc in zip(rho, L_ad, L_co):
     # one decimal throughout. "3x" for both 2.93 and 2.69 would contradict the
     # 2.7 quoted in the text, and rounding 68.6 to "69x" contradicted the

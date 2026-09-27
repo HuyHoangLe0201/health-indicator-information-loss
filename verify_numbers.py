@@ -16,7 +16,8 @@ main.tex and compares. Any drift between code and manuscript is reported.
     python verify_numbers.py            # Sections V-VI  (fast)
     python verify_numbers.py --fleet    # + Section 7, five fleets (slow)
     python verify_numbers.py --regime   # + Table II   (re-optimises q, slow)
-    python verify_numbers.py --full     # everything, incl. the Dinkelbach limit
+    python verify_numbers.py --full     # everything, incl. re-running two
+                                        # entries of the Dinkelbach record
 
 Exit status is non-zero if any check fails, so it can gate a build.
 """
@@ -28,7 +29,6 @@ import sys
 
 import numpy as np
 from scipy.integrate import solve_ivp
-from scipy.interpolate import RegularGridInterpolator
 from scipy.optimize import minimize
 
 # ----------------------------------------------------------------- CONFIG --
@@ -40,7 +40,6 @@ CFG = dict(
     w=0.9,                                 # SNR weight gamma/(1+gamma)
     xfail=0.9, x0=5e-3, tmax=200.0,
     NU=41,                                 # control grid used throughout
-    Ngrid=(25, 29, 35),                    # HJB state grids
     qstar=np.array([0.466109, 0.770508, 0.434809]),
     gain=1.0e3,                            # Var[R]/sigma^2 for the SNR profile
 )
@@ -92,7 +91,7 @@ def traj(law, n=2000, rtol=1e-10):
 
 
 def greedy(q, NU=None, fast=False):
-    """adaptive (myopic-alignment) policy: value and lifetime.
+    """The myopic policy (arg-min of beta on the control grid): value and lifetime.
 
     fast=True loosens the quadrature and the integrator for use inside the
     Nelder-Mead search of Table II; the winner is always re-evaluated at full
@@ -153,6 +152,14 @@ def beta_min_range(q, X):
 
 
 def levelset_table():
+    """Table 2: (u, delta, record score, indicator score I_z, rms beta, loss).
+
+    The rms column was np.degrees(b.std()) for many revisions while the
+    table called it rms; a reviewer caught it with l-bar ~ 1/2 rms^2, which
+    the standard deviation violates by a factor of four. It is now the root
+    mean square, and main() checks that bound on the PRINTED columns, so a
+    mislabel can no longer pass by agreeing with the code that made it.
+    """
     rows = [const_curve(u) for u in (0.0, 1.0, 1.5, 2.0, 3.0)]
     F = float(np.mean(rows[2][2]))
     out = []
@@ -163,7 +170,9 @@ def levelset_table():
         b = np.arccos(np.clip(DH @ QS, -1, 1))
         L = float(np.mean(-0.5 * np.log(np.maximum(
             1 - wv * np.sin(b) ** 2, 1e-300))))
-        out.append((u, dl, F, float(np.degrees(b.std())), L))
+        Iz = float(np.mean(dl ** 2 * d2 * np.cos(b) ** 2))
+        rms = float(np.degrees(np.sqrt(np.mean(b ** 2))))
+        out.append((u, dl, F, Iz, rms, L))
     return out
 
 
@@ -264,7 +273,11 @@ def discussion_order(path):
     # broader than Proposition 4.6, which rules out ranking by the loss
     # and not designing on other grounds. The reading was reworded; the
     # check still asks that the two plant-independent readings lead.
-    lead = ("Test the separability", "No Fisher criterion")
+    # "No Fisher criterion can rank fixed indicators" went in the P1
+    # revision: Proposition 4.6 had been proved through an invariance under a
+    # common gain that the loss does not have, and the corrected proposition
+    # says which Fisher information to score rather than that none works.
+    lead = ("Test the separability", "Score the indicator's")
     got = tuple(p[:22] for p in paras[1:3])
     return float(all(g.startswith(x[:22]) for g, x in zip(got, lead)))
 
@@ -634,7 +647,7 @@ def rho_sweep_stats():
 
     rho_sweep.py draws 300 plants from a fixed seed -- two to five mechanisms,
     one or two inputs, and every other parameter varied with them -- and for
-    each records the regime index and the gain of adaptive steering over the
+    each records the regime index and the gain of myopic steering over the
     best constant input. It runs for about three hours, so the gate reads the
     recorded result rather than repeating it.
 
@@ -989,28 +1002,74 @@ def main():
     L_ad, Tf_ad, X_ad = greedy(QS)
     L_co, u_co = best_constant(QS)
     ratio = L_co / L_ad
-    L_ad_fine, _, _ = greedy(QS, NU=161)
-    ratio_fine = best_constant(QS, NU=161)[0] / L_ad_fine
+    # The value of steering against two baselines and on three control
+    # grids. "ratio" holds the indicator at q*, the one designed FOR
+    # steering; a reviewer pointed out that a constant-input operator would
+    # design its own, so the fair baseline minimises over the indicator too.
+    # The headline in the abstract is the fair one.
+    L_fair, u_fair, _ = fair_constant()
+    ratio_fair = L_fair / L_ad
+    grids = {}
+    for _nu in (81, 161):
+        _la = greedy(QS, NU=_nu)[0]
+        grids[_nu] = (_la, best_constant(QS, NU=_nu)[0] / _la,
+                      fair_constant(NU=_nu)[0] / _la)
+    Tf_co = traj(lambda x: u_co)[1]
+    Tf_fair = traj(lambda x: u_fair)[1]
     bmin_lo, bmin_hi = beta_min_range(QS, X_ad)
     tab = levelset_table()
-    span = max(r[4] for r in tab) / min(r[4] for r in tab)
-    fisher_pref = tab[0][4] / tab[1][4]         # loss at u=0 over u=1
+    span = max(r[5] for r in tab) / min(r[5] for r in tab)
+    fisher_pref = tab[0][5] / tab[1][5]         # loss at u=0 over u=1
     L_bal, Tf_bal, _ = greedy(np.ones(3) / np.sqrt(3))
     (Lb_best, u_best), (Lb_worst, _) = barycentre_scan()
 
     rows = [
-        ("adaptive loss at q*",
-         find(s, r"adaptive policy attains\s*\n?\$([0-9.]+)\\times10\^\{-4\}"),
+        ("myopic loss at q*",
+         find(s, r"at which the myopic policy attains\s*\$([0-9.]+)\\times10\^\{-4\}"),
          L_ad * 1e4, 5e-3),
+        ("myopic loss at q*, restated in Sec 6.6",
+         find(s, r"The myopic policy attains \$([0-9.]+)\\times10\^\{-4\}\$ "
+                 r"and is realisable"), L_ad * 1e4, 5e-3),
         ("best-constant loss at q*",
          find(s, r"\$([0-9.]+)\\times10\^\{-2\}\$ under the best"),
          L_co * 1e2, 5e-3),
-        ("headline ratio",
+        ("headline ratio at q*",
          find(s, r"input, a factor of \$([0-9]+)\$"),
          ratio, 0.01),
-        ("ratio, 161-point grid",
-         find(s, r"rising to \$([0-9]+)\$ at \$161\$ points"), ratio_fine,
-         0.01),
+        ("fair baseline (x1e-3)",
+         find(s, r"together gives \$([0-9.]+)\\times10\^\{-3\}\$"),
+         L_fair * 1e3, 5e-3),
+        ("fair baseline sits at u=0", 0.0, u_fair, 0.0),
+        ("fair ratio",
+         find(s, r"steering is worth a factor of \$([0-9]+)\$"),
+         ratio_fair, 0.01),
+        ("ratio at q*, 81-point grid",
+         find(s, r"on \$81\$ points they become \$([0-9]+)\$"),
+         grids[81][1], 0.01),
+        ("fair ratio, 81-point grid",
+         find(s, r"on \$81\$ points they become \$[0-9]+\$ and \$([0-9]+)\$"),
+         grids[81][2], 0.01),
+        ("ratio at q*, 161-point grid",
+         find(s, r"on \$161\$ points \$([0-9]+)\$ and"), grids[161][1], 0.01),
+        ("fair ratio, 161-point grid",
+         find(s, r"on \$161\$ points \$[0-9]+\$ and \$([0-9]+)\$ again"),
+         grids[161][2], 0.01),
+        # Corollary 2.4 applied to the fair baseline: e^{2 l} - 1, in per cent
+        ("fair baseline's excess error variance (%)",
+         find(s, r"error variance only \$([0-9.]+)\\%\$ above"),
+         100.0 * (np.exp(2.0 * L_fair) - 1.0), 0.02),
+        ("fair baseline loss, restated with Cor 2.4 (x1e-3)",
+         find(s, r"a loss of \$([0-9.]+)\\times10\^\{-3\}\$ already"),
+         L_fair * 1e3, 5e-3),
+        ("life: myopic loop over best constant at q*",
+         find(s, r"myopic loop at \$q\^\{\\star\}\$ lives \$([0-9.]+)\$ times"),
+         Tf_ad / Tf_co, 0.01),
+        ("life: myopic loop over fair baseline",
+         find(s, r"and \$([0-9.]+)\$ times as long as the fair baseline"),
+         Tf_ad / Tf_fair, 0.02),
+        ("policy's control grid (points)",
+         find(s, r"searched on a grid of \$([0-9]+)\$ points"),
+         float(CFG["NU"]), 0.0),
         ("Table I span",
          find(s, r"exposure factor \$\\delta\$\.\s+The loss still spans a "
                  r"factor(?:\s+of)?\s+\$([0-9.]+)\$"), span, 0.01),
@@ -1033,9 +1092,11 @@ def main():
         ("headline ratio, restated in the Discussion",
          find(s, r"collapsing from \$([0-9]+)\\times\$ to under"),
          ratio, 0.01),
-        # a fifth copy, in the abstract, which no pattern above reaches
-        ("headline ratio, restated in the abstract",
-         find(s, r"lowers the information-loss objective \$([0-9]+)\$-fold"), ratio, 0.01),
+        # the abstract quotes the FAIR ratio, against a constant design
+        # with its own indicator
+        ("fair ratio, restated in the abstract",
+         find(s, r"lowers the information-loss objective \$([0-9]+)\$-fold"),
+         ratio_fair, 0.01),
         ("beta_min upper, restated in Sec 6.4",
          find(s, r"peak floor moves from \$([0-9.]+)\^\{\\circ\}\$"),
          bmin_hi, 0.01),
@@ -1141,17 +1202,34 @@ def main():
                  float(WORDNUM[_m.group(1)]) if _m else None,
                  float(discussion_leads(args.tex)), 0.0))
 
-    for i, (u, dl, F, rms, L) in enumerate(tab):
+    _printed = []
+    for i, (u, dl, F, Iz, rms, L) in enumerate(tab):
         pat = (r"\$" + f"{u:.1f}".replace(".", r"\.") +
                r"\$ & \$([0-9.]+)\$ & \$[0-9.]+\$ & \$([0-9.]+)\$ & "
-               r"\$([0-9.]+)\$")
+               r"\$([0-9.]+)\$ & \$([0-9.]+)\$")
         m = re.search(pat, s)
         rows.append((f"Table I u={u:.1f}: delta",
                      float(m.group(1)) if m else None, dl, 0.01))
+        rows.append((f"Table I u={u:.1f}: indicator information I_z",
+                     float(m.group(2)) if m else None, Iz, 0.002))
         rows.append((f"Table I u={u:.1f}: rms beta",
-                     float(m.group(2)) if m else None, rms, 0.01))
+                     float(m.group(3)) if m else None, rms, 0.01))
         rows.append((f"Table I u={u:.1f}: loss",
-                     float(m.group(3)) if m else None, L, 0.02))
+                     float(m.group(4)) if m else None, L, 0.02))
+        if m:
+            _printed.append(tuple(float(g) for g in m.groups()))
+    # A cross-column bound on the PRINTED numbers, independent of the code
+    # that filled them: l <= -log cos(beta) ~ beta^2/2 at small angle and
+    # w ~ 1 here, so l-bar must sit near 1/2 rms^2 (within the quartic term
+    # of Lemma 2.2, a few per cent at 27 degrees). A standard deviation
+    # labelled rms misses this by a factor of four.
+    rows.append(("Table I: l-bar within 6% of 1/2 rms^2, rows", 5.0,
+                 float(sum(abs(0.5 * np.radians(r_) ** 2 / l_ - 1.0) < 0.06
+                           for (_, _, r_, l_) in _printed)), 0.0))
+    # "I_z orders the five inputs exactly as the loss does"
+    rows.append(("Table I: I_z orders the inputs as the loss does", 1.0,
+                 float(list(np.argsort([-r[3] for r in tab]))
+                       == list(np.argsort([r[5] for r in tab]))), 0.0))
 
     _rs = rho_sweep_stats()
     if _rs is None:
@@ -1389,12 +1467,15 @@ def main():
         print("\n[Table II] re-optimising q for each system ...", flush=True)
         tabII = re.findall(
             r"\$\(([0-9.,]+)\)\$ & \$([0-9.]+)\^\{\\circ\}\$ & \$([0-9.]+)\$ "
-            r"& \$([0-9.]+)\\times10\^\{(-[0-9])\}\$ & \$([0-9.]+)\\times\$",
+            r"& \$([0-9.]+)\\times10\^\{(-[0-9])\}\$ & \$([0-9.]+)\\times\$"
+            r" & \$([0-9.]+)\\times\$",
             s)
-        _Lst_all = []
+        _Lst_all, _gains, _fairs = [], [], []
         for k, Ev in enumerate(REGIME):
-            arc, rho, Lst, gain = regime_row(Ev)
+            arc, rho, Lst, gain, fgain = regime_row(Ev)
             _Lst_all.append(Lst)
+            _gains.append(gain)
+            _fairs.append(fgain)
             cl = tabII[k] if k < len(tabII) else None
             rows += [
                 (f"Table II row {k+1}: arc",
@@ -1405,6 +1486,8 @@ def main():
                  float(cl[3]) * 10 ** float(cl[4]) if cl else None, Lst, 0.05),
                 (f"Table II row {k+1}: gain",
                  float(cl[5]) if cl else None, gain, 0.05),
+                (f"Table II row {k+1}: own-indicator gain",
+                 float(cl[6]) if cl else None, fgain, 0.05),
             ]
             # Fig. 4(b) replots these same three regimes from constants
             # hard-carried into make_fig1.py. Nothing used to tie them to the
@@ -1438,6 +1521,27 @@ def main():
             ("Sec 6.7 loss rises by a factor over the regimes",
              find(s, r"rises by a factor \$([0-9]+)\$"),
              _Lst_all[-1] / _Lst_all[0], 0.05))
+        rows += [
+            ("Sec 6.7 own-indicator gain, first row",
+             find(s, r"and from \$([0-9]+)\$ to \$[0-9.]+\$ against a constant"),
+             _fairs[0], 0.02),
+            ("Sec 6.7 own-indicator gain, last row",
+             find(s, r"and from \$[0-9]+\$ to \$([0-9.]+)\$ against a constant"),
+             _fairs[-1], 0.02),
+            ("Discussion: own-indicator gain, first row",
+             find(s, r"and from \$([0-9]+)\\times\$ to under"), _fairs[0], 0.02),
+            ("Discussion: own-indicator gain, last row under",
+             find(s, r"\$[0-9]+\\times\$ to under \$([0-9]+)\\times\$ against"),
+             _fairs[-1], "<"),
+            # the sweep's gain holds the indicator at the steering design;
+            # the text states by how much that overstates it on Table II
+            ("Sec 6.7 overstatement, smallest",
+             find(s, r"overstates it by factors of \$([0-9.]+)\$ to"),
+             min(g / f for g, f in zip(_gains, _fairs)), 0.03),
+            ("Sec 6.7 overstatement, largest",
+             find(s, r"overstates it by factors of \$[0-9.]+\$ to \$([0-9.]+)\$"),
+             max(g / f for g, f in zip(_gains, _fairs)), 0.03),
+        ]
         print("\n[Sec 6.8] loss against remaining-life error ...",
               flush=True)
         _id, _sp, _rt = downstream_rul()
@@ -1477,23 +1581,64 @@ def main():
             ("record vs time-averaged loss differ (rel)", 0.05, _rgap, ">"),
         ]
 
-        print("\n[Sec 6.4] two-input reachability floor ...", flush=True)
-        det, inside, ntot, res, gfloor = two_input_floor()
+        print("\n[Sec 6.4] two-input closed loop along S_q ...", flush=True)
+        ti = two_input_floor()
         rows += [
             ("2-input system determinant",
-             find(s, r"determinant \$([0-9.]+)\$ here"), det, 0.02),
-            ("2-input states inside the box",
-             find(s, r"at every one of \$([0-9]+)\$ sampled states"),
-             float(inside), 0.0),
-            ("2-input states sampled",
-             find(s, r"at every one of \$([0-9]+)\$ sampled states"),
-             float(ntot), 0.0),
+             find(s, r"determinant \$([0-9.]+)\$ here"), ti["det"], 0.02),
+            ("2-input central operating point",
+             find(s, r"central operating point \$\(([0-9.]+),[0-9.]+\)\$"),
+             1.5, 0.0),
+            ("2-input points of S_q inside the box",
+             find(s, r"at every one of \$([0-9]+)\$ points of that segment"),
+             float(ti["inside"]), 0.0),
+            ("2-input points of S_q sampled",
+             find(s, r"at every one of \$([0-9]+)\$ points of that segment"),
+             float(ti["n"]), 0.0),
+            ("2-input margin to the box",
+             find(s, r"at least\s+\$([0-9.]+)\$ from its boundary"),
+             ti["margin"], 0.02),
+            ("2-input u1 along S_q, low",
+             find(s, r"it sweeps \$u_1\$ from \$([0-9.]+)\$ to"),
+             ti["u1"][0], 0.01),
+            ("2-input u1 along S_q, high",
+             find(s, r"it sweeps \$u_1\$ from \$[0-9.]+\$ to\s+\$([0-9.]+)\$"),
+             ti["u1"][1], 0.01),
+            ("2-input u2 along S_q, low",
+             find(s, r"\$u_2\$ stays between \$([0-9.]+)\$ and"),
+             ti["u2"][0], 0.01),
+            ("2-input u2 along S_q, high",
+             find(s, r"\$u_2\$ stays between \$[0-9.]+\$ and \$([0-9.]+)\$"),
+             ti["u2"][1], 0.01),
+            # "keeps the state on S_q to machine precision"
+            ("2-input closed loop's distance from S_q", 1e-9, ti["dist"], "<"),
             # the residual must be zero to numerical precision, not merely
-            # small: the paper claims the floor vanishes, not that it shrinks
-            ("2-input residual (deg)", 1e-5, res, "<"),
-            ("2-input grid floor (deg)",
+            # small: the paper claims the loss vanishes, not that it shrinks
+            ("2-input closed-loop misalignment (deg)",
+             (10.0 ** -find(s, r"misalignment below \$10\^\{-([0-9]+)\}\$\s+"
+                               r"degrees")
+              if find(s, r"misalignment below \$10\^\{-([0-9]+)\}\$\s+degrees")
+              else None), ti["res"], "<"),
+            ("2-input grid floor along S_q (deg)",
              find(s, r"floor of at most \$([0-9.]+)\^\{\\circ\}\$"),
-             gfloor, 0.05),
+             ti["floor"], 0.05),
+        ]
+
+        print("[Remark 4.2] the counterexample on the segment ...", flush=True)
+        _reach, _x2e, _off, _x2x, _x1x, _before = segment_counterexample()
+        rows += [
+            ("Rem 4.2 reachable along the u=1.3 trajectory", 1.0, _reach, 0.0),
+            ("Rem 4.2 aligning input offset",
+             find(s, r"aligned at state \$x\$ by the input\s+\$u=([0-9.]+)\+x_2\$"),
+             _off, 0.0),
+            ("Rem 4.2 admissible while x2 <=",
+             find(s, r"admissible exactly when \$x_2\\le([0-9.]+)\$"),
+             _x2x, 0.0),
+            ("Rem 4.2 x2 at failure under u=1.3",
+             find(s, r"the plant fails with \$x_2=([0-9.]+)\$"), _x2e, 0.01),
+            ("Rem 4.2 x1 where S_q leaves the envelope",
+             find(s, r"reaches \$0\.6\$ at\s+\$x_1=([0-9.]+)\$"), _x1x, 0.01),
+            ("Rem 4.2 that happens before failure", 1.0, _before, 0.0),
         ]
 
     if args.fleet or args.full:
@@ -1621,6 +1766,21 @@ def main():
                 ("S1 NC DS01 interaction over its noise floor",
                  find(s, r"and \$([0-9.]+)\$ times on DS01"), _i1, 0.02),
             ]
+            # what the interaction can be: the damage the simulator imposes
+            # is constant within every flight, so a within-flight contrast
+            # reads the sensor map, not the stress factor
+            _c02, _n02 = ncmapss_health_constant("ncmapss")
+            _c01, _n01 = ncmapss_health_constant("ncmapss01")
+            rows += [
+                ("S1 NC health parameters constant within every flight", 1.0,
+                 float(_c02 and _c01), 0.0),
+                ("S1 NC DS02 flights",
+                 find(s, r"every one of the \$([0-9]+)\$ flights of DS02"),
+                 float(_n02), 0.0),
+                ("S1 NC DS01 flights",
+                 find(s, r"flights of DS02 and \$([0-9]+)\$ of DS01"),
+                 float(_n01), 0.0),
+            ]
         except Exception as exc:
             skip("  SKIPPED N-CMAPSS:", exc)
         print("[Sec 7] C-MAPSS FD004/FD002 (slow) ...", flush=True)
@@ -1653,9 +1813,6 @@ def main():
                 ("C-MAPSS engines total",
                  find(s, r"of \$([0-9]+)\$ engines"),
                  float(ntot), 0.0),
-                ("C-MAPSS engines total, conclusion",
-                 find(s, r"and on \$([0-9]+)\$ simulated turbofan records the evidence"),
-                 float(ntot), 0.0),
                 # "stable over w in {7,9,11}": the smallest effect over the
                 # three windows must still clear the largest control bias
                 ("C-MAPSS weakest B-W over w (deg)",
@@ -1678,24 +1835,72 @@ def main():
                  float(c4["nregime"]), 0.0),
             ]
 
-    if args.full:
-        print("\n[Sec 6.6] Dinkelbach limit at q* ...", flush=True)
-        lam = dinkelbach_limit()
+    # Section 6.6. The grid sequence takes hours, so dinkelbach_grids.py
+    # records it and the checks read the record, as for the sweeps; --full
+    # recomputes two of its entries afresh.
+    print("\n[Sec 6.6] fractional optimum from the grid records ...",
+          flush=True)
+    dk = dinkelbach_record()
+    if dk is None:
+        skip("  SKIPPED Section 6.6: dinkelbach_grids_NU*.json incomplete")
+    else:
+        my = {41: L_ad, 81: grids[81][0], 161: grids[161][0]}
+        l41 = dk[41]["lam"]
         rows += [
+            ("6.6 state grids, fewest points",
+             find(s, r"state grids of \$([0-9]+)\$ to"),
+             float(dk[41]["N"].min()), 0.0),
+            ("6.6 state grids, most points",
+             find(s, r"state grids of \$[0-9]+\$ to \$([0-9]+)\$ points"),
+             float(dk[41]["N"].max()), 0.0),
+            ("6.6 fitted order",
+             find(s, r"the order is \$([0-9.]+)\$"), dk[41]["p"], 0.02),
             ("lambda* extrapolated",
              find(s, r"\\lambda\^\{\\star\}_\\infty=([0-9.]+)"
-                     r"\\times10\^\{-4\}"), lam * 1e4, 0.03),
-            # the letter's own guard: the limit must lie below a policy that
-            # is actually realisable at the same control grid
-            ("lambda* below realisable", L_ad, lam, "<"),
-            # Section 6.5's "2.7% above the optimum" is exactly these two
-            # numbers, and nothing read it until now. Its companion, 9.4% at
-            # "a poorly chosen indicator", stays unchecked because the paper
-            # does not say which indicator that is.
-            ("Sec 6.5 myopic gap at q* (%)",
+                     r"\\times10\^\{-4\}"), l41 * 1e4, 0.01),
+            ("6.6 myopic gap at q* (%)",
              find(s, r"sits \$([0-9.]+)\\%\$ above the optimum"),
-             (L_ad / lam - 1.0) * 100.0, 0.05),
+             (my[41] / l41 - 1.0) * 100.0, 0.05),
+            # the spread: both fitting windows on all three control grids
+            ("6.6 gap over windows and control grids, smallest (%)",
+             find(s, r"puts the gap between \$([0-9.]+)\\%\$ and"),
+             min(100.0 * (my[_nu] / dk[_nu][_k] - 1.0)
+                 for _nu in (41, 81, 161) for _k in ("lam", "lam_prev")),
+             0.05),
+            ("6.6 gap over windows and control grids, largest (%)",
+             find(s, r"puts the gap between \$[0-9.]+\\%\$ and "
+                     r"\$([0-9.]+)\\%\$"),
+             max(100.0 * (my[_nu] / dk[_nu][_k] - 1.0)
+                 for _nu in (41, 81, 161) for _k in ("lam", "lam_prev")),
+             0.05),
+            ("6.6 81 points lower the myopic value by more than (%)",
+             find(s, r"extrapolated optimum by more than \$([0-9]+)\\%\$"),
+             100.0 * (1.0 - my[81] / my[41]), ">"),
+            ("6.6 81 points lower the optimum by more than (%)",
+             find(s, r"extrapolated optimum by more than \$([0-9]+)\\%\$"),
+             100.0 * (1.0 - dk[81]["lam"] / l41), ">"),
+            ("6.6 finest grid above the extrapolant (%)",
+             find(s, r"returns a value \$([0-9]+)\\%\$ above it"),
+             100.0 * (dk[41]["v"][-1] / l41 - 1.0), 0.03),
         ]
+        # the guard of the section: on every control grid, and whichever
+        # window is fitted, the optimum must lie below the realisable policy
+        for _nu in (41, 81, 161):
+            for _k in ("lam", "lam_prev"):
+                rows.append((f"6.6 {_k} below the myopic policy, {_nu} points",
+                             my[_nu], dk[_nu][_k], "<"))
+            # every control grid must carry the same state grids, or the
+            # windows compared above are not like for like
+            rows.append((f"6.6 record for {_nu} points has the six grids", 1.0,
+                         float(list(dk[_nu]["N"]) == [25, 35, 49, 69, 97, 137]),
+                         0.0))
+        if args.full:
+            import dinkelbach_grids as _dg
+            for _N in (49, 69):
+                _fresh = _dg.dinkelbach(_N, 41)[0]
+                _rec = dk[41]["v"][list(dk[41]["N"]).index(_N)]
+                rows.append((f"6.6 record reproduced afresh, N={_N} (rel)",
+                             1e-9, abs(_fresh / _rec - 1.0), "<"))
 
     bad = check(rows)
     if SKIPS:
@@ -2579,6 +2784,34 @@ def rul_two_predictors(lwin=30, kbest=5, cap=125.0):
             int(better), len(tags))
 
 
+def ncmapss_health_constant(key="ncmapss"):
+    """Are the simulated health parameters constant within every flight?
+
+    N-CMAPSS ships the health parameters its simulator imposed (T_dev), one
+    row per second, with unit and cycle in A_dev. A review pointed out that
+    the separability test's interaction cannot be assigned to the stress
+    factor rather than to the sensor map; if the damage never changes within
+    a flight, a within-flight contrast between operating points cannot come
+    from the stress factor at all. Returns (constant in every flight, number
+    of (unit, cycle) flights in the development set).
+    """
+    import h5py
+    with h5py.File(DATA[key], "r") as f:
+        names = [n.decode() if isinstance(n, bytes) else str(n)
+                 for n in np.array(f["A_var"])]
+        A = np.array(f["A_dev"], dtype=float)
+        T = np.array(f["T_dev"], dtype=float)
+    k = A[:, names.index("unit")] * 10000 + A[:, names.index("cycle")]
+    order = np.argsort(k, kind="stable")
+    k, T = k[order], T[order]
+    cuts = np.flatnonzero(np.diff(k)) + 1
+    starts = np.r_[0, cuts]
+    ends = np.r_[cuts, len(k)]
+    const = all(np.all(T[a:b].max(0) == T[a:b].min(0))
+                for a, b in zip(starts, ends))
+    return bool(const), int(len(starts))
+
+
 def ncmapss_sep(nclust=6, nstage=2, minpts=400, units=(2, 5, 10, 16, 18, 20),
                 key="ncmapss"):
     """Two-way separability test on N-CMAPSS DS02.
@@ -2839,7 +3072,7 @@ def threshold_sensitivity(xf=1.0):
     finally: an exception here would otherwise leave every later check
     running against the wrong threshold, and they would still all pass.
 
-    Returns (peak floor in degrees, adaptive gain, lifetime change in per
+    Returns (peak floor in degrees, myopic gain, lifetime change in per
     cent) at the alternative threshold.
     """
     global XFAIL
@@ -2927,13 +3160,25 @@ def _traj_E(Ev, law, n=800, rtol=1e-9):
     return sol.sol(np.linspace(0, sol.t[-1], n)).T
 
 
-def two_input_floor(n=600, ngrid=90):
-    """The 'if' half of Theorem 5.1: at m = d-1 the floor should vanish.
+def two_input_floor(n=600, ngrid=90, uc=(1.5, 1.5)):
+    """The sufficient half of Theorem 4.1 at m = d-1, on the CLOSED LOOP.
 
     With phi_i(u) = exp(a_i - E_i u1 - G_i u2), log d_i is affine in (u1,u2),
     so matching a target direction is d-1 = 2 linear equations in 2 unknowns.
-    Returns (det, states inside the box, states tested, worst residual
-    misalignment in deg, worst grid-search floor in deg).
+
+    An earlier version solved those equations along the constant-input
+    trajectory the target was read from. Three reviewers pointed out that the
+    aligning input generates a different trajectory: zero loss pins d-hat to
+    v, so x-dot = ||d|| v and the state runs along the segment
+    S_q = x0 + s v (unit noise). The envelope condition is checked along
+    S_q, and the plant is then integrated under the aligning feedback to
+    confirm it stays there. The target is read at mid-life under the central
+    operating point uc, the same point make_fig4.py uses (the two once
+    disagreed: (1.2,1.2) here, (1.5,1.5) in the figure).
+
+    Returns a dict: det, inside, n, margin to the box, u1 and u2 ranges along
+    S_q, largest distance of the closed loop from S_q, worst closed-loop
+    misalignment (deg), worst grid-search floor along S_q (deg).
     """
     def phi(u1, u2):
         return np.exp(A - u1 * E - u2 * G2)
@@ -2942,39 +3187,121 @@ def two_input_floor(n=600, ngrid=90):
         d = phi(u1, u2) * (1.0 + HC * x)
         return d / np.linalg.norm(d)
 
-    def rhs(t, x):
-        return phi(1.2, 1.2) * (1.0 + HC * x)
-
     def ev(t, x):
         return x.max() - XFAIL
     ev.terminal, ev.direction = True, 1
-    sol = solve_ivp(rhs, [0, TMAX], np.full(3, X0), events=ev,
-                    rtol=1e-10, atol=1e-12, dense_output=True)
-    X = sol.sol(np.linspace(0, sol.t[-1], n)).T
-    q = dh(X[n // 2], 1.2, 1.2)
+    sol = solve_ivp(lambda t, x: phi(*uc) * (1.0 + HC * x), [0, TMAX],
+                    np.full(3, X0), events=ev, rtol=1e-10, atol=1e-12,
+                    dense_output=True)
+    Xc = sol.sol(np.linspace(0, sol.t[-1], n)).T
+    v = dh(Xc[n // 2], *uc)
 
     M = np.array([[-(E[0] - E[2]), -(G2[0] - G2[2])],
                   [-(E[1] - E[2]), -(G2[1] - G2[2])]])
     det = float(np.linalg.det(M))
 
-    us = np.linspace(UMIN, UMAX, ngrid)
-    inside, worst_res, worst_floor = 0, 0.0, 0.0
-    for x in X:
-        lh, lq = np.log(1.0 + HC * x), np.log(q)
+    def align(x):
+        lh, lq = np.log(1.0 + HC * x), np.log(v)
         r = np.array([(lq[0] - lq[2]) - (A[0] - A[2]) - (lh[0] - lh[2]),
                       (lq[1] - lq[2]) - (A[1] - A[2]) - (lh[1] - lh[2])])
-        u1, u2 = np.linalg.solve(M, r)
-        if UMIN <= u1 <= UMAX and UMIN <= u2 <= UMAX:
-            inside += 1
-            worst_res = max(worst_res, float(np.degrees(np.arccos(
-                np.clip(dh(x, u1, u2) @ q, -1, 1)))))
+        return np.linalg.solve(M, r)
+
+    x0 = np.full(3, X0)
+    seg = x0[None, :] + np.linspace(0.0, (XFAIL - X0) / v.max(),
+                                    n)[:, None] * v[None, :]
+    UU = np.array([align(x) for x in seg])
+    ok = np.all((UU >= UMIN) & (UU <= UMAX), axis=1)
+
+    sol = solve_ivp(lambda t, x: phi(*align(x)) * (1.0 + HC * x), [0, TMAX],
+                    x0, events=ev, rtol=1e-11, atol=1e-13, dense_output=True)
+    XL = sol.sol(np.linspace(0, sol.t[-1], n)).T
+    off = XL - x0[None, :]
+    dist = float(np.linalg.norm(off - (off @ v)[:, None] * v[None, :],
+                                axis=1).max())
+    res = max(float(np.degrees(np.arccos(np.clip(dh(x, *align(x)) @ v,
+                                                 -1, 1)))) for x in XL)
+
+    us = np.linspace(UMIN, UMAX, ngrid)
+    worst_floor = 0.0
+    for x in seg:
         best = np.inf
         for a1 in us:
             D = np.array([dh(x, a1, a2) for a2 in us])
             best = min(best, float(np.degrees(
-                np.arccos(np.clip(D @ q, -1, 1))).min()))
+                np.arccos(np.clip(D @ v, -1, 1))).min()))
         worst_floor = max(worst_floor, best)
-    return det, inside, n, worst_res, worst_floor
+    return dict(det=det, inside=int(ok.sum()), n=n,
+                margin=float(np.minimum(UU - UMIN, UMAX - UU).min()),
+                u1=(float(UU[:, 0].min()), float(UU[:, 0].max())),
+                u2=(float(UU[:, 1].min()), float(UU[:, 1].max())),
+                dist=dist, res=res, floor=worst_floor)
+
+
+def segment_counterexample():
+    """Remark 4.2: reachable along one trajectory, unattainable on S_q.
+
+    d = 2, m = 1, unit noise, phi_i = exp(theta_i - E_i u), h1 = 1,
+    h2 = e^x, x0 = 0, x_f = 0.9, U = [0, 1.3], log(v2/v1) = kappa = -0.2.
+    log(d2/d1) = (theta2 - theta1) - (E2 - E1) u + x2, so the aligning input
+    is u = (theta2 - theta1 + x2 - kappa)/(E2 - E1) = 0.7 + x2.
+
+    Returns (reachable at every state of the u = 1.3 trajectory, x2 at its
+    failure, offset 0.7 of the aligning input, x2 at which it leaves U, x1 at
+    which S_q reaches that x2, and whether that is before failure).
+    """
+    th, Ec, umax, kappa, xf = (np.array([0.0, 0.5]), np.array([1.0, 2.0]),
+                               1.3, -0.2, 0.9)
+
+    def ev(t, x):
+        return x.max() - xf
+    ev.terminal, ev.direction = True, 1
+    sol = solve_ivp(lambda t, x: np.array([np.exp(th[0] - Ec[0] * umax),
+                                           np.exp(th[1] - Ec[1] * umax + x[1])]),
+                    [0, 100], np.zeros(2), events=ev, rtol=1e-11, atol=1e-13,
+                    dense_output=True)
+    X = sol.sol(np.linspace(0, sol.t[-1], 4000)).T
+    off = (th[1] - th[0] - kappa) / (Ec[1] - Ec[0])
+    u_req = off + X[:, 1] / (Ec[1] - Ec[0])
+    reach = float(np.all((u_req >= 0.0) & (u_req <= umax)))
+    x2_exit = umax * (Ec[1] - Ec[0]) - (th[1] - th[0]) + kappa
+    x1_exit = x2_exit / np.exp(kappa)        # along S_q, x2 = e^kappa x1
+    return reach, float(X[-1, 1]), float(off), float(x2_exit), \
+        float(x1_exit), float(x1_exit < xf)
+
+
+def fair_constant(NU=None, restarts=4, seed=3):
+    """Best constant-input design with its OWN indicator: the minimum over
+    (indicator, constant input on the NU grid) of the time-averaged loss.
+
+    best_constant(q) scores a constant input at a given indicator; used with
+    q*, the indicator optimised for steering, it denies the constant-input
+    operator the design it would actually make. On the test plant that
+    inflated the value of steering from 47 to 68.
+    Returns (loss, u, indicator). Reads the module-level E, like traj().
+    """
+    US = np.linspace(UMIN, UMAX, NU or CFG["NU"])
+    rng = np.random.default_rng(seed)
+    best = (np.inf, None, None)
+    for u in US:
+        X, _ = traj(lambda x, u=u: u)
+        if X is None:
+            continue
+        D = np.exp(A - u * E)[None, :] * (1.0 + HC[None, :] * X)
+        nr = np.linalg.norm(D, axis=1)
+        DH, d2 = D / nr[:, None], nr ** 2
+
+        def L(v, DH=DH, d2=d2):
+            v = np.abs(v) / np.linalg.norm(v)
+            return float(np.mean(ell(np.arccos(np.clip(DH @ v, -1, 1)), d2)))
+        starts = [DH.mean(0)] + [np.abs(rng.normal(size=3)) + 0.05
+                                 for _ in range(restarts)]
+        for s0 in starts:
+            r = minimize(L, s0, method="Nelder-Mead",
+                         options=dict(maxiter=3000, xatol=1e-9, fatol=1e-14))
+            if r.fun < best[0]:
+                best = (float(r.fun), float(u),
+                        np.abs(r.x) / np.linalg.norm(r.x))
+    return best
 
 
 # ------------------------------------------- model misspecification ------
@@ -2990,22 +3317,29 @@ def _indicator_from(Ev, u0=1.2):
 
 
 def _loss_on_true(q):
-    """Closed-loop loss of indicator q on the plant with the TRUE energies."""
+    """Closed-loop loss of indicator q on the plant with the TRUE energies.
+
+    Evaluated at the plant's own gamma. It used to call ell() without d2,
+    i.e. at the fixed w = 0.9, while Section 6.1 says every loss of the test
+    plant uses the plant's own gamma; the table moved only in its third
+    digit when corrected, but it was an undisclosed convention.
+    """
     q = np.abs(q) / np.linalg.norm(q)
     US = np.linspace(UMIN, UMAX, CFG["NU"])
     PHI = np.exp(A[None, :] - US[:, None] * E[None, :])
 
     def best(x):
         D = PHI * (1.0 + HC[None, :] * x[None, :])
-        D = D / np.linalg.norm(D, axis=1, keepdims=True)
-        b = np.arccos(np.clip(D @ q, -1, 1))
+        nr = np.linalg.norm(D, axis=1, keepdims=True)
+        b = np.arccos(np.clip((D / nr) @ q, -1, 1))
         j = int(np.argmin(b))
-        return US[j], float(b[j])
+        return US[j], float(b[j]), float(nr[j, 0] ** 2)
 
     X = _traj_E(E, lambda x: best(x)[0])
     if X is None:
         return np.inf
-    return float(np.mean(ell(np.array([best(x)[1] for x in X]))))
+    v = np.array([best(x)[1:] for x in X])
+    return float(np.mean(ell(v[:, 0], v[:, 1])))
 
 
 def misspec_table(levels=(0.02, 0.05, 0.10, 0.20, 0.35), draws=40, seed=11):
@@ -3034,7 +3368,8 @@ REGIME = [np.array([0.60, 1.10, 0.80]),
 
 
 def regime_row(Ev, restarts=8, seed=7):
-    """arc, rho, best adaptive loss and the gain over the best constant."""
+    """arc, rho, best myopic loss, and its gain over the best constant input
+    at the same indicator and over the best constant design with its own."""
     global E
     keep, E = E, Ev
     try:
@@ -3066,7 +3401,9 @@ def regime_row(Ev, restarts=8, seed=7):
         q_b = best[1]
         L_ad = greedy(q_b)[0]          # winner, full accuracy
         L_co, _ = best_constant(q_b)
-        return arc, drift / arc, L_ad, L_co / L_ad
+        # the second gain column: a constant design with its own indicator
+        L_fair = fair_constant()[0]
+        return arc, drift / arc, L_ad, L_co / L_ad, L_fair / L_ad
     finally:
         E = keep
 
@@ -3387,58 +3724,50 @@ def severson_stats(win):
                 shares=mid)
 
 
-def dinkelbach_limit():
-    """Richardson-extrapolated fractional optimum at q*; slow."""
-    def solve_F(lam, N):
-        ax = np.linspace(X0, XFAIL, N)
-        g = [ax] * 3
-        P = np.stack([m.ravel() for m in np.meshgrid(*g, indexing="ij")], 1)
-        h = 1.6 * (ax[1] - ax[0])
-        US, _ = grid(CFG["NU"])
-        term = P.max(1) >= XFAIL - 1e-12
-        ST, TI, HI, RU = [], [], [], []
-        for u in US:
-            f = np.exp(A - u * E)[None, :] * (1.0 + HC[None, :] * P)
-            nf = np.linalg.norm(f, axis=1, keepdims=True)
-            gg = f / nf
-            with np.errstate(divide="ignore", invalid="ignore"):
-                si = (XFAIL - P) / np.where(gg > 1e-15, gg, np.inf)
-            st = np.minimum(h, np.min(np.where(si > 0, si, np.inf), axis=1))
-            ST.append(P + st[:, None] * gg)
-            TI.append(st / nf[:, 0])
-            HI.append(st < h - 1e-15)
-            RU.append(ell(np.arccos(np.clip(gg @ QS, -1, 1)),
-                          nf[:, 0] ** 2))
-        RU = np.stack(RU)
-        W = np.zeros(len(P))
-        for _ in range(500):
-            it = RegularGridInterpolator(g, W.reshape(N, N, N),
-                                         bounds_error=False, fill_value=None)
-            Wn = np.stack([TI[j] * (RU[j] - lam)
-                           + np.where(HI[j], 0.0, it(ST[j]))
-                           for j in range(len(US))]).min(axis=0)
-            Wn[term] = 0.0
-            if np.max(np.abs(Wn - W)) < 1e-13:
-                W = Wn
-                break
-            W = Wn
-        it = RegularGridInterpolator(g, W.reshape(N, N, N),
-                                     bounds_error=False, fill_value=None)
-        return float(it(np.full((1, 3), X0))[0])
+def dinkelbach_record(k=4):
+    """{NU: dict(lam, p, N, v)} from dinkelbach_grids_NU*.json, or None.
 
-    vals = []
-    for N in CFG["Ngrid"]:
-        lo, hi = 0.0, 0.01
-        for _ in range(26):
-            mid = 0.5 * (lo + hi)
-            if solve_F(mid, N) > 0:
-                lo = mid
-            else:
-                hi = mid
-        vals.append(0.5 * (lo + hi))
-        print(f"   Dinkelbach N={N}: {vals[-1]:.8f}", flush=True)
-    v, Na = np.array(vals), np.array(CFG["Ngrid"], float)
-    return v[-2] - (v[-2] - v[-1]) / (1 / Na[-2] - 1 / Na[-1]) / Na[-2]
+    The record holds the fractional optimum at q* on a sequence of state
+    grids for each control grid NU (dinkelbach_grids.py, hours). lam and p
+    come from a least-squares fit v = lam + C h^p over the k finest grids,
+    h = 1/(N-1) the mesh width.
+
+    This replaced dinkelbach_limit(), which ran value iteration on
+    N = 25, 29, 35 and extrapolated first order in 1/N from the last pair.
+    A reviewer showed that equally defensible extrapolants of those three
+    values spanned 1.61 to 1.73e-4, straddling the realisable 1.676e-4, so
+    the "two digits" it supported were not there. An exact one-sweep solver
+    of the same scheme made grids up to N = 137 affordable; there the order
+    is visibly one, and the paper reports an interval, not a digit count.
+    """
+    import json as _json
+    import os as _os
+    from scipy.optimize import curve_fit
+    here = _os.path.dirname(_os.path.abspath(__file__))
+    out = {}
+    for NU in (41, 81, 161):
+        p = _os.path.join(here, f"dinkelbach_grids_NU{NU}.json")
+        if not _os.path.exists(p):
+            return None
+        rec = _json.load(io.open(p, encoding="utf-8"))
+        N = np.array(sorted(int(n) for n in rec))
+        if len(N) < k + 1:
+            return None
+        v = np.array([rec[str(n)] for n in N])
+        h = 1.0 / (N - 1)
+
+        def fit(sl):
+            po, _ = curve_fit(lambda hh, lam, c, pp: lam + c * hh ** pp,
+                              h[sl], v[sl], p0=(v[-1] * 0.7, 5e-3, 1.0),
+                              maxfev=20000)
+            return float(po[0]), float(po[2])
+        # the finest k grids give the reported value; the k grids one step
+        # coarser say how much it moves with the choice of window, which is
+        # what the text reports as its spread
+        lam, pw = fit(slice(-k, None))
+        lam_prev, _ = fit(slice(-k - 1, -1))
+        out[NU] = dict(lam=lam, p=pw, lam_prev=lam_prev, N=N, v=v)
+    return out
 
 
 if __name__ == "__main__":

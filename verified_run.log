@@ -1,12 +1,16 @@
 md5 BEFORE
-  e291233adfb973d41c23310ad0b3ad18  theory.tex
-  498af098163cf57c7aa3f9a9620bedb5  supplement.tex
-  556179577386264f4c87dbd9756a3e64  verify_numbers.py
+  acee8e21fc9da460170ed75cba39510e  theory.tex
+  b39896c73e929d033a2020408811dc1c  supplement.tex
+  4e35fb4a6c6c81c6708a8c8cbbab9818  verify_numbers.py
   c0db59819961d0f743f9c0fc5d58cac5  rho_sweep.json
   506f77029478c7d27b65de63b294c58f  downstream_sweep.json
-  2fca511bba69262b0645136c0078246c  fig4.pdf
-  cc7ba4d06914e3fcd800c98f13f6bdd5  make_fig4.py
-CONFIG: {'a': [0.0, 0.3, -0.2], 'E': [0.6, 1.1, 0.8], 'c': [-0.5, 2.0, 0.8], 'U': (0.0, 3.0), 'w': 0.9, 'xfail': 0.9, 'x0': 0.005, 'tmax': 200.0, 'NU': 41, 'Ngrid': (25, 29, 35), 'qstar': [0.466109, 0.770508, 0.434809], 'gain': 1000.0}
+  05eb9819d0edfdfffebbcdf66932eccb  dinkelbach_grids.py
+  ff47ddcb51e950348d18fd9983c6d308  dinkelbach_grids_NU41.json
+  bd2c0d70ca4846cc4bf26cc57c5036f9  dinkelbach_grids_NU81.json
+  6b76e89c1cc4857fb9a07732dda4f18e  dinkelbach_grids_NU161.json
+  13b3fb1400db94d60a8359efdeeae5b7  fig4.pdf
+  d0ba5db8b50e38a7c8e179281a5d2e47  make_fig4.py
+CONFIG: {'a': [0.0, 0.3, -0.2], 'E': [0.6, 1.1, 0.8], 'c': [-0.5, 2.0, 0.8], 'U': (0.0, 3.0), 'w': 0.9, 'xfail': 0.9, 'x0': 0.005, 'tmax': 200.0, 'NU': 41, 'qstar': [0.466109, 0.770508, 0.434809], 'gain': 1000.0}
 [Sec 4.1] one-input family, d = 2..8 ...
 [Sec 4.1] the same family mistuned by 1% ...
 [Sec 6.9] design from a misspecified stress model ...
@@ -19,7 +23,8 @@ CONFIG: {'a': [0.0, 0.3, -0.2], 'E': [0.6, 1.1, 0.8], 'c': [-0.5, 2.0, 0.8], 'U'
 
 [Sec 2.4] Proposition 2.3, the record-level identity ...
 
-[Sec 6.4] two-input reachability floor ...
+[Sec 6.4] two-input closed loop along S_q ...
+[Remark 4.2] the counterexample on the segment ...
 
 [Sec 7] reading the Severson fleet ...
 [Sec 7] XJTU-SY ...
@@ -30,231 +35,293 @@ CONFIG: {'a': [0.0, 0.3, -0.2], 'E': [0.6, 1.1, 0.8], 'c': [-0.5, 2.0, 0.8], 'U'
 [Sec 7] N-CMAPSS separability (slow) ...
 [Sec 7] C-MAPSS FD004/FD002 (slow) ...
 
-[Sec 6.6] Dinkelbach limit at q* ...
-   Dinkelbach N=25: 0.00041554
-   Dinkelbach N=29: 0.00038045
-   Dinkelbach N=35: 0.00034318
+[Sec 6.6] fractional optimum from the grid records ...
 
-quantity                                               manuscript   recomputed  status
---------------------------------------------------------------------------------------------
-adaptive loss at q*                                          1.68      1.67589  ok
-best-constant loss at q*                                     1.15      1.14948  ok
-headline ratio                                                 68       68.589  ok
-ratio, 161-point grid                                          72      72.4872  ok
-Table I span                                                  9.4      9.40367  ok
-Table I span, restated in Sec 6.2                             9.4      9.40367  ok
-Fisher-preferred/u=1 loss                                     1.7      1.73905  ok
-beta_min upper (deg)                                         4.52      4.52015  ok
-headline ratio, restated in Sec 6.7                            68       68.589  ok
-headline ratio, restated in the Discussion                     68       68.589  ok
-headline ratio, restated in the abstract                       68       68.589  ok
-beta_min upper, restated in Sec 6.4                          4.52      4.52015  ok
-beta_min upper, restated in the contributions                4.52      4.52015  ok
-beta_min dips below (deg)                                    0.01   0.00575907  ok (bound)
-lifetime factor q* vs balanced                                3.4      3.44018  ok
-regime index stated upside down                                 0            0  ok
-figure panels the text never points at                          0            0  ok
-unscoped six-regime claims about C-MAPSS                        0            0  ok
-unqualified consequences of $m<d-1$                             0            0  ok
-sub.tex matches theory.tex                                      1            1  ok
-6.7 Table 3 drift, smallest (deg)                              24       23.895  ok
-6.7 Table 3 drift, largest (deg)                               30       29.832  ok
-supplement pointers that do not resolve                         0            0  ok
-S1 Severson window (cycles)                                   301          301  ok
-S1 Severson minimum cycles                                    400          400  ok
-S1 Severson filter order                                        3            3  ok
-S1 Severson grid points                                        40           40  ok
-S1 Severson grid start                                       0.15         0.15  ok
-S1 Severson grid end                                          0.9          0.9  ok
-S1 C-MAPSS grid points                                         10           10  ok
-S1 C-MAPSS grid start                                         0.3          0.3  ok
-S1 C-MAPSS grid end                                          0.85         0.85  ok
-S1 C-MAPSS reported window                                      7            7  ok
-S1 C-MAPSS stability window, first                              9            9  ok
-S1 C-MAPSS stability window, second                            11           11  ok
-S1 N-CMAPSS clusters                                            6            6  ok
-S1 N-CMAPSS stages                                              2            2  ok
-S1 N-CMAPSS minimum points per cell                           400          400  ok
-S1 N-CMAPSS sweep minimum points                              300          300  ok
-S1 N-CMAPSS DS02 units as run                                   1            1  ok
-sections the roadmap forgets                                    0            0  ok
-longest sentence the prose says twice (words)                  16           11  ok (bound)
-reproducibility exceptions announced vs listed                  0            0  ok
-limitations announced vs listed                                 0            0  ok
-fleets announced minus fleets cited                             0            0  ok
-Discussion: unconditional readings come first                   1            1  ok
-Discussion readings announced vs given                          4            4  ok
-Table I u=0.0: delta                                        0.235     0.235005  ok
-Table I u=0.0: rms beta                                      6.23      6.22476  ok
-Table I u=0.0: loss                                        0.0215    0.0214717  ok
-Table I u=1.0: delta                                        0.628     0.627863  ok
-Table I u=1.0: rms beta                                      4.53      4.52994  ok
-Table I u=1.0: loss                                        0.0123    0.0123468  ok
-Table I u=1.5: delta                                            1            1  ok
-Table I u=1.5: rms beta                                      6.22       6.2179  ok
-Table I u=1.5: loss                                        0.0208     0.020805  ok
-Table I u=2.0: delta                                        1.564      1.56444  ok
-Table I u=2.0: rms beta                                      7.53      7.53238  ok
-Table I u=2.0: loss                                        0.0379    0.0378746  ok
-Table I u=3.0: delta                                        3.769      3.76874  ok
-Table I u=3.0: rms beta                                      6.57      6.57367  ok
-Table I u=3.0: loss                                        0.1161     0.116105  ok
-6.7 sweep plants                                              299          299  ok
-6.7 Spearman rho vs gain                                    -0.36    -0.355179  ok
-6.7 Spearman interval, lower                                -0.46    -0.463969  ok
-6.7 Spearman interval, upper                                -0.24    -0.237911  ok
-6.7 base rate repaying                                         32      32.4415  ok
-6.7 AUC of rho                                               0.73     0.733898  ok
-6.7 AUC of rho, lower                                        0.67     0.671769  ok
-6.7 AUC of rho, upper                                        0.79     0.791432  ok
-6.7 AUC of the arc alone                                     0.73     0.731346  ok
-6.7 AUC of the drift alone                                   0.53     0.533531  ok
-6.7 AUC of the drift, lower                                  0.46      0.46171  ok
-6.7 AUC of the drift, upper                                   0.6     0.603063  ok
-6.7 drift AUC interval contains 0.5                             1            1  ok
-6.7 lowest decile repaying                                     43      43.3333  ok
-6.7 nested: drift adds to arc, p                             0.47     0.473567  ok
-6.7 nested: drift adds nothing (p > 0.05)                       1            1  ok
-6.7 nested: ratio constraint, p (x1e-5)                       7.7      7.71273  ok
-6.7 nested: Akaike information of rho                         351      351.086  ok
-6.7 nested: Akaike information of the arc                     336      335.972  ok
-6.7 nested: both hold in each input count                       1            1  ok
-6.7 nested: interaction p (x1e-4)                               3       3.0192  ok
-6.7 tercile: low authority, low drift                        0.18     0.176471  ok
-6.7 tercile: low authority, high drift                       0.08         0.08  ok
-6.7 tercile: high authority, low drift                       0.48     0.477273  ok
-6.7 tercile: high authority, high drift                      0.61     0.612903  ok
-6.7 cross-validated AUC, arc                                 0.72     0.722441  ok
-6.7 cross-validated AUC, rho                                 0.72     0.723984  ok
-6.7 cross-validated AUC, with interaction                    0.74     0.744414  ok
-6.7 interaction better in every repeat                          1            1  ok
-6.7 lowest decile drift (deg)                                 2.7      2.68688  ok
-6.7 median drift, all plants (deg)                             14      14.3627  ok
-6.7 median gain at Table II's rho                             5.2      5.19632  ok
-abstract: AUC of the arc                                     0.73     0.731346  ok
-abstract: sweep plants                                        299          299  ok
-6.8 Spearman interval, lower                                 0.34     0.342657  ok
-6.8 Spearman interval, upper                                  0.9     0.902098  ok
-6.8 error-ratio interval, lower                               1.4      1.39618  ok
-6.8 error-ratio interval, upper                              2.03      2.02547  ok
-6.8 permutation p (x1e-4)                                     1.5      1.49999  ok
-6.8 point estimate in top tenth of interval                     1            1  ok
-6.8 repeat: plants                                            120          120  ok
-6.8 repeat: lowest correlation                               0.87     0.867133  ok
-6.8 repeat: highest correlation                              0.99     0.993007  ok
-6.8 random tilts: median correlation                         0.74     0.741259  ok
-6.8 random tilts: interval excludes zero (%)                   84      84.1667  ok
-6.8 random tilts: identical ranking (%)                        82      81.6667  ok
-4.1 family misalignment (deg)                                 1.5      1.47878  ok (bound)
-4.1 family mean loss                                           15      15.9683  ok (bound)
-4.1 best constant, low                                        1.2      1.23007  ok
-4.1 best constant, high                                       5.4      5.42736  ok
-4.1 mistuned closed loop                                      3.2      3.23906  ok
-4.1 best constant, perturbed                                  1.8      1.81134  ok
-4.1 mistuned is worse than not steering                         1            1  ok
-6.9 misspecification table rows                                 5            5  ok
-6.9 eps=0.02 median                                          1.03      1.03351  ok
-6.9 eps=0.02 90th pct                                        1.52      1.51715  ok
-6.9 eps=0.02 worst of 40                                     2.04      2.03704  ok
-6.9 eps=0.05 median                                           1.4      1.40084  ok
-6.9 eps=0.05 90th pct                                        2.95      2.94877  ok
-6.9 eps=0.05 worst of 40                                     6.42      6.42279  ok
-6.9 eps=0.10 median                                           3.1      3.10338  ok
-6.9 eps=0.10 90th pct                                       10.81      10.8072  ok
-6.9 eps=0.10 worst of 40                                    67.53      67.5325  ok
-6.9 eps=0.20 median                                          9.96      9.96239  ok
-6.9 eps=0.20 90th pct                                       44.71      44.7078  ok
-6.9 eps=0.20 worst of 40                                    79.48      79.4842  ok
-6.9 eps=0.35 median                                         35.77      35.7666  ok
-6.9 eps=0.35 90th pct                                       95.24      95.2394  ok
-6.9 eps=0.35 worst of 40                                   196.75      196.749  ok
-6.9 median cost at 5%                                         1.4      1.40084  ok
-6.9 median cost at 10%                                        3.1      3.10338  ok
-6.9 worst of 40 at 10%                                      67.53      67.5325  ok
-6.9 median at eps=0.35                                      35.77      35.7666  ok
-6.9 contributions: median cost at 10%                         3.1      3.10338  ok
-6.9 every column monotone in eps                                1            1  ok
-Table II row 1: arc                                          33.9      33.8978  ok
-Table II row 1: rho                                          0.88     0.883361  ok
-Table II row 1: L*                                        0.00017  0.000167591  ok
-Table II row 1: gain                                           68      68.6283  ok
-Fig. 4(b) row 1: rho                                     0.883361     0.883361  ok
-Fig. 4(b) row 1: L*                                   0.000167591  0.000167591  ok
-Fig. 4(b) row 1: gain                                      68.628      68.6283  ok
-Table II row 2: arc                                          1.93       1.9293  ok
-Table II row 2: rho                                          12.5      12.5318  ok
-Table II row 2: L*                                         0.0036   0.00358573  ok
-Table II row 2: gain                                          2.9      2.93988  ok
-Fig. 4(b) row 2: rho                                      12.5318      12.5318  ok
-Fig. 4(b) row 2: L*                                    0.00358573   0.00358573  ok
-Fig. 4(b) row 2: gain                                        2.94      2.93988  ok
-Table II row 3: arc                                          0.45     0.451647  ok
-Table II row 3: rho                                          53.1       53.053  ok
-Table II row 3: L*                                         0.0042    0.0041742  ok
-Table II row 3: gain                                          2.7      2.69023  ok
-Fig. 4(b) row 3: rho                                       53.053       53.053  ok
-Fig. 4(b) row 3: L*                                     0.0041742    0.0041742  ok
-Fig. 4(b) row 3: gain                                        2.69      2.69023  ok
-floor peaks at the start of life (tau)                       0.02            0  ok (bound)
-floor dips at mid-life, not early                               1            1  ok
-Fig 4(a) mid-life arc is the closest of three                   1            1  ok
-Sec 6.7 loss rises by a factor over the regimes                25       24.907  ok
-6.8 exp(2l) identity (rel err)                              1e-12  8.81449e-16  ok (bound)
-6.8 loss vs RUL error, Spearman                              0.89     0.888112  ok
-6.8 best-aligned beats worst                                  1.5      1.51883  ok
-6.1 peak floor at x_f=1 (deg)                                5.41      5.39827  ok
-6.1 gain at x_f=1                                              58      58.6301  ok
-Prop 2.3 record identity (abs err)                          1e-12  6.10623e-16  ok (bound)
-record vs time-averaged loss differ (rel)                    0.05     0.307114  ok (bound)
-2-input system determinant                                   0.27         0.27  ok
-2-input states inside the box                                 600          600  ok
-2-input states sampled                                        600          600  ok
-2-input residual (deg)                                      1e-05  8.53774e-07  ok (bound)
-2-input grid floor (deg)                                    0.156     0.156399  ok
-Severson cells used                                           129          129  ok
-Severson arc travel (deg)                                    30.7      30.6575  ok
-Severson end-to-end (deg)                                      21      21.3423  ok
-Severson positivity at win 301                                  1            1  ok
-S1 Severson cells qualifying                                  129          129  ok
-XJTU conditions                                                 3            3  ok
-XJTU cells per condition                                        5            5  ok
-NASA cells                                                      4            4  ok
-NASA window spread (fold)                                       7       7.1771  ok
-NASA positivity beyond win 31                                   1            1  ok
-Sec 7 interaction exceeds regime effect                         1            1  ok
-Sec 7 fleets where regression is more accurate                  4            4  ok
-Sec 7 NC interaction / main                                  1.65      1.64906  ok
-Sec 7 NC interaction always exceeds the main effect             1            1  ok
-S1 NC DS02 interaction over its noise floor                   566       566.01  ok
-S1 NC sweep: smallest interaction over main                  1.42      1.42042  ok
-Sec 7 NC DS01 interaction / main                             1.84      1.84117  ok
-Sec 7 NC DS01 interaction exceeds the main effect               1            1  ok
-S1 NC DS01 interaction over its noise floor                   110      109.891  ok
-C-MAPSS regimes, FD004                                          6            6  ok
-C-MAPSS regimes, FD002                                          6            6  ok
-C-MAPSS B-W, FD004 (deg)                                      7.9      7.93736  ok
-C-MAPSS B-W, FD002 (deg)                                     10.8      10.7898  ok
-C-MAPSS engines with B>W                                      436          436  ok
-C-MAPSS engines total                                         439          439  ok
-C-MAPSS engines total, conclusion                             439          439  ok
-C-MAPSS weakest B-W over w (deg)                         0.479033      7.93736  ok (bound)
-C-MAPSS control bias (deg)                                    0.5     0.479033  ok (bound)
-C-MAPSS control p, at chance                                 0.05     0.345795  ok (bound)
-S1 C-MAPSS smallest control p                                0.35     0.345795  ok
-S1 C-MAPSS control bias bound (deg)                           0.5     0.479033  ok (bound)
-S1 C-MAPSS regimes per file                                     6            6  ok
-lambda* extrapolated                                         1.63      1.63085  ok
-lambda* below realisable                              0.000167589  0.000163085  ok (bound)
-Sec 6.5 myopic gap at q* (%)                                  2.8      2.76179  ok
+quantity                                                 manuscript   recomputed  status
+----------------------------------------------------------------------------------------------
+myopic loss at q*                                              1.68      1.67589  ok
+myopic loss at q*, restated in Sec 6.6                         1.68      1.67589  ok
+best-constant loss at q*                                       1.15      1.14948  ok
+headline ratio at q*                                             68       68.589  ok
+fair baseline (x1e-3)                                          7.95      7.95405  ok
+fair baseline sits at u=0                                         0            0  ok
+fair ratio                                                       47      47.4615  ok
+ratio at q*, 81-point grid                                       72      71.6529  ok
+fair ratio, 81-point grid                                        50       49.647  ok
+ratio at q*, 161-point grid                                      72      72.4872  ok
+fair ratio, 161-point grid                                       50       50.225  ok
+fair baseline's excess error variance (%)                       1.6      1.60353  ok
+fair baseline loss, restated with Cor 2.4 (x1e-3)              7.95      7.95405  ok
+life: myopic loop over best constant at q*                     1.66      1.66221  ok
+life: myopic loop over fair baseline                            3.8      3.79296  ok
+policy's control grid (points)                                   41           41  ok
+Table I span                                                    9.4      9.40367  ok
+Table I span, restated in Sec 6.2                               9.4      9.40367  ok
+Fisher-preferred/u=1 loss                                       1.7      1.73905  ok
+beta_min upper (deg)                                           4.52      4.52015  ok
+headline ratio, restated in Sec 6.7                              68       68.589  ok
+headline ratio, restated in the Discussion                       68       68.589  ok
+fair ratio, restated in the abstract                             47      47.4615  ok
+beta_min upper, restated in Sec 6.4                            4.52      4.52015  ok
+beta_min upper, restated in the contributions                  4.52      4.52015  ok
+beta_min dips below (deg)                                      0.01   0.00575907  ok (bound)
+lifetime factor q* vs balanced                                  3.4      3.44018  ok
+regime index stated upside down                                   0            0  ok
+figure panels the text never points at                            0            0  ok
+unscoped six-regime claims about C-MAPSS                          0            0  ok
+unqualified consequences of $m<d-1$                               0            0  ok
+sub.tex matches theory.tex                                        1            1  ok
+6.7 Table 3 drift, smallest (deg)                                24       23.895  ok
+6.7 Table 3 drift, largest (deg)                                 30       29.832  ok
+supplement pointers that do not resolve                           0            0  ok
+S1 Severson window (cycles)                                     301          301  ok
+S1 Severson minimum cycles                                      400          400  ok
+S1 Severson filter order                                          3            3  ok
+S1 Severson grid points                                          40           40  ok
+S1 Severson grid start                                         0.15         0.15  ok
+S1 Severson grid end                                            0.9          0.9  ok
+S1 C-MAPSS grid points                                           10           10  ok
+S1 C-MAPSS grid start                                           0.3          0.3  ok
+S1 C-MAPSS grid end                                            0.85         0.85  ok
+S1 C-MAPSS reported window                                        7            7  ok
+S1 C-MAPSS stability window, first                                9            9  ok
+S1 C-MAPSS stability window, second                              11           11  ok
+S1 N-CMAPSS clusters                                              6            6  ok
+S1 N-CMAPSS stages                                                2            2  ok
+S1 N-CMAPSS minimum points per cell                             400          400  ok
+S1 N-CMAPSS sweep minimum points                                300          300  ok
+S1 N-CMAPSS DS02 units as run                                     1            1  ok
+sections the roadmap forgets                                      0            0  ok
+longest sentence the prose says twice (words)                    16           12  ok (bound)
+reproducibility exceptions announced vs listed                    0            0  ok
+limitations announced vs listed                                   0            0  ok
+fleets announced minus fleets cited                               0            0  ok
+Discussion: unconditional readings come first                     1            1  ok
+Discussion readings announced vs given                            4            4  ok
+Table I u=0.0: delta                                          0.235     0.235005  ok
+Table I u=0.0: indicator information I_z                     0.4055     0.405474  ok
+Table I u=0.0: rms beta                                        11.8      11.8032  ok
+Table I u=0.0: loss                                          0.0215    0.0214717  ok
+Table I u=1.0: delta                                          0.628     0.627863  ok
+Table I u=1.0: indicator information I_z                     0.4207      0.42065  ok
+Table I u=1.0: rms beta                                        8.98      8.98177  ok
+Table I u=1.0: loss                                          0.0123    0.0123468  ok
+Table I u=1.5: delta                                              1            1  ok
+Table I u=1.5: indicator information I_z                      0.417     0.417004  ok
+Table I u=1.5: rms beta                                       11.61      11.6147  ok
+Table I u=1.5: loss                                          0.0208     0.020805  ok
+Table I u=2.0: delta                                          1.564      1.56444  ok
+Table I u=2.0: indicator information I_z                      0.405     0.405015  ok
+Table I u=2.0: rms beta                                        15.6      15.5951  ok
+Table I u=2.0: loss                                          0.0379    0.0378746  ok
+Table I u=3.0: delta                                          3.769      3.76874  ok
+Table I u=3.0: indicator information I_z                     0.3421     0.342144  ok
+Table I u=3.0: rms beta                                       26.98      26.9807  ok
+Table I u=3.0: loss                                          0.1161     0.116105  ok
+Table I: l-bar within 6% of 1/2 rms^2, rows                       5            5  ok
+Table I: I_z orders the inputs as the loss does                   1            1  ok
+6.7 sweep plants                                                299          299  ok
+6.7 Spearman rho vs gain                                      -0.36    -0.355179  ok
+6.7 Spearman interval, lower                                  -0.46    -0.463969  ok
+6.7 Spearman interval, upper                                  -0.24    -0.237911  ok
+6.7 base rate repaying                                           32      32.4415  ok
+6.7 AUC of rho                                                 0.73     0.733898  ok
+6.7 AUC of rho, lower                                          0.67     0.671769  ok
+6.7 AUC of rho, upper                                          0.79     0.791432  ok
+6.7 AUC of the arc alone                                       0.73     0.731346  ok
+6.7 AUC of the drift alone                                     0.53     0.533531  ok
+6.7 AUC of the drift, lower                                    0.46      0.46171  ok
+6.7 AUC of the drift, upper                                     0.6     0.603063  ok
+6.7 drift AUC interval contains 0.5                               1            1  ok
+6.7 lowest decile repaying                                       43      43.3333  ok
+6.7 nested: drift adds to arc, p                               0.47     0.473567  ok
+6.7 nested: drift adds nothing (p > 0.05)                         1            1  ok
+6.7 nested: ratio constraint, p (x1e-5)                         7.7      7.71273  ok
+6.7 nested: Akaike information of rho                           351      351.086  ok
+6.7 nested: Akaike information of the arc                       336      335.972  ok
+6.7 nested: both hold in each input count                         1            1  ok
+6.7 nested: interaction p (x1e-4)                                 3       3.0192  ok
+6.7 tercile: low authority, low drift                          0.18     0.176471  ok
+6.7 tercile: low authority, high drift                         0.08         0.08  ok
+6.7 tercile: high authority, low drift                         0.48     0.477273  ok
+6.7 tercile: high authority, high drift                        0.61     0.612903  ok
+6.7 cross-validated AUC, arc                                   0.72     0.722441  ok
+6.7 cross-validated AUC, rho                                   0.72     0.723984  ok
+6.7 cross-validated AUC, with interaction                      0.74     0.744414  ok
+6.7 interaction better in every repeat                            1            1  ok
+6.7 lowest decile drift (deg)                                   2.7      2.68688  ok
+6.7 median drift, all plants (deg)                               14      14.3627  ok
+6.7 median gain at Table II's rho                               5.2      5.19632  ok
+abstract: AUC of the arc                                       0.73     0.731346  ok
+abstract: sweep plants                                          299          299  ok
+6.8 Spearman interval, lower                                   0.34     0.342657  ok
+6.8 Spearman interval, upper                                    0.9     0.902098  ok
+6.8 error-ratio interval, lower                                 1.4      1.39618  ok
+6.8 error-ratio interval, upper                                2.03      2.02547  ok
+6.8 permutation p (x1e-4)                                       1.5      1.49999  ok
+6.8 point estimate in top tenth of interval                       1            1  ok
+6.8 repeat: plants                                              120          120  ok
+6.8 repeat: lowest correlation                                 0.87     0.867133  ok
+6.8 repeat: highest correlation                                0.99     0.993007  ok
+6.8 random tilts: median correlation                           0.74     0.741259  ok
+6.8 random tilts: interval excludes zero (%)                     84      84.1667  ok
+6.8 random tilts: identical ranking (%)                          82      81.6667  ok
+4.1 family misalignment (deg)                                   1.5      1.47878  ok (bound)
+4.1 family mean loss                                             15      15.9683  ok (bound)
+4.1 best constant, low                                          1.2      1.23007  ok
+4.1 best constant, high                                         5.4      5.42736  ok
+4.1 mistuned closed loop                                        3.2      3.23906  ok
+4.1 best constant, perturbed                                    1.8      1.81134  ok
+4.1 mistuned is worse than not steering                           1            1  ok
+6.9 misspecification table rows                                   5            5  ok
+6.9 eps=0.02 median                                            1.03      1.03435  ok
+6.9 eps=0.02 90th pct                                          1.52      1.51811  ok
+6.9 eps=0.02 worst of 40                                       2.04      2.03521  ok
+6.9 eps=0.05 median                                             1.4      1.40024  ok
+6.9 eps=0.05 90th pct                                          2.94      2.94065  ok
+6.9 eps=0.05 worst of 40                                       6.44      6.43933  ok
+6.9 eps=0.10 median                                             3.1      3.10401  ok
+6.9 eps=0.10 90th pct                                          10.8      10.8273  ok
+6.9 eps=0.10 worst of 40                                       67.7       67.672  ok
+6.9 eps=0.20 median                                              10      10.0278  ok
+6.9 eps=0.20 90th pct                                          44.9      44.9104  ok
+6.9 eps=0.20 worst of 40                                       78.6      78.6198  ok
+6.9 eps=0.35 median                                              36      35.9769  ok
+6.9 eps=0.35 90th pct                                          94.1      94.0508  ok
+6.9 eps=0.35 worst of 40                                        195      194.846  ok
+6.9 median cost at 5%                                           1.4      1.40024  ok
+6.9 median cost at 10%                                          3.1      3.10401  ok
+6.9 worst of 40 at 10%                                         67.7       67.672  ok
+6.9 median at eps=0.35                                           36      35.9769  ok
+6.9 contributions: median cost at 10%                           3.1      3.10401  ok
+6.9 every column monotone in eps                                  1            1  ok
+Table II row 1: arc                                            33.9      33.8978  ok
+Table II row 1: rho                                            0.88     0.883361  ok
+Table II row 1: L*                                          0.00017  0.000167591  ok
+Table II row 1: gain                                             68      68.6283  ok
+Table II row 1: own-indicator gain                               47       47.461  ok
+Fig. 4(b) row 1: rho                                       0.883361     0.883361  ok
+Fig. 4(b) row 1: L*                                     0.000167591  0.000167591  ok
+Fig. 4(b) row 1: gain                                        68.628      68.6283  ok
+Table II row 2: arc                                            1.93       1.9293  ok
+Table II row 2: rho                                            12.5      12.5318  ok
+Table II row 2: L*                                           0.0036   0.00358573  ok
+Table II row 2: gain                                            2.9      2.93988  ok
+Table II row 2: own-indicator gain                              2.2      2.21825  ok
+Fig. 4(b) row 2: rho                                        12.5318      12.5318  ok
+Fig. 4(b) row 2: L*                                      0.00358573   0.00358573  ok
+Fig. 4(b) row 2: gain                                          2.94      2.93988  ok
+Table II row 3: arc                                            0.45     0.451647  ok
+Table II row 3: rho                                            53.1       53.053  ok
+Table II row 3: L*                                           0.0042    0.0041742  ok
+Table II row 3: gain                                            2.7      2.69023  ok
+Table II row 3: own-indicator gain                              1.9      1.89164  ok
+Fig. 4(b) row 3: rho                                         53.053       53.053  ok
+Fig. 4(b) row 3: L*                                       0.0041742    0.0041742  ok
+Fig. 4(b) row 3: gain                                          2.69      2.69023  ok
+floor peaks at the start of life (tau)                         0.02            0  ok (bound)
+floor dips at mid-life, not early                                 1            1  ok
+Fig 4(a) mid-life arc is the closest of three                     1            1  ok
+Sec 6.7 loss rises by a factor over the regimes                  25       24.907  ok
+Sec 6.7 own-indicator gain, first row                            47       47.461  ok
+Sec 6.7 own-indicator gain, last row                            1.9      1.89164  ok
+Discussion: own-indicator gain, first row                        47       47.461  ok
+Discussion: own-indicator gain, last row under                    2      1.89164  ok (bound)
+Sec 6.7 overstatement, smallest                                 1.3      1.32531  ok
+Sec 6.7 overstatement, largest                                  1.4      1.44599  ok
+6.8 exp(2l) identity (rel err)                                1e-12  8.81449e-16  ok (bound)
+6.8 loss vs RUL error, Spearman                                0.89     0.888112  ok
+6.8 best-aligned beats worst                                    1.5      1.51883  ok
+6.1 peak floor at x_f=1 (deg)                                  5.41      5.39827  ok
+6.1 gain at x_f=1                                                58      58.6301  ok
+Prop 2.3 record identity (abs err)                            1e-12  6.10623e-16  ok (bound)
+record vs time-averaged loss differ (rel)                      0.05     0.307114  ok (bound)
+2-input system determinant                                     0.27         0.27  ok
+2-input central operating point                                 1.5          1.5  ok
+2-input points of S_q inside the box                            600          600  ok
+2-input points of S_q sampled                                   600          600  ok
+2-input margin to the box                                      0.52     0.518762  ok
+2-input u1 along S_q, low                                      0.55     0.549274  ok
+2-input u1 along S_q, high                                     2.48      2.48124  ok
+2-input u2 along S_q, low                                      1.32      1.32185  ok
+2-input u2 along S_q, high                                      1.7      1.69455  ok
+2-input closed loop's distance from S_q                       1e-09  3.76495e-16  ok (bound)
+2-input closed-loop misalignment (deg)                        1e-06  8.53774e-07  ok (bound)
+2-input grid floor along S_q (deg)                            0.152     0.151652  ok
+Rem 4.2 reachable along the u=1.3 trajectory                      1            1  ok
+Rem 4.2 aligning input offset                                   0.7          0.7  ok
+Rem 4.2 admissible while x2 <=                                  0.6          0.6  ok
+Rem 4.2 x2 at failure under u=1.3                              0.52     0.518179  ok
+Rem 4.2 x1 where S_q leaves the envelope                       0.73     0.732842  ok
+Rem 4.2 that happens before failure                               1            1  ok
+Severson cells used                                             129          129  ok
+Severson arc travel (deg)                                      30.7      30.6575  ok
+Severson end-to-end (deg)                                        21      21.3423  ok
+Severson positivity at win 301                                    1            1  ok
+S1 Severson cells qualifying                                    129          129  ok
+XJTU conditions                                                   3            3  ok
+XJTU cells per condition                                          5            5  ok
+NASA cells                                                        4            4  ok
+NASA window spread (fold)                                         7       7.1771  ok
+NASA positivity beyond win 31                                     1            1  ok
+Sec 7 interaction exceeds regime effect                           1            1  ok
+Sec 7 fleets where regression is more accurate                    4            4  ok
+Sec 7 NC interaction / main                                    1.65      1.64906  ok
+Sec 7 NC interaction always exceeds the main effect               1            1  ok
+S1 NC DS02 interaction over its noise floor                     566       566.01  ok
+S1 NC sweep: smallest interaction over main                    1.42      1.42042  ok
+Sec 7 NC DS01 interaction / main                               1.84      1.84117  ok
+Sec 7 NC DS01 interaction exceeds the main effect                 1            1  ok
+S1 NC DS01 interaction over its noise floor                     110      109.891  ok
+S1 NC health parameters constant within every flight              1            1  ok
+S1 NC DS02 flights                                              446          446  ok
+S1 NC DS01 flights                                              553          553  ok
+C-MAPSS regimes, FD004                                            6            6  ok
+C-MAPSS regimes, FD002                                            6            6  ok
+C-MAPSS B-W, FD004 (deg)                                        7.9      7.93736  ok
+C-MAPSS B-W, FD002 (deg)                                       10.8      10.7898  ok
+C-MAPSS engines with B>W                                        436          436  ok
+C-MAPSS engines total                                           439          439  ok
+C-MAPSS weakest B-W over w (deg)                           0.479033      7.93736  ok (bound)
+C-MAPSS control bias (deg)                                      0.5     0.479033  ok (bound)
+C-MAPSS control p, at chance                                   0.05     0.345795  ok (bound)
+S1 C-MAPSS smallest control p                                  0.35     0.345795  ok
+S1 C-MAPSS control bias bound (deg)                             0.5     0.479033  ok (bound)
+S1 C-MAPSS regimes per file                                       6            6  ok
+6.6 state grids, fewest points                                   25           25  ok
+6.6 state grids, most points                                    137          137  ok
+6.6 fitted order                                               0.99     0.987498  ok
+lambda* extrapolated                                           1.65      1.65251  ok
+6.6 myopic gap at q* (%)                                        1.4       1.4151  ok
+6.6 gap over windows and control grids, smallest (%)            1.4       1.4151  ok
+6.6 gap over windows and control grids, largest (%)               2      2.03266  ok
+6.6 81 points lower the myopic value by more than (%)             4      4.40198  ok (bound)
+6.6 81 points lower the optimum by more than (%)                  4      4.46983  ok (bound)
+6.6 finest grid above the extrapolant (%)                        27      27.4388  ok
+6.6 lam below the myopic policy, 41 points              0.000167589  0.000165251  ok (bound)
+6.6 lam_prev below the myopic policy, 41 points         0.000167589  0.000164251  ok (bound)
+6.6 record for 41 points has the six grids                        1            1  ok
+6.6 lam below the myopic policy, 81 points              0.000160212  0.000157865  ok (bound)
+6.6 lam_prev below the myopic policy, 81 points         0.000160212  0.000157431  ok (bound)
+6.6 record for 81 points has the six grids                        1            1  ok
+6.6 lam below the myopic policy, 161 points             0.000158368  0.000156046  ok (bound)
+6.6 lam_prev below the myopic policy, 161 points        0.000158368  0.000155438  ok (bound)
+6.6 record for 161 points has the six grids                       1            1  ok
+6.6 record reproduced afresh, N=49 (rel)                      1e-09            0  ok (bound)
+6.6 record reproduced afresh, N=69 (rel)                      1e-09            0  ok (bound)
 
 ALL CHECKS PASS
 
-exit 0 after 58.6 min
+exit 0 after 26.0 min
 md5 AFTER
-  e291233adfb973d41c23310ad0b3ad18  theory.tex  [same]
-  498af098163cf57c7aa3f9a9620bedb5  supplement.tex  [same]
-  556179577386264f4c87dbd9756a3e64  verify_numbers.py  [same]
+  acee8e21fc9da460170ed75cba39510e  theory.tex  [same]
+  b39896c73e929d033a2020408811dc1c  supplement.tex  [same]
+  4e35fb4a6c6c81c6708a8c8cbbab9818  verify_numbers.py  [same]
   c0db59819961d0f743f9c0fc5d58cac5  rho_sweep.json  [same]
   506f77029478c7d27b65de63b294c58f  downstream_sweep.json  [same]
-  2fca511bba69262b0645136c0078246c  fig4.pdf  [same]
-  cc7ba4d06914e3fcd800c98f13f6bdd5  make_fig4.py  [same]
+  05eb9819d0edfdfffebbcdf66932eccb  dinkelbach_grids.py  [same]
+  ff47ddcb51e950348d18fd9983c6d308  dinkelbach_grids_NU41.json  [same]
+  bd2c0d70ca4846cc4bf26cc57c5036f9  dinkelbach_grids_NU81.json  [same]
+  6b76e89c1cc4857fb9a07732dda4f18e  dinkelbach_grids_NU161.json  [same]
+  13b3fb1400db94d60a8359efdeeae5b7  fig4.pdf  [same]
+  d0ba5db8b50e38a7c8e179281a5d2e47  make_fig4.py  [same]

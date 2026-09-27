@@ -1,4 +1,4 @@
-\begin{thebibliography}{36}
+\begin{thebibliography}{39}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
@@ -191,6 +191,20 @@ Erkki Oja.
 \newblock \emph{J. Math. Biol.}, 15:\penalty0 267--273, 1982.
 \newblock \doi{10.1007/bf00275687}.
 
+\bibitem[Aubin and Frankowska(2009)]{aubin2009}
+Jean-Pierre Aubin and H{\'e}l{\`e}ne Frankowska.
+\newblock \emph{Set-Valued Analysis}.
+\newblock Birkh\"auser, Boston, MA, 2009.
+\newblock \doi{10.1007/978-0-8176-4848-0}.
+\newblock Reprint of the 1990 edition.
+
+\bibitem[Bardi and Capuzzo-Dolcetta(1997)]{bardi1997}
+Martino Bardi and Italo Capuzzo-Dolcetta.
+\newblock \emph{Optimal Control and Viscosity Solutions of
+  Hamilton--Jacobi--Bellman Equations}.
+\newblock Birkh\"auser, 1997.
+\newblock \doi{10.1007/978-0-8176-4755-1}.
+
 \bibitem[Dinkelbach(1967)]{dinkelbach1967}
 Werner Dinkelbach.
 \newblock On nonlinear fractional programming.
@@ -212,6 +226,23 @@ Abhinav Saxena, Jose Celaya, Edward Balaban, Kai Goebel, Bhaskar Saha,
 \newblock In \emph{International Conference on Prognostics and Health
   Management}, pages 1--17, 2008{\natexlab{a}}.
 \newblock \doi{10.1109/phm.2008.4711436}.
+
+\bibitem[Saxena et~al.(2008{\natexlab{b}})Saxena, Goebel, Simon, and
+  Eklund]{saxena2008}
+Abhinav Saxena, Kai Goebel, Don Simon, and Neil Eklund.
+\newblock Damage propagation modeling for aircraft engine run-to-failure
+  simulation.
+\newblock In \emph{Int. Conf. Prognostics Health Manage. (PHM)}, pages 1--9,
+  Denver, CO, USA, 2008{\natexlab{b}}.
+\newblock \doi{10.1109/phm.2008.4711414}.
+
+\bibitem[Arias~Chao et~al.(2022)Arias~Chao, Kulkarni, Goebel, and
+  Fink]{arias2022fusing}
+Manuel Arias~Chao, Chetan Kulkarni, Kai Goebel, and Olga Fink.
+\newblock Fusing physics-based and deep learning models for prognostics.
+\newblock \emph{Reliability Engineering \& System Safety}, 217:\penalty0
+  107961, 2022.
+\newblock \doi{10.1016/j.ress.2021.107961}.
 
 \bibitem[Severson et~al.(2019)Severson, Attia, Jin, Perkins, Jiang, Yang, Chen,
   Aykol, Herring, Fraggedakis, Bazant, Harris, Chueh, and Braatz]{severson2019}
@@ -244,15 +275,6 @@ Patrick Nectoux, Rafael Gouriveau, Kamal Medjaher, Emmanuel Ramasso, Brigitte
 Bhaskar Saha and Kai Goebel.
 \newblock Battery data set.
 \newblock NASA Ames Prognostics Data Repository, 2007.
-
-\bibitem[Saxena et~al.(2008{\natexlab{b}})Saxena, Goebel, Simon, and
-  Eklund]{saxena2008}
-Abhinav Saxena, Kai Goebel, Don Simon, and Neil Eklund.
-\newblock Damage propagation modeling for aircraft engine run-to-failure
-  simulation.
-\newblock In \emph{Int. Conf. Prognostics Health Manage. (PHM)}, pages 1--9,
-  Denver, CO, USA, 2008{\natexlab{b}}.
-\newblock \doi{10.1109/phm.2008.4711414}.
 
 \bibitem[Arias~Chao et~al.(2021)Arias~Chao, Kulkarni, Goebel, and
   Fink]{arias2021}

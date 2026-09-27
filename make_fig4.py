@@ -4,22 +4,29 @@ Sections 6.3 and 6.4 state this result in words and three numbers, and nothing
 plots it. Panel (a) is Section 6.3: with one input the floor is largest at the
 start of life at 4.52 degrees, falls through mid-life below the sampling
 resolution, and rises again towards failure. Panel (b) is Section 6.4: with a
-second input the residual is 8.5e-7 degrees, zero to precision.
+second input the residual is below 1e-6 degrees, zero to precision.
 
 Panel (b) does NOT plot that residual. On any axis it is a flat line at zero,
 which shows the reader nothing about why it is zero. What it plots instead is
 the operating point the alignment demands: u1 has to sweep most of the
 envelope over life while u2 barely moves, and both stay inside [0,3]^2 at all
-600 states. That containment is the content of Proposition 4.4 and is the
-reason the floor vanishes; the residual itself is one annotated number.
+600 states. That containment along the segment S_q is the envelope condition
+of Theorem 4.1(i) and is the reason the loss vanishes; the residual itself is
+one annotated number.
+
+Panel (b) is drawn along the CLOSED LOOP. An earlier version solved the
+aligning equations along the constant-input trajectory the target was read
+from, which is not the trajectory the aligning input generates: a reviewer
+pointed out that the caption then described a schedule that did not produce
+its own curve. Zero loss confines the state to the segment S_q, and the loop
+below is integrated under the aligning feedback and checked to stay on it.
 
 The two panels use different targets, because their two sections do. Panel (a)
 measures against q*, the optimal fixed indicator, along the closed loop at q*.
 Panel (b) measures against the direction the plant occupies at mid-life under
-the central operating point (1.5, 1.5), on that plant's own trajectory -- the
-open circle in (b), where both inputs equal 1.5 by construction. The caption
-says so. Putting both curves on one axis would have read as a single
-controlled comparison, which it is not.
+the central operating point (1.5, 1.5) -- the same point verify_numbers.py
+uses. The caption says so. Putting both curves on one axis would have read as
+a single controlled comparison, which it is not.
 
 No \mathcal: matplotlib's default dejavusans mathtext has no calligraphic
 alphabet, and figs 1-3 all use that default, so switching fontsets here would
@@ -30,10 +37,10 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from scipy.integrate import solve_ivp
-
 import os as _os
 _HERE = _os.path.dirname(_os.path.abspath(__file__))
 _DATA = _os.environ.get("HI_DATA", _os.path.join(_HERE, "data"))
+
 
 
 # IEEE Xplore and Elsevier both reject Type 3 fonts, and matplotlib's
@@ -90,21 +97,33 @@ for i, x in enumerate(X1):
     D /= np.linalg.norm(D, axis=1, keepdims=True)
     floor1[i] = np.degrees(np.arccos(np.clip((D @ Q).max(), -1, 1)))
 
-# ---- (b) two inputs: the schedule that holds the mid-life direction -----
-X2, tau2 = trajectory(lambda x: (1.5, 1.5))
-tgt = dhat(X2[len(X2) // 2], 1.5, 1.5)
+# ---- (b) two inputs: the closed loop that holds the mid-life direction ---
+# The target is read at mid-life of the constant (1.5, 1.5) trajectory. Zero
+# loss then confines the state to the segment S_q = x0 + s*tgt (Theorem 4.1),
+# so the schedule is plotted along the closed loop the aligning feedback
+# generates, not along the constant-input trajectory the target came from:
+# the aligning input generates its own trajectory.
+XC, _ = trajectory(lambda x: (1.5, 1.5))
+tgt = dhat(XC[len(XC) // 2], 1.5, 1.5)
 lt = np.log(tgt)
 M = np.array([[E[0] - E[1], G[0] - G[1]],
               [E[1] - E[2], G[1] - G[2]]])
-uu = np.empty((len(X2), 2))
-res = np.empty(len(X2))
-for i, x in enumerate(X2):
+
+
+def align(x):
     h = np.log(1.0 + HC * x)
     rhs = np.array([(lt[0] - lt[1]) - (h[0] - h[1]) - (A[0] - A[1]),
                     (lt[1] - lt[2]) - (h[1] - h[2]) - (A[1] - A[2])])
-    uu[i] = np.linalg.solve(-M, rhs)
-    uc = np.clip(uu[i], UMIN, UMAX)
-    res[i] = np.degrees(np.arccos(np.clip(dhat(x, uc[0], uc[1]) @ tgt, -1, 1)))
+    return np.linalg.solve(-M, rhs)
+
+
+X2, tau2 = trajectory(align)
+uu = np.array([align(x) for x in X2])
+res = np.array([np.degrees(np.arccos(np.clip(
+    dhat(x, *np.clip(u, UMIN, UMAX)) @ tgt, -1, 1))) for x, u in zip(X2, uu)])
+off = X2 - X2[0]
+seg_dist = np.linalg.norm(off - (off @ tgt)[:, None] * tgt[None, :],
+                          axis=1).max()
 
 inside = int(np.sum(np.all((uu >= UMIN - 1e-9) & (uu <= UMAX + 1e-9), axis=1)))
 
@@ -112,7 +131,8 @@ inside = int(np.sum(np.all((uu >= UMIN - 1e-9) & (uu <= UMAX + 1e-9), axis=1)))
 assert abs(floor1.max() - 4.52) < 0.01, floor1.max()
 assert floor1.min() < 0.01, floor1.min()
 assert inside == NSTATE, inside
-assert res.max() < 1e-5, res.max()
+assert res.max() < 1e-6, res.max()
+assert seg_dist < 1e-9, seg_dist
 
 # ---- draw ---------------------------------------------------------------
 fig, (ax, bx) = plt.subplots(1, 2, figsize=(5.4, 2.25))
@@ -149,20 +169,13 @@ bx.annotate(r"$u_1$", (tau2[j], uu[j, 0]), xytext=(1, 6),
             textcoords="offset points", fontsize=7.5, color="0.15")
 bx.annotate(r"$u_2$", (tau2[j], uu[j, 1]), xytext=(1, -12),
             textcoords="offset points", fontsize=7.5, color="0.5")
-# the mid-life state the target direction is read from; both curves pass
-# through 1.5 there by construction
-k = NSTATE // 2
-bx.plot([tau2[k]], [1.5], "o", ms=3.5, mfc="w", mec="0.3", mew=1.0)
-bx.annotate("target read here", (tau2[k], 1.5), xytext=(-5, 8),
-            textcoords="offset points", fontsize=6.5, color="0.35",
-            ha="right")
 e = int(np.floor(np.log10(res.max())))
 bx.annotate(rf"residual ${res.max() / 10.0 ** e:.1f}\times10^{{{e}}}$ deg",
             (0.5, 0.10), xycoords="axes fraction", fontsize=7.0, color="0.2",
             ha="center")
 bx.set_xlabel(r"normalised age $\tau$", fontsize=8.0)
 bx.set_ylabel(r"required operating point", fontsize=8.0)
-bx.set_title(r"(b)  $m=2=d-1$", fontsize=8.0, loc="left")
+bx.set_title(r"(b)  $m=2=d-1$, closed loop", fontsize=8.0, loc="left")
 bx.set_xlim(0, 1)
 bx.set_ylim(-0.25, 3.25)
 
@@ -181,6 +194,7 @@ print(f"  (a) minimum {floor1.min():.4f} deg at tau={tau[imin]:.3f}   "
       f"(paper: below 0.01)")
 print(f"  (a) failure {floor1[-1]:.4f} deg")
 print(f"  (b) inside [0,3]^2 {inside} of {NSTATE}   (paper: all 600)")
-print(f"  (b) residual {res.max():.3e} deg   (paper: 8.5e-7)")
+print(f"  (b) residual {res.max():.3e} deg   (paper: below 1e-6)")
+print(f"  (b) largest distance from S_q {seg_dist:.1e}")
 print(f"  (b) u1 spans [{uu[:, 0].min():.3f}, {uu[:, 0].max():.3f}], "
       f"u2 spans [{uu[:, 1].min():.3f}, {uu[:, 1].max():.3f}]")

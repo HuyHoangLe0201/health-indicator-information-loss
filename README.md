@@ -20,7 +20,7 @@ written in `theory.tex` — not against a stored expectation, but against the
 text itself, so the paper and the code cannot drift apart quietly. It ends with
 `ALL CHECKS PASS` or names the rows that failed.
 
-For all 209 checks you need the fleets; see [DATA.md](DATA.md).
+For all 270 checks you need the fleets; see [DATA.md](DATA.md).
 
 ```bash
 export HI_DATA=/path/to/data
@@ -31,15 +31,16 @@ python verify_numbers.py --full        # about 30 minutes
 
 | | |
 |---|---|
-| `theory.tex`, `theory.pdf` | the manuscript, 31 pages |
+| `theory.tex`, `theory.pdf` | the manuscript, 34 pages |
 | `supplement.tex`, `supplement.pdf` | Supplementary Sections S1-S4: the Section 7 protocols, two proofs, the candidate certificates, the numerical checks |
 | `sub.tex`, `sub.pdf` | the same source set in two columns, which shows what overflows a narrow measure |
 | `Ref.bib`, `theory.bbl` | bibliography |
 | `fig1.pdf`, `fig2.pdf`, `fig4.pdf` | the three plotted figures |
 | `make_fig1.py`, `make_fig2.py`, `make_fig4.py` | the scripts that draw them |
-| `verify_numbers.py` | the 209 checks |
+| `verify_numbers.py` | the 270 checks |
 | `rho_sweep.py`, `rho_sweep.json` | the random-plant sweep of Section 6.7, and what it produced |
 | `downstream_sweep.py`, `downstream_sweep.json` | Section 6.8 repeated on 120 random plants, and what it produced |
+| `dinkelbach_grids.py`, `dinkelbach_grids_NU41.json`, `dinkelbach_grids_NU81.json`, `dinkelbach_grids_NU161.json` | the fractional optimum of Section 6.6 on state grids of 25 to 137 points per axis for three control grids, and what it produced |
 | `verified_run.log` | the output of the run that checked the shipped PDF |
 | `make_sub.py` | renders `sub.tex` from `theory.tex` |
 | `check_fonts.py` | Type 3 and embedding check on every PDF |
@@ -120,23 +121,30 @@ value:
   manuscript optimises the second and states the first; if this row ever
   collapsed towards zero the distinction the text draws would have quietly
   gone.
+- **`Table I: l-bar within 6% of 1/2 rms^2`** reads two columns of Table 2 as
+  printed and checks a bound that ties them, independently of the code that
+  filled them. For many revisions the column headed "rms" held a standard
+  deviation, and every row matched because the gate compared it with the same
+  computation; a reviewer caught it with this bound, which the standard
+  deviation misses by a factor of four.
 
 ## What a passing run looks like
 
 `verified_run.log` is the real output of `--full` against the files in
-this repository: 209 rows, each with the value the manuscript states
+this repository: 270 rows, each with the value the manuscript states
 beside the value recomputed from the model, and `ALL CHECKS PASS` at the
 end. Compare your own run against it line by line.
 
 It opens and closes with the md5 of every file the checks read: the
-manuscript, the supplement, `verify_numbers.py`, both sweep records, and
-`fig4.pdf` with its script. That bracket is the point: it says the checks and
+manuscript, the supplement, `verify_numbers.py`, both sweep records, the
+grid script with its three records, and `fig4.pdf` with its script. That
+bracket is the point: it says the checks and
 the manuscript were the same files throughout, so a run that passed against an edited copy cannot
 be presented as a run that passed against this one. `theory.tex` here is
-`e291233adfb9`, which is the hash the log records.
+`acee8e21fc9d`, which is the hash the log records.
 
 The row count depends on the data you have. Without the fleets a subset
-runs and the total is smaller; 209 is the number with all six present.
+runs and the total is smaller; 270 is the number with all six present.
 
 ## Reproducing on another machine
 
@@ -154,7 +162,8 @@ These are in the manuscript's own words and are not defects in the code:
   it `xfail` while `w = 0.9` also appears: `w` is the signal-to-noise weight of
   Lemma 2.2, an unrelated parameter that happens to carry the same value. The
   computed constants do depend on the threshold — at `x_f = 1.0` the peak floor
-  is 5.41° rather than 4.52° and the adaptive gain is 58× rather than 68× — so
+  is 5.41° rather than 4.52° and the myopic policy's gain at the steering
+  indicator is 58× rather than 68× — so
   do not compare numbers across thresholds. Section 6.1 says this, and two gate
   rows check it via `threshold_sensitivity()`, which moves `XFAIL` and restores
   it in a `finally`: leaving it moved would send every later check against the
@@ -162,15 +171,21 @@ These are in the manuscript's own words and are not defects in the code:
 
   The lifetime change is deliberately not quoted, here or in the paper, because
   it depends on the policy: about +7 % at a constant input of 1.5 and about
-  +13 % under the adaptive policy. A single figure would be meaningless without
+  +13 % under the myopic policy. A single figure would be meaningless without
   naming which.
-- The fractional limit in Section 5 is computed, not certified. The manuscript
-  says so: "we do not claim a certified converse here".
-- The actuation premise is supported in simulation and remains untested on
-  measured hardware, for the reason Section 7 gives — only the turbofan fleets vary the
-  operating point within a unit.
-- Section 4.1, with Lemma 4.3 and Proposition 4.4, holds on a separable
-  subclass that the highest-fidelity turbofan data reject. Figure 6 marks which branch of the
+- The fractional optimum of Section 6.6 is bracketed, not certified: the
+  myopic policy bounds it from above, and the extrapolation of
+  `dinkelbach_grids_NU*.json` puts it within about 2 % below. The lower end
+  rests on the extrapolation, which the gate fits to the finest four grids
+  and, for its spread, to the four next-finest.
+- The actuation premise is untested. The measured fleets never vary the
+  operating point within a unit, and the two turbofan simulations impose
+  their damage independently of it: C-MAPSS as a function of time, and in
+  N-CMAPSS the health parameters shipped with the data are constant within
+  every flight, which the gate reads from the files.
+- Section 4.1, with Lemma 4.4 and Proposition 4.5, holds on a separable
+  subclass that the highest-fidelity turbofan data reject jointly with the
+  pairing of channels with mechanisms. Figure 6 marks which branch of the
   development depends on it; nothing before that subsection does.
 
 ## Requirements
