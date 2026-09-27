@@ -39,6 +39,8 @@
 \newtheorem{proposition}[theorem]{Proposition}
 \newtheorem{corollary}[theorem]{Corollary}
 \newtheorem{remark}[theorem]{Remark}
+\theoremstyle{definition}
+\newtheorem{problem}{Problem}
 
 \newcommand{\R}{\mathbb{R}}
 \newcommand{\E}{\mathbb{E}}
@@ -146,6 +148,18 @@ zero loss is attainable at all, how many independent inputs that would take,
 and what the best achievable loss is when it is not. These are the questions
 this paper answers.
 
+In the terms of nonlinear control, the plant is a positive system whose input
+enters through the stress factors rather than additively, and the indicator
+is a fixed static functional of its measurements. Zero loss asks that the
+$d-1$ components of the information-carrying vector orthogonal to the
+indicator vanish along the whole trajectory: an output-zeroing problem, with
+direct feedthrough, for $d-1$ outputs and $m$ inputs~\cite{isidori1995},
+which is why the count of independent inputs generically decides it. The
+best achievable loss is an optimal control problem whose objective is a
+ratio and whose horizon, the failure time, is set by the input, so neither a
+fixed-horizon formulation nor a policy that aligns the indicator pointwise is
+optimal. Section~\ref{sec:problems} states the three problems formally.
+
 They sit against five bodies of work. Four address parts of the problem and
 the fifth supplies the geometry used in Section~\ref{sec:simplex}; to our knowledge none of them addresses the position taken here.
 
@@ -246,6 +260,13 @@ the loss they incur.
 whose objective is a ratio, and whose terminal time is itself controlled
 (Section~\ref{sec:limit}); we compute its value to two digits and do not certify it. The actuation authority, measured by the width of the reachable set and computable before any indicator is designed, provides a moderate screening signal for the regime in which steering can have substantial value; on $299$ randomly drawn plants it ranks them as well as its ratio to the drift of the informative direction and fits them better, and the drift matters only in combination with it (Section~\ref{sec:regime}).
 
+\item Robustness to model error is measured rather than assumed
+(Section~\ref{sec:misspec}): an indicator designed from activation energies
+in error by $10\%$ costs a median factor $3.10$ in loss, while an error of
+$2\%$ costs almost nothing, and the plants that escape the counting rule are
+knife edges on which one percent of shape error makes steering worse than
+not steering.
+
 \item The premises are separately testable on public run-to-failure
 data, and Section~\ref{sec:scope} tests three in turn: whether the informative
 direction rotates, whether the operating point moves it, and whether the
@@ -274,6 +295,20 @@ to~\ref{sec:limit} develop the theory, Section~\ref{sec:num} exercises the
 three of its claims that are stated sharply enough to be refuted, and
 Section~\ref{sec:scope} reports what public fleet data can and cannot
 establish about the premises the theory rests on.
+
+\paragraph{Notation} $S^{d-1}$ is the unit sphere in $\R^{d}$,
+$\|\cdot\|$ the Euclidean norm and $\angle(a,b)\in[0,\pi]$ the angle
+between non-zero vectors $a$ and $b$. The state $x$ lies in the closed
+positive orthant and the input $u$ in a compact set
+$\mathcal U\subset\R^{m}$; an admissible input is a measurable function
+$u(\cdot)$ with values in $\mathcal U$ for which \eqref{eq:plant} has an
+absolutely continuous solution that reaches the condemnation limit in finite
+time, so the failure time $T_f$ is a functional of the input. The indicator
+is a unit weight vector $\mathbf v$; from Section~\ref{sec:simplex} on it is
+identified with its share vector $q$, $q_i=\mathbf v_i^{2}$, through the
+isometry between the simplex and the positive part of $S^{d-1}$, and $q$
+denotes both. The misalignment $\angle(\dhat,\mathbf v)$ is written $\psi$
+in Section~\ref{sec:prelim} and $\beta$ thereafter.
 
 \section{Problem formulation}
 \label{sec:prelim}
@@ -625,6 +660,47 @@ Write $\tilde y=\dvec R+\epsilon$ with $\epsilon\sim N(0,I_d)$ and $R$ Gaussian.
 \end{proof}
 
 The loss is therefore not a score standing in for estimation error: it is the logarithm of the factor by which that error inflates. What the corollary does not settle is whether the ordering survives an estimator other than the one the model prescribes, and Section~\ref{sec:downstream} checks that separately.
+
+\subsection{The control problems}
+\label{sec:problems}
+
+The plant \eqref{eq:plant} is a nonlinear system driven by the operating
+point, and the fixed indicator is a static output functional of its
+measurements. The paper studies three problems on it, stated here so that
+each result below can be placed.
+
+\begin{problem}[attainability]\label{prob:zero}
+Given the plant \eqref{eq:plant}, the envelope $\mathcal U$ and an initial
+state $x_0$, characterise the indicators and admissible inputs for which
+$\bar\lloss=0$, and count the independent inputs this requires.
+\end{problem}
+
+\begin{problem}[best achievable loss]\label{prob:frac}
+For a fixed indicator, find the infimum of $\bar\lloss$ over admissible
+inputs, the horizon $T_f$ being determined by the input, and certify it.
+\end{problem}
+
+\begin{problem}[screening before design]\label{prob:screen}
+From the plant model and $\mathcal U$ alone, before any indicator is chosen,
+decide whether steering can reduce $\bar\lloss$ substantially below its
+value under the best constant input.
+\end{problem}
+
+Theorem~\ref{thm:zero} answers Problem~\ref{prob:zero} exactly, as
+membership of every reachable direction set, and generically, as a count of
+inputs; Corollary~\ref{cor:tri} separates it from the weaker task of
+holding the misalignment constant, and Proposition~\ref{prop:contain} gives
+an exact criterion on the separable subclass. Problem~\ref{prob:frac} is the
+fractional optimal control problem of Section~\ref{sec:limit}. Its value is
+computed in Section~\ref{sec:frac}, and Proposition~\ref{prop:converse}
+reduces its certification to exhibiting one verification function, which
+remains open; Section~\ref{sec:misspec} measures how much of the computed
+benefit survives an error in the model the design is built on.
+Problem~\ref{prob:screen} is addressed empirically, across random plants of
+the separable model, in Section~\ref{sec:regime}. Proposition~\ref{prop:blind}
+shows that the objective of Problems~\ref{prob:zero} and~\ref{prob:frac}
+cannot be read from any criterion built from the Fisher information about
+remaining life, so neither reduces to input design for observability.
 
 
 \begin{figure}[t]
@@ -1224,8 +1300,9 @@ the loss is invisible to a Fisher criterion, that the counting rule $m\ge d-1$
 binds in both directions on a generic plant, and that the best achievable loss
 is a finite number one can compute. This section instantiates the model on a
 synthetic three-mechanism plant on which every quantity is available in closed
-form, checks those three claims against it, measures what steering is worth,
-and asks which quantity, available in advance, says whether it will repay the effort. Section~\ref{sec:scope} then reports what measured fleets
+form, checks those three claims against it, measures what steering is worth, asks which quantity, available in
+advance, says whether it will repay the effort, and measures how much of
+the benefit survives an error in the stress model. Section~\ref{sec:scope} then reports what measured fleets
 can and cannot establish about the premises.
 
 \subsection{The test plant}
@@ -1472,6 +1549,63 @@ is not evidence that the time-averaged loss improves on a mid-life snapshot of
 the misalignment, which would need a plant whose direction rotates by more
 than its candidate indicators differ.
 
+\subsection{Robustness to model error}
+\label{sec:misspec}
+
+Everything above assumes the designer knows $\varphi_i$ and $h_i$. In practice
+the activation energies are estimated from accelerated tests and carry error,
+so the question a robust design must answer is how much of the benefit
+survives a wrong model. We answer it by direct computation on the test plant
+rather than by a perturbation bound.
+
+For each level $\varepsilon$ we draw a perturbed energy vector
+$E(1+\varepsilon\eta)$, with $\eta$ standard normal, and build the barycentre
+indicator of Proposition~\ref{prop:bary} from that wrong plant along the
+trajectory of a constant input, as a designer following this paper would. We
+then evaluate it on the true plant under the policy that brings it as close
+to the informative direction as the envelope allows at each state.
+Table~\ref{tab:misspec} reports the ratio of that loss to the loss of the
+indicator designed from the true model, over $40$ draws per level, so a ratio
+of $1$ means the error cost nothing.
+
+\begin{table}[t]
+\caption{Cost of designing the indicator from a misspecified stress model.
+Entries are the loss on the true plant relative to that of the indicator
+designed from the true model; $\varepsilon$ is the relative standard deviation
+of the error in the activation energies.}
+\label{tab:misspec}
+\centering
+\begin{tabular}{cccc}
+\hline
+$\varepsilon$ & median & 90th percentile & worst of $40$\\
+\hline
+$0.02$ & $1.03$ & $1.52$ & $2.04$\\
+$0.05$ & $1.40$ & $2.95$ & $6.42$\\
+$0.10$ & $3.10$ & $10.81$ & $67.53$\\
+$0.20$ & $9.96$ & $44.71$ & $79.48$\\
+$0.35$ & $35.77$ & $95.24$ & $196.75$\\
+\hline
+\end{tabular}
+\end{table}
+
+An error of $2\%$ in the energies is almost free. At $5\%$ the median cost is a
+factor $1.40$. At $10\%$ the median cost is $3.10$ and the worst of forty draws
+costs $67.53$, comparable in size to the whole benefit of steering in
+Section~\ref{sec:steer}; beyond that every column grows monotonically, to a
+median of $35.77$ at $\varepsilon=0.35$. The design therefore tolerates an
+error of two percent in the energies almost entirely and one of five percent
+in the median, but not one of ten percent, so the accuracy of the stress model
+bounds what steering can deliver in practice.
+
+The structural counterpart is the knife edge of Remark~\ref{rem:family}: the
+plants that escape the counting rule do so only at exact parameter values, and
+at one percent of error in their shape coefficients steering is already worse
+than not steering, a fragility that closing the loop halves but does not
+remove (Supplementary Section~S4). Both results point the same way: the counting
+rule of Theorem~\ref{thm:zero}, which holds for generic data, is the one to
+design against, and the model it is applied to has to be known to within a
+few percent.
+
 \section{What public data can say about the premises}
 \label{sec:scope}
 
@@ -1658,7 +1792,10 @@ holds. The optimum of Section~\ref{sec:limit} is computed rather than certified,
 A fixed health indicator discards information, and this paper has treated what
 it discards as a quantity the operating point controls. Indicator design then
 becomes a reachability question. The family of reachable direction sets bounds what the operating
-point can achieve, and their width, available before any indicator is fixed, indicates whether substantial benefit is plausible, and across random plants of this model the drift of the informative direction refines that indication only in combination with it. Under the proposed model, actuation authority, rather than sophistication of the indicator, governs whether a fixed compression can come close to lossless. Whether that authority is
+point can achieve, and their width, available before any indicator is fixed, indicates whether substantial benefit is plausible, and across random plants of this model the drift of the informative direction refines that indication only in combination with it. Under the proposed model, actuation authority, rather than sophistication of the indicator, governs whether a fixed compression can come close to lossless. What
+steering delivers in practice is bounded by how well the stress model is
+known: an error of two percent in the activation energies is almost free,
+and one of ten percent is not (Section~\ref{sec:misspec}). Whether that authority is
 present is an empirical question rather than a modelling assumption, and on $439$ simulated turbofan records the evidence supports it. Establishing the same on measured
 fleets awaits records in which the operating point varies enough to show the
 effect.

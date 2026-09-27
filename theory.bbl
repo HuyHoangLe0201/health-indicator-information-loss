@@ -1,4 +1,4 @@
-\begin{thebibliography}{35}
+\begin{thebibliography}{36}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
@@ -32,6 +32,12 @@ Huy~Hoang Le and Kim-Anh Nguyen.
   prediction from complete degradation trajectories.
 \newblock \emph{Meas. Sci. Technol.}, 37:\penalty0 226203, 2026{\natexlab{b}}.
 \newblock \doi{10.1088/1361-6501/ae7109}.
+
+\bibitem[Isidori(1995)]{isidori1995}
+Alberto Isidori.
+\newblock \emph{Nonlinear Control Systems}.
+\newblock Springer, London, 3rd edition, 1995.
+\newblock \doi{10.1007/978-1-84628-615-5}.
 
 \bibitem[Liu et~al.(2013)Liu, Gebraeel, and Shi]{liu2013fusion}
 Kaibo Liu, Nagi~Z. Gebraeel, and Jianjun Shi.

@@ -392,7 +392,10 @@ def roadmap_gap(path):
             if r"\ref{sec:prelim}" in p and r"\item" not in p]
     if not para:
         return float(len(want))
-    road = para[-1]
+    # the roadmap is the paragraph that names the most sections. Taking the
+    # LAST paragraph that cites sec:prelim picked the Notation paragraph once
+    # one was added after the roadmap, and reported four sections forgotten
+    road = max(para, key=lambda p: len(set(re.findall(r"\\ref\{(sec:[^}]*)\}", p))))
     named = re.findall(r"\\ref\{(sec:[^}]*)\}", road)
     have = set(named)
     # expand "A to~B" and "A--B" into the sections they span
@@ -1342,6 +1345,47 @@ def main():
             ("4.1 mistuned is worse than not steering", 1.0,
              float(_m > _c), 0.0),
         ]
+        print("[Sec 6.9] design from a misspecified stress model ...",
+              flush=True)
+        # restored from the extended version, whose table this function
+        # produced; recomputed, it matches that table to every printed digit
+        _mt = misspec_table()
+        _mb = s[s.index("Cost of designing the indicator from a misspecified"):]
+        _mb = _mb[:_mb.index(r"\end{tabular}")]
+        _mr = re.findall(r"\$([0-9.]+)\$ & \$([0-9.]+)\$ & \$([0-9.]+)\$ "
+                         r"& \$([0-9.]+)\$", _mb)
+        rows.append(("6.9 misspecification table rows", 5.0,
+                     float(len(_mr)), 0.0))
+        for _e, _med, _p90, _wst in _mr:
+            _v = _mt.get(float(_e))
+            for _lab, _claim, _i in (("median", _med, 0), ("90th pct", _p90, 1),
+                                     ("worst of 40", _wst, 2)):
+                rows.append((f"6.9 eps={_e} {_lab}", float(_claim),
+                             None if _v is None else _v[_i], 0.01))
+        rows += [
+            ("6.9 median cost at 5%",
+             find(s, r"At \$5\\%\$ the median cost is a factor \$([0-9.]+)\$"),
+             _mt[0.05][0], 0.01),
+            ("6.9 median cost at 10%",
+             find(s, r"At \$10\\%\$ the median cost is \$([0-9.]+)\$"),
+             _mt[0.10][0], 0.01),
+            ("6.9 worst of 40 at 10%",
+             find(s, r"worst of forty draws costs \$([0-9.]+)\$"),
+             _mt[0.10][2], 0.01),
+            ("6.9 median at eps=0.35",
+             find(s, r"to a median of \$([0-9.]+)\$ at"),
+             _mt[0.35][0], 0.01),
+            ("6.9 contributions: median cost at 10%",
+             find(s, r"in error by \$10\\%\$ costs a median factor \$([0-9.]+)\$"),
+             _mt[0.10][0], 0.01),
+            # "every column grows monotonically" is a claim too
+            ("6.9 every column monotone in eps", 1.0,
+             float(all(all(a[i] < b[i] for i in range(3))
+                       for a, b in zip([_mt[k] for k in sorted(_mt)],
+                                       [_mt[k] for k in sorted(_mt)][1:]))),
+             0.0),
+        ]
+
         print("\n[Table II] re-optimising q for each system ...", flush=True)
         tabII = re.findall(
             r"\$\(([0-9.,]+)\)\$ & \$([0-9.]+)\^\{\\circ\}\$ & \$([0-9.]+)\$ "
