@@ -245,46 +245,93 @@ def discussion_leads(path):
     paragraphs between the opening sentence and the Limitations heading.
     """
     t = io.open(path, encoding="utf-8").read()
-    body = t.split(r"\section{Discussion}")[1]
+    # "\section{Discussion" without the closing brace: the RESS version is
+    # "Discussion and conclusions"
+    body = t.split(r"\section{Discussion")[1]
     body = body.split(r"\paragraph{Limitations}")[0]
     blocks = [b for b in body.split("\n\n") if b.strip()]
-    # block 0 is \label, block 1 is the sentence announcing the count
+    # block 0 is the title's tail and \label, block 1 the sentence announcing
+    # the count
     return len(blocks) - 2
 
 
 def discussion_order(path):
-    """Are the three plant-independent readings the first three?
+    """Are the Discussion's readings the three the paper argues, in order?
 
-    Returns 1.0 when the opening's promise about ordering holds. The three
-    are identified by their opening words, which are also what a reader
-    scanning the section sees.
+    Returns 1.0 when they are. The readings are identified by their opening
+    words, which are also what a reader scanning the section sees. (Earlier
+    versions checked that two plant-independent readings led; the RESS
+    rewrite replaced the four readings with three.)
     """
     t = io.open(path, encoding="utf-8").read()
-    body = t.split(r"\section{Discussion}")[1]
+    body = t.split(r"\section{Discussion")[1]
     body = body.split(r"\paragraph{Limitations}")[0]
     paras = [p.strip() for p in body.split("\n\n") if p.strip()]
-    paras = [p for p in paras if not p.startswith(r"\label")]
-    if len(paras) < 4:
-        return 0.0
-    # Two unconditional readings, not three: "Misalignment is
-    # worth measuring" went with the remaining-life benchmark that
-    # supported it when the paper was cut to its theory.
-    # "A Fisher criterion cannot be used to design a fixed indicator" was
-    # broader than Proposition 4.6, which rules out ranking by the loss
-    # and not designing on other grounds. The reading was reworded; the
-    # check still asks that the two plant-independent readings lead.
-    # "No Fisher criterion can rank fixed indicators" went in the P1
-    # revision: Proposition 4.6 had been proved through an invariance under a
-    # common gain that the loss does not have, and the corrected proposition
-    # says which Fisher information to score rather than that none works.
-    lead = ("Test the separability", "Score the indicator's")
-    got = tuple(p[:22] for p in paras[1:3])
-    return float(all(g.startswith(x[:22]) for g, x in zip(got, lead)))
+    paras = [p for p in paras if not p.startswith(r"\label")
+             and not p.startswith(" and conclusions}")
+             and not p.startswith("and conclusions}")]
+    # The RESS rewrite states three readings in the order the paper argues
+    # them: measure the arc, choose the operating point for life, count the
+    # operating variables. The check is that the three are the ones given
+    # and in that order.
+    # The academic rewrite opens the three with First/Second/Third and
+    # announces them as "implications" rather than "readings".
+    # The fit-review restructure (2026-09-29) dropped the third
+    # implication (the operating-variable count), which moved to the
+    # supplement with the zero-loss conditions.
+    lead3 = ("First, the rotation arc", "Second, the operating point")
+    got3 = [p for p in paras if not p.startswith("The results have")]
+    return float(len(got3) == len(lead3)
+                 and all(g.startswith(x) for g, x in zip(got3, lead3)))
+
+
+def _ea(e, t_hot=60.0, t_cold=25.0, span=3.0):
+    """Activation energy (eV) of a coefficient E on the scaled input u of
+    Section 5.2: u = span (1/kT - 1/kT_hot) / (1/kT_cold - 1/kT_hot)."""
+    k = 8.617333262e-5
+    d = 1.0 / (k * (t_cold + 273.15)) - 1.0 / (k * (t_hot + 273.15))
+    return float(e * span / d)
+
+
+def _t_of_u(u, t_hot=60.0, t_cold=25.0, span=3.0):
+    """Temperature (C) at scaled input u of Section 5.2."""
+    k = 8.617333262e-5
+    a = 1.0 / (k * (t_hot + 273.15))
+    d = 1.0 / (k * (t_cold + 273.15)) - a
+    return float(1.0 / (k * (a + u * d / span)) - 273.15)
 
 
 def find(s, pat):
     m = re.search(pat, s)
     return float(m.group(1)) if m else None
+
+
+def cells_table(s):
+    """Table tab:cells as {label: dict(psi, ratio[3], cost, fail, unused)}.
+
+    Rows are split on \\ and cells on &, math dollars stripped; a '---'
+    cell reads as None. Anchored on the caption, which claims() keeps."""
+    i = s.find("Case study on the Severson cells.")
+    if i < 0:
+        return {}
+    body = s[i:s.index(r"\end{tabular}", i)]
+    body = body.split(r"\hline")[2] if body.count(r"\hline") >= 3 else body
+    out = {}
+
+    def num(c):
+        c = c.replace("$", "").replace(r"^{\circ}", "").replace(r"\%", "").strip()
+        return None if c in ("---", "") else float(c)
+
+    for line in body.split("\\\\"):
+        cells = [c.strip() for c in line.split("&")]
+        if len(cells) != 8:
+            continue
+        lab = cells[0]
+        out[lab] = dict(psi=num(cells[1]),
+                        ratio=[num(c) for c in cells[2:5]],
+                        cost=num(cells[5]), fail=num(cells[6]),
+                        unused=num(cells[7]))
+    return out
 
 
 def baseline_rows(path):
@@ -395,14 +442,20 @@ def roadmap_gap(path):
     t = io.open(path, encoding="utf-8").read()
     order = re.findall(r"\\section\{[^}]*\}\s*\\label\{([^}]*)\}", t)
     exempt = {"sec:intro", "sec:discussion", "sec:conclusion"}
-    want = [k for k in order if k not in exempt]
+    # appendix sections (app:...) are named by the roadmap as \ref{app:...}
+    # and counted by the body sections alone
+    want = [k for k in order if k not in exempt and k.startswith("sec:")]
 
     # Related work was merged into the Introduction, so the section
     # that used to end it is gone; the model section now does, and
     # the roadmap paragraph is the one that names it.
-    intro = t.split(r"\section{Problem formulation}")[0]
+    # the Introduction is everything before the second \section; the RESS
+    # rewrite renamed the model section, and a split on its old title
+    # returned the whole paper
+    secs = [m.start() for m in re.finditer(r"\\section\{", t)]
+    intro = t[:secs[1]] if len(secs) > 1 else t
     para = [p for p in intro.split("\n\n")
-            if r"\ref{sec:prelim}" in p and r"\item" not in p]
+            if r"\ref{sec:model}" in p and r"\item" not in p]
     if not para:
         return float(len(want))
     # the roadmap is the paragraph that names the most sections. Taking the
@@ -596,10 +649,10 @@ def repro_exceptions(path):
     a fifth exists that the sentence does not mention at all.
     """
     t = re.sub(r"\s+", " ", io.open(path, encoding="utf-8").read())
-    m = re.search(r"(\w+) groups of numbers lie outside (?:it|the checks):(.*?)\.\s", t)
+    m = re.search(r"(\w+) groups? of numbers lies? outside (?:it|the checks):(.*?)\.\s", t)
     if not m:
         return -1.0
-    words = dict(two=2, three=3, four=4, five=5, six=6)
+    words = dict(one=1, two=2, three=3, four=4, five=5, six=6)
     said = words.get(m.group(1).lower(), -1)
     # an exception may sit in the supplement, cited in plain text
     listed = len(re.findall(r"Section~(?:\\ref\{|S\d)", m.group(2)))
@@ -884,10 +937,16 @@ def supplement_refs(path):
     for each other when their numbers are swapped.
     """
     import os
-    title_word = {1: "Protocols", 2: "Proofs", 3: "certificates",
-                  4: "verification"}
-    topic = {1: r"protocol", 2: r"proof", 3: r"certif|candidate",
-             4: r"numerical|integrat|residual|shape coefficient"}
+    # S2 became "The loss over a record, and the best fixed indicator" and S5
+    # "Further results on the test plant" in the RESS rewrite
+    # the fit-review restructure removed the certificates section, so the
+    # verification section is S3 and the further results S4
+    title_word = {1: "Protocols", 2: "record", 3: "verification",
+                  4: "further results"}
+    topic = {1: r"protocol", 2: r"record|barycentre|Bhattacharyya",
+             3: r"numerical|integrat|residual|shape coefficient",
+             4: r"plant|system|grid|example|downstream|width|constants|"
+                r"coefficients|limit|authority"}
     t = re.sub(r"\s+", " ", io.open(path, encoding="utf-8").read())
     sp = os.path.join(os.path.dirname(os.path.abspath(path)), "supplement.tex")
     if not os.path.exists(sp):
@@ -1027,7 +1086,7 @@ def main():
         ("myopic loss at q*",
          find(s, r"at which the myopic policy attains\s*\$([0-9.]+)\\times10\^\{-4\}"),
          L_ad * 1e4, 5e-3),
-        ("myopic loss at q*, restated in Sec 6.6",
+        ("myopic loss at q*, restated in S5",
          find(s, r"The myopic policy attains \$([0-9.]+)\\times10\^\{-4\}\$ "
                  r"and is realisable"), L_ad * 1e4, 5e-3),
         ("best-constant loss at q*",
@@ -1037,17 +1096,17 @@ def main():
          find(s, r"input, a factor of \$([0-9]+)\$"),
          ratio, 0.01),
         ("fair baseline (x1e-3)",
-         find(s, r"together gives \$([0-9.]+)\\times10\^\{-3\}\$"),
+         find(s, r"jointly gives \$([0-9.]+)\\times10\^\{-3\}\$"),
          L_fair * 1e3, 5e-3),
         ("fair baseline sits at u=0", 0.0, u_fair, 0.0),
         ("fair ratio",
-         find(s, r"steering is worth a factor of \$([0-9]+)\$"),
+         find(s, r"the\s+reduction achieved by steering is a factor of \$([0-9]+)\$"),
          ratio_fair, 0.01),
         ("ratio at q*, 81-point grid",
-         find(s, r"on \$81\$ points they become \$([0-9]+)\$"),
+         find(s, r"\$81\$ points the two factors become \$([0-9]+)\$"),
          grids[81][1], 0.01),
         ("fair ratio, 81-point grid",
-         find(s, r"on \$81\$ points they become \$[0-9]+\$ and \$([0-9]+)\$"),
+         find(s, r"\$81\$ points the two factors become \$[0-9]+\$ and \$([0-9]+)\$"),
          grids[81][2], 0.01),
         ("ratio at q*, 161-point grid",
          find(s, r"on \$161\$ points \$([0-9]+)\$ and"), grids[161][1], 0.01),
@@ -1062,19 +1121,17 @@ def main():
          find(s, r"a loss of \$([0-9.]+)\\times10\^\{-3\}\$ already"),
          L_fair * 1e3, 5e-3),
         ("life: myopic loop over best constant at q*",
-         find(s, r"myopic loop at \$q\^\{\\star\}\$ lives \$([0-9.]+)\$ times"),
+         find(s, r"myopic loop at \$q\^\{\\star\}\$ attains a lifetime \$([0-9.]+)\$ times"),
          Tf_ad / Tf_co, 0.01),
-        ("life: myopic loop over fair baseline",
-         find(s, r"and \$([0-9.]+)\$ times as long as the fair baseline"),
+        ("life: myopic loop over the smallest-loss constant design",
+         find(s, r"and \$([0-9.]+)\$ times that of the constant design "
+                 r"with the smallest loss"),
          Tf_ad / Tf_fair, 0.02),
         ("policy's control grid (points)",
          find(s, r"searched on a grid of \$([0-9]+)\$ points"),
          float(CFG["NU"]), 0.0),
-        ("Table I span",
+        ("Table S2 span",
          find(s, r"exposure factor \$\\delta\$\.\s+The loss still spans a "
-                 r"factor(?:\s+of)?\s+\$([0-9.]+)\$"), span, 0.01),
-        ("Table I span, restated in Sec 6.2",
-         find(s, r"held equal to seven digits,\s+the loss still spans a "
                  r"factor(?:\s+of)?\s+\$([0-9.]+)\$"), span, 0.01),
         ("Fisher-preferred/u=1 loss",
          find(s, r"loss is \$([0-9.]+)\$ times its value"), fisher_pref, 0.02),
@@ -1083,36 +1140,55 @@ def main():
         # the same factor is quoted in three further places; a
         # correction that reaches only the gated copy would leave those
         # stale and every check here would still pass
-        ("headline ratio, restated in Sec 6.7",
+        ("headline ratio at q*, restated in S5",
          # anchored on "value of control": "falls from $68$ to" alone also
          # matches the threshold sentence of Section 6.1, and find() took
          # that one first -- both said 68, so the row passed while reading
          # the wrong sentence
          find(s, r"value of control falls from \$([0-9]+)\$ to"), ratio, 0.01),
-        ("headline ratio, restated in the Discussion",
-         find(s, r"collapsing from \$([0-9]+)\\times\$ to under"),
-         ratio, 0.01),
         # the abstract quotes the FAIR ratio, against a constant design
         # with its own indicator
         ("fair ratio, restated in the abstract",
-         find(s, r"lowers the information-loss objective \$([0-9]+)\$-fold"),
+         find(s, r"steering the operating point reduces the\s+information\s+loss by a factor of \$([0-9]+)\$"),
          ratio_fair, 0.01),
-        ("beta_min upper, restated in Sec 6.4",
-         find(s, r"peak floor moves from \$([0-9.]+)\^\{\\circ\}\$"),
-         bmin_hi, 0.01),
-        ("beta_min upper, restated in the contributions",
-         find(s, r"peak reachability floor from \$([0-9.]+)\^\{\\circ\}\$"),
+        ("beta_min upper, restated in S4",
+         find(s, r"reduces the peak floor from \$([0-9.]+)\^\{\\circ\}\$"),
          bmin_hi, 0.01),
         ("beta_min dips below (deg)",
          find(s, r"below the \$([0-9.]+)\^\{\\circ\}\$ resolution"),
          bmin_lo, "<"),
-        ("lifetime factor q* vs balanced",
-         find(s, r"differ by a factor \$([0-9.]+)\$ in lifetime"),
+        ("lifetime factor, balanced-indicator loop over q* loop",
+         find(s, r"extends the lifetime by a\s+further factor of \$([0-9.]+)\$"),
          Tf_bal / Tf_ad, 0.02),
+        # Section 5.2: u is reciprocal temperature scaled so that u = 0 is
+        # 60 C and u = 3 is 25 C; E in those units becomes an activation
+        # energy in eV, and u = 1.5 a temperature.
+        ("5.2 activation energy 1 (eV)",
+         find(s, r"which in these units are activation energies of \$([0-9.]+)\$"),
+         _ea(CFG["E"][0]), 0.0),
+        ("5.2 activation energy 2 (eV)",
+         find(s, r"activation energies of \$[0-9.]+\$,\s+\$([0-9.]+)\$"),
+         _ea(CFG["E"][1]), 0.0),
+        ("5.2 activation energy 3 (eV)",
+         find(s, r"activation energies of \$[0-9.]+\$,\s+\$[0-9.]+\$ and "
+                 r"\$([0-9.]+)\$~eV"), _ea(CFG["E"][2]), 0.0),
+        ("5.2 temperature at u=1.5 (C)",
+         find(s, r"constant, \$([0-9.]+)\\,\^\{\\circ\}\$C & \$1\.44"),
+         _t_of_u(1.5), 0.0),
+        # Section 3.2: the arc bound 1/cos^2(arc/2) - 1 at three arcs
+        ("3.2 bound for a 30 deg arc (%)",
+         find(s, r"An arc of \$30\^\{\\circ\}\$ allows at most \$([0-9.]+)\\%\$"),
+         100.0 * (1.0 / np.cos(np.radians(15.0)) ** 2 - 1.0), 0.01),
+        ("3.2 bound for a 60 deg arc (%)",
+         find(s, r"\$60\^\{\\circ\}\$ at most \$([0-9]+)\\%\$"),
+         100.0 * (1.0 / np.cos(np.radians(30.0)) ** 2 - 1.0), 0.02),
+        # "and 90 degrees a doubling"
+        ("3.2 bound for a 90 deg arc is a doubling", 2.0,
+         1.0 / np.cos(np.radians(45.0)) ** 2, 1e-12),
     ]
 
-    WORDNUM = dict(Two=2, Three=3, Four=4, Five=5, Six=6)
-    _m = re.search(r"(\w+) practical readings follow", s)
+    WORDNUM = dict(two=2, three=3, four=4, five=5, six=6)
+    _m = re.search(r"The results have (\w+) practical implications", s)
     rows.append(("regime index stated upside down",
                  0.0, inverted_regime_ratio(args.tex), 0.0))
     rows.append(("figure panels the text never points at",
@@ -1126,10 +1202,10 @@ def main():
                      r"\$([0-9.]+)\$ &", s)
     _dr = [float(a) * float(b) for a, b in _t3]
     rows += [
-        ("6.7 Table 3 drift, smallest (deg)",
+        ("S4 screen: Table 3 drift, smallest (deg)",
          find(s, r"staying between \$([0-9]+)\^\{\\circ\}\$ and"),
          min(_dr) if _dr else None, 0.02),
-        ("6.7 Table 3 drift, largest (deg)",
+        ("S4 screen: Table 3 drift, largest (deg)",
          find(s, r"and \$([0-9]+)\^\{\\circ\}\$ while the arc spans"),
          max(_dr) if _dr else None, 0.02),
     ]
@@ -1199,7 +1275,7 @@ def main():
     rows.append(("Discussion: unconditional readings come first",
                  1.0, discussion_order(args.tex), 0.0))
     rows.append(("Discussion readings announced vs given",
-                 float(WORDNUM[_m.group(1)]) if _m else None,
+                 float(WORDNUM[_m.group(1).lower()]) if _m else None,
                  float(discussion_leads(args.tex)), 0.0))
 
     _printed = []
@@ -1208,13 +1284,13 @@ def main():
                r"\$ & \$([0-9.]+)\$ & \$[0-9.]+\$ & \$([0-9.]+)\$ & "
                r"\$([0-9.]+)\$ & \$([0-9.]+)\$")
         m = re.search(pat, s)
-        rows.append((f"Table I u={u:.1f}: delta",
+        rows.append((f"Table S2 u={u:.1f}: delta",
                      float(m.group(1)) if m else None, dl, 0.01))
-        rows.append((f"Table I u={u:.1f}: indicator information I_z",
+        rows.append((f"Table S2 u={u:.1f}: indicator information I_z",
                      float(m.group(2)) if m else None, Iz, 0.002))
-        rows.append((f"Table I u={u:.1f}: rms beta",
+        rows.append((f"Table S2 u={u:.1f}: rms beta",
                      float(m.group(3)) if m else None, rms, 0.01))
-        rows.append((f"Table I u={u:.1f}: loss",
+        rows.append((f"Table S2 u={u:.1f}: loss",
                      float(m.group(4)) if m else None, L, 0.02))
         if m:
             _printed.append(tuple(float(g) for g in m.groups()))
@@ -1223,11 +1299,11 @@ def main():
     # w ~ 1 here, so l-bar must sit near 1/2 rms^2 (within the quartic term
     # of Lemma 2.2, a few per cent at 27 degrees). A standard deviation
     # labelled rms misses this by a factor of four.
-    rows.append(("Table I: l-bar within 6% of 1/2 rms^2, rows", 5.0,
+    rows.append(("Table S2: l-bar within 6% of 1/2 rms^2, rows", 5.0,
                  float(sum(abs(0.5 * np.radians(r_) ** 2 / l_ - 1.0) < 0.06
                            for (_, _, r_, l_) in _printed)), 0.0))
     # "I_z orders the five inputs exactly as the loss does"
-    rows.append(("Table I: I_z orders the inputs as the loss does", 1.0,
+    rows.append(("Table S2: I_z orders the inputs as the loss does", 1.0,
                  float(list(np.argsort([-r[3] for r in tab]))
                        == list(np.argsort([r[5] for r in tab]))), 0.0))
 
@@ -1236,110 +1312,111 @@ def main():
         skip("  SKIPPED Section 6.7 sweep: rho_sweep.json not found")
     else:
         rows += [
-            ("6.7 sweep plants",
-             find(s, r"tested on \$([0-9]+)\$ further plants"),
+            ("S4 screen: sweep systems",
+             find(s, r"tested on \$([0-9]+)\$ further systems"),
              _rs["n"], 0.0),
-            ("6.7 Spearman rho vs gain",
+            ("S4 screen: Spearman rho vs gain",
              find(s, r"between \$\\rho\$ and the gain is \$(-?[0-9.]+)\$"),
              _rs["sp"], 0.02),
-            ("6.7 Spearman interval, lower",
+            ("S4 screen: Spearman interval, lower",
              find(s, r"interval from \$(-?[0-9.]+)\$ to \$-?[0-9.]+\$, and it keeps"),
              _rs["sp_lo"], 0.02),
-            ("6.7 Spearman interval, upper",
+            ("S4 screen: Spearman interval, upper",
              find(s, r"interval from \$-?[0-9.]+\$ to \$(-?[0-9.]+)\$, and it keeps"),
              _rs["sp_hi"], 0.02),
-            ("6.7 base rate repaying",
-             find(s, r"which \$([0-9]+)\\%\$ of the plants do"),
+            ("S4 screen: base rate repaying",
+             find(s, r"outcome\s+observed for \$([0-9]+)\\%\$ of the systems"),
              _rs["base"], 0.02),
             # AUC, threshold-free: how often acting on the index is right
-            ("6.7 AUC of rho",
+            ("S4 screen: AUC of rho",
              find(s, r"receiver-operating curve of \$([0-9.]+)\$, with interval"),
              _rs["auc_rho"], 0.02),
-            ("6.7 AUC of rho, lower",
+            ("S4 screen: AUC of rho, lower",
              find(s, r"curve of \$[0-9.]+\$, with interval \$([0-9.]+)\$ to"),
              _rs["auc_rho_lo"], 0.02),
-            ("6.7 AUC of rho, upper",
+            ("S4 screen: AUC of rho, upper",
              find(s, r"curve of \$[0-9.]+\$, with interval \$[0-9.]+\$ to \$([0-9.]+)\$"),
              _rs["auc_rho_hi"], 0.02),
-            ("6.7 AUC of the arc alone",
+            ("S4 screen: AUC of the arc alone",
              find(s, r"arc alone scores \$([0-9.]+)\$ as well"),
              _rs["auc_arc"], 0.02),
-            ("6.7 AUC of the drift alone",
+            ("S4 screen: AUC of the drift alone",
              find(s, r"drift alone \$([0-9.]+)\$, with interval"),
              _rs["auc_drift"], 0.02),
-            ("6.7 AUC of the drift, lower",
+            ("S4 screen: AUC of the drift, lower",
              find(s, r"drift alone \$[0-9.]+\$, with interval \$([0-9.]+)\$"),
              _rs["auc_drift_lo"], 0.02),
-            ("6.7 AUC of the drift, upper",
+            ("S4 screen: AUC of the drift, upper",
              find(s, r"drift alone \$[0-9.]+\$, with interval \$[0-9.]+\$ to \$([0-9.]+)\$"),
              _rs["auc_drift_hi"], 0.02),
             # the sentence says the drift's interval includes a coin toss
-            ("6.7 drift AUC interval contains 0.5", 1.0,
+            ("S4 screen: drift AUC interval contains 0.5", 1.0,
              float(_rs["auc_drift_lo"] < 0.5 < _rs["auc_drift_hi"]), 0.0),
-            ("6.7 lowest decile repaying",
+            ("S4 screen: lowest decile repaying",
              find(s, r"lowest tenth of \$\\rho\$ repays fivefold only "
                      r"\$([0-9]+)\\%\$"),
              _rs["p_lowest_decile"], 0.02),
             # nested logistic models: is the ratio better than its parts?
-            ("6.7 nested: drift adds to arc, p",
+            ("S4 screen: nested: drift adds to arc, p",
              find(s, r"as a main effect \(\$p=([0-9.]+)\$\)"),
              _rs["p_drift_main"], 0.02),
-            ("6.7 nested: drift adds nothing (p > 0.05)", 1.0,
+            ("S4 screen: nested: drift adds nothing (p > 0.05)", 1.0,
              float(_rs["p_drift_main"] > 0.05), 0.0),
-            ("6.7 nested: ratio constraint, p (x1e-5)",
+            ("S4 screen: nested: ratio constraint, p (x1e-5)",
              find(s, r"worse than the arc alone \(\$p=([0-9.]+)\\times10\^\{-5\}\$"),
              _rs["p_ratio"] * 1e5, 0.02),
-            ("6.7 nested: Akaike information of rho",
+            ("S4 screen: nested: Akaike information of rho",
              find(s, r"Akaike information \$([0-9]+)\$ against"),
              _rs["aic_rho"], 0.005),
-            ("6.7 nested: Akaike information of the arc",
+            ("S4 screen: nested: Akaike information of the arc",
              find(s, r"Akaike information \$[0-9]+\$ against \$([0-9]+)\$"),
              _rs["aic_arc"], 0.005),
-            ("6.7 nested: both hold in each input count", 1.0,
+            ("S4 screen: nested: both hold in each input count", 1.0,
              _rs["strata_agree"], 0.0),
-            ("6.7 nested: interaction p (x1e-4)",
+            ("S4 screen: nested: interaction p (x1e-4)",
              find(s, r"\(\$p=([0-9.]+)\\times10\^\{-4\}\$ for their interaction\)"),
              _rs["p_interaction"] * 1e4, 0.02),
-            ("6.7 tercile: low authority, low drift",
+            ("S4 screen: tercile: low authority, low drift",
              find(s, r"repaying fivefold falls from \$([0-9.]+)\$ to"),
              _rs["t_lo_lo"], 0.03),
-            ("6.7 tercile: low authority, high drift",
+            ("S4 screen: tercile: low authority, high drift",
              find(s, r"repaying fivefold falls from \$[0-9.]+\$ to \$([0-9.]+)\$"),
              _rs["t_lo_hi"], 0.03),
-            ("6.7 tercile: high authority, low drift",
+            ("S4 screen: tercile: high authority, low drift",
              find(s, r"high authority it rises from \$([0-9.]+)\$ to"),
              _rs["t_hi_lo"], 0.03),
-            ("6.7 tercile: high authority, high drift",
+            ("S4 screen: tercile: high authority, high drift",
              find(s, r"high authority it rises from \$[0-9.]+\$ to \$([0-9.]+)\$"),
              _rs["t_hi_hi"], 0.03),
             # out of sample, the claim the recommendation rests on
-            ("6.7 cross-validated AUC, arc",
-             find(s, r"each rank unseen plants with an area of \$([0-9.]+)\$"),
+            ("S4 screen: cross-validated AUC, arc",
+             find(s, r"each rank unseen systems with an area of \$([0-9.]+)\$"),
              _rs["cv_arc"], 0.02),
-            ("6.7 cross-validated AUC, rho",
-             find(s, r"each rank unseen plants with an area of \$([0-9.]+)\$"),
+            ("S4 screen: cross-validated AUC, rho",
+             find(s, r"each rank unseen systems with an area of \$([0-9.]+)\$"),
              _rs["cv_rho"], 0.02),
-            ("6.7 cross-validated AUC, with interaction",
+            ("S4 screen: cross-validated AUC, with interaction",
              find(s, r"interaction with the arc reaches \$([0-9.]+)\$"),
              _rs["cv_inter"], 0.02),
-            ("6.7 interaction better in every repeat", 1.0,
+            ("S4 screen: interaction better in every repeat", 1.0,
              _rs["cv_inter_always_better"], 0.0),
-            ("6.7 lowest decile drift (deg)",
+            ("S4 screen: lowest decile drift (deg)",
              find(s, r"a median of \$([0-9.]+)\^\{\\circ\}\$ against"),
              _rs["drift_lowest_decile"], 0.02),
-            ("6.7 median drift, all plants (deg)",
+            ("S4 screen: median drift, all systems (deg)",
              find(s, r"against \$([0-9]+)\^\{\\circ\}\$ over the sample"),
              _rs["drift_all"], 0.03),
-            ("6.7 median gain at Table II's rho",
+            ("S4 screen: median gain at Table II's rho",
              find(s, r"the median gain is \$([0-9.]+)\$ rather"),
              _rs["med_near"], 0.02),
-            # the abstract quotes the same AUC and the same sample size
-            # the abstract now quotes the ARC's area, not rho's
-            ("abstract: AUC of the arc",
-             find(s, r"\(area under the receiver-operating curve \$([0-9.]+)\$\)"),
+            # Section 5.4 of the main text quotes the arc's area and the
+            # sample size (they left the abstract in the RESS rewrite)
+            ("S4 screen (main-text summary): AUC of the arc",
+             find(s, r"cuts the loss fivefold with an area under the "
+                     r"receiver-operating\s+curve of \$([0-9.]+)\$"),
              _rs["auc_arc"], 0.02),
-            ("abstract: sweep plants",
-             find(s, r"Across \$([0-9]+)\$ random plants of the separable model, the reachable-set width"),
+            ("S4 screen (main-text summary): sweep systems",
+             find(s, r"Across \$([0-9]+)\$ random systems of the separable model, the reachable-set width"),
              _rs["n"], 0.0),
         ]
 
@@ -1349,41 +1426,41 @@ def main():
     else:
         _pp = _ds["paper"]
         rows += [
-            ("6.8 Spearman interval, lower",
+            ("S4 downstream: Spearman interval, lower",
              find(s, r"\$([0-9.]+)\$ to \$[0-9.]+\$ for the correlation"),
              _pp["sp_lo"], 0.02),
-            ("6.8 Spearman interval, upper",
+            ("S4 downstream: Spearman interval, upper",
              find(s, r"\$[0-9.]+\$ to \$([0-9.]+)\$ for the correlation"),
              _pp["sp_hi"], 0.02),
-            ("6.8 error-ratio interval, lower",
+            ("S4 downstream: error-ratio interval, lower",
              find(s, r"\$([0-9.]+)\$ to \$[0-9.]+\$ for the factor"),
              _pp["ratio_lo"], 0.02),
-            ("6.8 error-ratio interval, upper",
+            ("S4 downstream: error-ratio interval, upper",
              find(s, r"\$[0-9.]+\$ to \$([0-9.]+)\$ for the factor"),
              _pp["ratio_hi"], 0.02),
-            ("6.8 permutation p (x1e-4)",
+            ("S4 downstream: permutation p (x1e-4)",
              find(s, r"gives \$p=([0-9.]+)\\times10\^\{-4\}\$"),
              _pp["perm_p"] * 1e4, 0.05),
             # "sits near the top of its own interval"
-            ("6.8 point estimate in top tenth of interval", 1.0,
+            ("S4 downstream: point estimate in top tenth of interval", 1.0,
              float(_pp["sp"] > _pp["sp_hi"]
                    - 0.1 * (_pp["sp_hi"] - _pp["sp_lo"])), 0.0),
-            ("6.8 repeat: plants",
-             find(s, r"same protocol on \$([0-9]+)\$ further plants"),
+            ("S4 downstream: repeat: systems",
+             find(s, r"same protocol on \$([0-9]+)\$ further systems"),
              _ds["n"], 0.0),
-            ("6.8 repeat: lowest correlation",
+            ("S4 downstream: repeat: lowest correlation",
              find(s, r"correlations between \$([0-9.]+)\$ and"),
              _ds["sp_min"], 0.02),
-            ("6.8 repeat: highest correlation",
+            ("S4 downstream: repeat: highest correlation",
              find(s, r"correlations between \$[0-9.]+\$ and \$([0-9.]+)\$"),
              _ds["sp_max"], 0.02),
-            ("6.8 random tilts: median correlation",
+            ("S4 downstream: random tilts: median correlation",
              find(s, r"median correlation to \$([0-9.]+)\$"),
              _ds["rand_median"], 0.02),
-            ("6.8 random tilts: interval excludes zero (%)",
+            ("S4 downstream: random tilts: interval excludes zero (%)",
              find(s, r"excluding zero on \$([0-9]+)\\%\$"),
              _ds["rand_excl"], 0.02),
-            ("6.8 random tilts: identical ranking (%)",
+            ("S4 downstream: random tilts: identical ranking (%)",
              find(s, r"identically to the loss on \$([0-9]+)\\%\$"),
              _ds["identical"], 0.02),
         ]
@@ -1391,39 +1468,39 @@ def main():
     if args.regime or args.full:
 
 
-        print("[Sec 4.1] one-input family, d = 2..8 ...", flush=True)
+        print("[S3] one-input family, d = 2..8 ...", flush=True)
         _ang, _ramp, _cb, _cw = one_input_family()
         rows += [
-            ("4.1 family misalignment (deg)",
+            ("S3 family: family misalignment (deg)",
              find(s, r"misalignment below \$([0-9.]+)\\times10\^\{-6\}\$"),
              _ang * 1e6, "<"),
-            ("4.1 family mean loss",
+            ("S3 family: family mean loss",
              find(s, r"mean loss below \$10\^\{-([0-9]+)\}\$"),
              # the claim is a loss BELOW 1e-15, so the exponent must exceed
              # the quoted 15: this row wants the other bound direction
              -np.log10(_ramp), ">"),
-            ("4.1 best constant, low",
+            ("S3 family: best constant, low",
              find(s, r"against \$([0-9.]+)\\times10\^\{-5\}\$ to"),
              _cb * 1e5, 0.03),
-            ("4.1 best constant, high",
+            ("S3 family: best constant, high",
              find(s, r"to \$([0-9.]+)\\times10\^\{-4\}\$ for the best constant"),
              _cw * 1e4, 0.03),
         ]
-        print("[Sec 4.1] the same family mistuned by 1% ...", flush=True)
+        print("[S3] the same family mistuned by 1% ...", flush=True)
         _m, _c = family_mistuned(0.01)
         rows += [
-            ("4.1 mistuned closed loop",
+            ("S3 family: mistuned closed loop",
              find(s, r"raises the mean loss to \$([0-9.]+)\\times10\^\{-4\}\$"),
              _m * 1e4, 0.05),
-            ("4.1 best constant, perturbed",
+            ("S3 family: best constant, perturbed",
              find(s, r"against \$([0-9.]+)\\times10\^\{-4\}\$ for the best "
                      r"constant input on"),
              _c * 1e4, 0.05),
             # the point of the remark: steering must be the worse of the two
-            ("4.1 mistuned is worse than not steering", 1.0,
+            ("S3 family: mistuned is worse than not steering", 1.0,
              float(_m > _c), 0.0),
         ]
-        print("[Sec 6.9] design from a misspecified stress model ...",
+        print("[Sec 5.3] design from a misspecified stress model ...",
               flush=True)
         # restored from the extended version, whose table this function
         # produced; recomputed, it matches that table to every printed digit
@@ -1432,39 +1509,133 @@ def main():
         _mb = _mb[:_mb.index(r"\end{tabular}")]
         _mr = re.findall(r"\$([0-9.]+)\$ & \$([0-9.]+)\$ & \$([0-9.]+)\$ "
                          r"& \$([0-9.]+)\$", _mb)
-        rows.append(("6.9 misspecification table rows", 5.0,
+        rows.append(("5.3 misspecification table rows", 5.0,
                      float(len(_mr)), 0.0))
         for _e, _med, _p90, _wst in _mr:
             _v = _mt.get(float(_e))
             for _lab, _claim, _i in (("median", _med, 0), ("90th pct", _p90, 1),
                                      ("worst of 40", _wst, 2)):
-                rows.append((f"6.9 eps={_e} {_lab}", float(_claim),
+                rows.append((f"5.3 eps={_e} {_lab}", float(_claim),
                              None if _v is None else _v[_i], 0.01))
         rows += [
-            ("6.9 median cost at 5%",
+            ("5.3 median cost at 5%",
              find(s, r"At \$5\\%\$ the median cost is a factor \$([0-9.]+)\$"),
              _mt[0.05][0], 0.01),
-            ("6.9 median cost at 10%",
+            ("5.3 median cost at 10%",
              find(s, r"At \$10\\%\$ the median cost is \$([0-9.]+)\$"),
              _mt[0.10][0], 0.01),
-            ("6.9 worst of 40 at 10%",
+            ("5.3 worst of 40 at 10%",
              find(s, r"worst of forty draws costs \$([0-9.]+)\$"),
              _mt[0.10][2], 0.01),
-            ("6.9 median at eps=0.35",
+            ("5.3 median at eps=0.35",
              find(s, r"to a median of \$([0-9.]+)\$ at"),
              _mt[0.35][0], 0.01),
-            ("6.9 contributions: median cost at 10%",
-             find(s, r"in error by \$10\\%\$ costs a median factor \$([0-9.]+)\$"),
-             _mt[0.10][0], 0.01),
             # "every column grows monotonically" is a claim too
-            ("6.9 every column monotone in eps", 1.0,
+            ("5.3 every column monotone in eps", 1.0,
              float(all(all(a[i] < b[i] for i in range(3))
                        for a, b in zip([_mt[k] for k in sorted(_mt)],
                                        [_mt[k] for k in sorted(_mt)][1:]))),
              0.0),
         ]
+        # "even a tenfold increase leaves the indicator's excess error
+        # variance below 1%": the loss the ratios multiply is the true-model
+        # design's, under the myopic policy
+        _ref = _loss_on_true(_indicator_from(E))
+        rows.append(("5.3 tenfold loss keeps the excess below (%)",
+                     find(s, r"excess error\s+variance below \$([0-9.]+)\\%\$"),
+                     100.0 * (np.exp(2.0 * 10.0 * _ref) - 1.0), "<"))
 
-        print("\n[Table II] re-optimising q for each system ...", flush=True)
+        print("[Sec 3.2] the arc bound on the test system ...", flush=True)
+        _ab = arc_bound_plant()
+        rows += [
+            ("3.2 system arc, smallest (deg)",
+             find(s, r"the\s+arc is between \$([0-9.]+)\^\{\\circ\}\$ and"),
+             _ab[:, 0].min(), 0.01),
+            ("3.2 system arc, largest (deg)",
+             find(s, r"arc is between \$[0-9.]+\^\{\\circ\}\$ and "
+                     r"\$([0-9.]+)\^\{\\circ\}\$"), _ab[:, 0].max(), 0.01),
+            ("3.2 system bound, smallest (%)",
+             find(s, r"the bound allows between \$([0-9.]+)\\%\$"),
+             _ab[:, 1].min(), 0.02),
+            ("3.2 system bound, largest (%)",
+             find(s, r"the bound allows between \$[0-9.]+\\%\$ and "
+                     r"\$([0-9.]+)\\%\$"), _ab[:, 1].max(), 0.02),
+            ("3.2 system actual excess, smallest (%)",
+             find(s, r"for each input incurs\s+between \$([0-9.]+)\\%\$"),
+             _ab[:, 2].min(), 0.03),
+            ("3.2 system actual excess, largest (%)",
+             find(s, r"for each input incurs\s+between \$[0-9.]+\\%\$ and "
+                     r"\$([0-9.]+)\\%\$"), _ab[:, 2].max(), 0.03),
+            # the bound must hold at every input, not merely on the extremes
+            ("3.2 the bound holds at every input", 1.0,
+             float(np.all(_ab[:, 1] >= _ab[:, 2])), 0.0),
+            # "conservative by about a factor of three in the excess", and
+            # the Discussion's "a third of the bound"
+            ("3.2 bound over actual excess, smallest", 2.5,
+             float((_ab[:, 1] / _ab[:, 2]).min()), ">"),
+            ("3.2 bound over actual excess, largest", 3.5,
+             float((_ab[:, 1] / _ab[:, 2]).max()), "<"),
+        ]
+
+        print("[Sec 5.2] loss, estimation error and lifetime by strategy ...",
+              flush=True)
+        _pt = policy_table()
+        # anchored on Table 1's caption, which the academic rewrite retitled
+        _tb = s[s.index("Information loss, remaining-life estimation error "
+                        "and lifetime of the test system"):]
+        _tb = _tb[:_tb.index(r"\end{tabular}")]
+        _pr = re.findall(r"& \$([0-9.]+)\\times10\^\{(-[0-9])\}\$ & "
+                         r"\$([0-9.]+)\\%\$ & \$([0-9.]+)\\%\$ & "
+                         r"\$([0-9.]+)\\%\$ & \$([0-9.]+)\$", _tb)
+        rows.append(("5.2 policy table rows", 5.0, float(len(_pr)), 0.0))
+        for k, ((L, Tf, ez, er), cl) in enumerate(zip(_pt, _pr)):
+            rows += [
+                (f"5.2 policy row {k+1}: loss",
+                 float(cl[0]) * 10 ** float(cl[1]), L, 0.01),
+                (f"5.2 policy row {k+1}: excess variance (%)",
+                 float(cl[2]), 100.0 * (np.exp(2.0 * L) - 1.0), 0.05),
+                (f"5.2 policy row {k+1}: RUL error, indicator (%)",
+                 float(cl[3]), 100.0 * ez, 0.01),
+                (f"5.2 policy row {k+1}: RUL error, all channels (%)",
+                 float(cl[4]), 100.0 * er, 0.01),
+                (f"5.2 policy row {k+1}: lifetime",
+                 float(cl[5]), Tf, 0.001),
+            ]
+        _dev = max(abs(ez / er - 1.0) for _, _, ez, er in _pt) * 100.0
+        _tfc = [Tf for _, Tf, _, _ in _pt[:3]]
+        rows += [
+            # stated as bounds ("less than", "within"): the largest deviation
+            # is 1.13%, which "at most 1.1%" understated before this row
+            # was written as a bound
+            ("5.2 indicator within x% of all channels, every policy",
+             find(s, r"the two estimators\s+differ by less than "
+                     r"\$([0-9.]+)\\%\$"), _dev, "<"),
+            ("abstract: indicator within x% of all channels",
+             find(s, r"stays within \$([0-9.]+)\\%\$ of an estimator using every "
+                     r"channel"), _dev, "<"),
+            ("5.2 RUL error as % of life, smallest",
+             find(s, r"the error as a fraction of life stays between "
+                     r"\$([0-9.]+)\\%\$"),
+             100.0 * min(ez for _, _, ez, _ in _pt), 0.01),
+            ("5.2 RUL error as % of life, largest",
+             find(s, r"the error as a fraction of life stays between "
+                     r"\$[0-9.]+\\%\$ and\s+\$([0-9.]+)\\%\$"),
+             100.0 * max(ez for _, _, ez, _ in _pt), 0.01),
+            ("5.2 lifetime range over the constant designs",
+             find(s, r"it varies \$([0-9]+)\$-fold"),
+             max(_tfc) / min(_tfc), 0.02),
+            ("abstract: lifetime range",
+             find(s, r"while lifetime varies \$([0-9]+)\$-fold"),
+             max(_tfc) / min(_tfc), 0.02),
+            ("5.2 estimator: instants observed",
+             find(s, r"observed at \$([0-9]+)\$ instants"), 30.0, 0.0),
+            ("5.2 estimator: share of life observed (%)",
+             find(s, r"instants over the last \$([0-9]+)\\%\$ of"), 40.0, 0.0),
+            ("5.2 estimator: units per policy",
+             find(s, r"estimator over \$([0-9]+)\$ units"), 2000.0, 0.0),
+        ]
+
+        print("\n[Table S3] re-optimising q for each system ...", flush=True)
         tabII = re.findall(
             r"\$\(([0-9.,]+)\)\$ & \$([0-9.]+)\^\{\\circ\}\$ & \$([0-9.]+)\$ "
             r"& \$([0-9.]+)\\times10\^\{(-[0-9])\}\$ & \$([0-9.]+)\\times\$"
@@ -1478,15 +1649,15 @@ def main():
             _fairs.append(fgain)
             cl = tabII[k] if k < len(tabII) else None
             rows += [
-                (f"Table II row {k+1}: arc",
+                (f"Table S3 row {k+1}: arc",
                  float(cl[1]) if cl else None, arc, 0.02),
-                (f"Table II row {k+1}: rho",
+                (f"Table S3 row {k+1}: rho",
                  float(cl[2]) if cl else None, rho, 0.03),
-                (f"Table II row {k+1}: L*",
+                (f"Table S3 row {k+1}: L*",
                  float(cl[3]) * 10 ** float(cl[4]) if cl else None, Lst, 0.05),
-                (f"Table II row {k+1}: gain",
+                (f"Table S3 row {k+1}: gain",
                  float(cl[5]) if cl else None, gain, 0.05),
-                (f"Table II row {k+1}: own-indicator gain",
+                (f"Table S3 row {k+1}: own-indicator gain",
                  float(cl[6]) if cl else None, fgain, 0.05),
             ]
             # Fig. 4(b) replots these same three regimes from constants
@@ -1518,70 +1689,65 @@ def main():
              _fmid, 0.0),
         ]
         rows.append(
-            ("Sec 6.7 loss rises by a factor over the regimes",
+            ("S4 regime: loss rises by a factor over the regimes",
              find(s, r"rises by a factor \$([0-9]+)\$"),
              _Lst_all[-1] / _Lst_all[0], 0.05))
         rows += [
-            ("Sec 6.7 own-indicator gain, first row",
+            ("S4 regime: own-indicator gain, first row",
              find(s, r"and from \$([0-9]+)\$ to \$[0-9.]+\$ against a constant"),
              _fairs[0], 0.02),
-            ("Sec 6.7 own-indicator gain, last row",
+            ("S4 regime: own-indicator gain, last row",
              find(s, r"and from \$[0-9]+\$ to \$([0-9.]+)\$ against a constant"),
              _fairs[-1], 0.02),
-            ("Discussion: own-indicator gain, first row",
-             find(s, r"and from \$([0-9]+)\\times\$ to under"), _fairs[0], 0.02),
-            ("Discussion: own-indicator gain, last row under",
-             find(s, r"\$[0-9]+\\times\$ to under \$([0-9]+)\\times\$ against"),
-             _fairs[-1], "<"),
             # the sweep's gain holds the indicator at the steering design;
             # the text states by how much that overstates it on Table II
-            ("Sec 6.7 overstatement, smallest",
+            ("S4 regime: overstatement, smallest",
              find(s, r"overstates it by factors of \$([0-9.]+)\$ to"),
              min(g / f for g, f in zip(_gains, _fairs)), 0.03),
-            ("Sec 6.7 overstatement, largest",
+            ("S4 regime: overstatement, largest",
              find(s, r"overstates it by factors of \$[0-9.]+\$ to \$([0-9.]+)\$"),
              max(g / f for g, f in zip(_gains, _fairs)), 0.03),
         ]
-        print("\n[Sec 6.8] loss against remaining-life error ...",
+        print("\n[S4] loss against remaining-life error ...",
               flush=True)
         _id, _sp, _rt = downstream_rul()
         rows += [
             # exact algebra, so this is a machine-precision claim
-            ("6.8 exp(2l) identity (rel err)", 1e-12, _id, "<"),
-            ("6.8 loss vs RUL error, Spearman",
+            ("S4 downstream: exp(2l) identity (rel err)", 1e-12, _id, "<"),
+            ("S4 downstream: loss vs RUL error, Spearman",
              find(s, r"at Spearman correlation \$([0-9.]+)\$"), _sp, 0.05),
-            ("6.8 best-aligned beats worst",
+            ("S4 downstream: best-aligned beats worst",
              find(s, r"beats the worst by a factor \$([0-9.]+)\$"),
              _rt, 0.10),
         ]
 
-        print("\n[Sec 6.1] sensitivity to the condemnation limit ...",
+        print("\n[S4] sensitivity to the condemnation limit ...",
               flush=True)
         _pk, _gn, _dl = threshold_sensitivity(1.0)
         rows += [
             # Section 6.1 tells the reader what x_f = 1 would give. Both are
             # computed by the same routines as their 0.9 counterparts, so the
             # pair is a comparison of thresholds and not of conventions.
-            ("6.1 peak floor at x_f=1 (deg)",
+            ("S4 threshold: peak floor at x_f=1 (deg)",
              find(s, r"rises from \$4\.52\^\{\\circ\}\$ to "
                      r"\$([0-9.]+)\^\{\\circ\}\$"), _pk, 0.01),
-            ("6.1 gain at x_f=1",
+            ("S4 threshold: gain at x_f=1",
              find(s, r"falls from \$68\$ to \$([0-9]+)\$"), _gn, 0.02),
         ]
 
-        print("\n[Sec 2.4] Proposition 2.3, the record-level identity ...",
+        print("\n[S2] the record-level identity ...",
               flush=True)
         _rid, _rgap = record_identity()
         rows += [
             # the identity is exact, so this is a machine-precision claim
-            ("Prop 2.3 record identity (abs err)", 1e-12, _rid, "<"),
+            ("S2 record-level identity (abs err)", 1e-12, _rid, "<"),
             # and the record loss really is a DIFFERENT number from the
             # time-averaged one: if this ever collapses to zero the paper's
             # distinction has quietly gone and the surrounding text is wrong
             ("record vs time-averaged loss differ (rel)", 0.05, _rgap, ">"),
         ]
 
-        print("\n[Sec 6.4] two-input closed loop along S_q ...", flush=True)
+        print("\n[S4] two-input closed loop along S_q ...", flush=True)
         ti = two_input_floor()
         rows += [
             ("2-input system determinant",
@@ -1624,25 +1790,25 @@ def main():
              ti["floor"], 0.05),
         ]
 
-        print("[Remark 4.2] the counterexample on the segment ...", flush=True)
+        print("[S4] the counterexample on the segment ...", flush=True)
         _reach, _x2e, _off, _x2x, _x1x, _before = segment_counterexample()
         rows += [
-            ("Rem 4.2 reachable along the u=1.3 trajectory", 1.0, _reach, 0.0),
-            ("Rem 4.2 aligning input offset",
+            ("S4 example: reachable along the u=1.3 trajectory", 1.0, _reach, 0.0),
+            ("S4 example: aligning input offset",
              find(s, r"aligned at state \$x\$ by the input\s+\$u=([0-9.]+)\+x_2\$"),
              _off, 0.0),
-            ("Rem 4.2 admissible while x2 <=",
+            ("S4 example: admissible while x2 <=",
              find(s, r"admissible exactly when \$x_2\\le([0-9.]+)\$"),
              _x2x, 0.0),
-            ("Rem 4.2 x2 at failure under u=1.3",
-             find(s, r"the plant fails with \$x_2=([0-9.]+)\$"), _x2e, 0.01),
-            ("Rem 4.2 x1 where S_q leaves the envelope",
+            ("S4 example: x2 at failure under u=1.3",
+             find(s, r"the system fails with \$x_2=([0-9.]+)\$"), _x2e, 0.01),
+            ("S4 example: x1 where S_q leaves the envelope",
              find(s, r"reaches \$0\.6\$ at\s+\$x_1=([0-9.]+)\$"), _x1x, 0.01),
-            ("Rem 4.2 that happens before failure", 1.0, _before, 0.0),
+            ("S4 example: that happens before failure", 1.0, _before, 0.0),
         ]
 
     if args.fleet or args.full:
-        print("\n[Sec 7] reading the Severson fleet ...", flush=True)
+        print("\n[Sec 4] reading the Severson fleet ...", flush=True)
         st = severson_stats(301)
         if st is None:
             skip("  SKIPPED: severson_cells.npz not found at",
@@ -1662,8 +1828,303 @@ def main():
                 ("S1 Severson cells qualifying",
                  find(s, r"\$([0-9]+)\$ cells qualify"), st["n"], 0.0),
             ]
+            # The arc bound on the measured fleet: the best fixed indicator
+            # inflates the error variance by at most 1/cos^2(arc/2) - 1. It
+            # is the paper's headline practical number and is quoted five
+            # times; each copy is read.
+            _sb = 100.0 * (1.0 / np.cos(np.radians(st["travel"]) / 2.0) ** 2
+                           - 1.0)
+            rows += [
+                ("abstract: battery cells",
+                 find(s, r"on \$([0-9]+)\$ measured battery cells the arc"),
+                 st["n"], 0.0),
+                ("abstract: battery arc (deg)",
+                 find(s, r"measured battery cells the arc is\s+"
+                         r"\$([0-9.]+)\^\{\\circ\}\$"), st["travel"], 0.01),
+                ("abstract: battery bound (%)",
+                 find(s, r"so by at most \$([0-9.]+)\\%\$"), _sb, 0.01),
+                ("contributions: battery bound (%)",
+                 find(s, r"on measured battery cells the\s+bound is "
+                         r"\$([0-9.]+)\\%\$"), _sb, 0.01),
+                ("Sec 4: battery arc (deg)",
+                 find(s, r"moves through an arc of \$([0-9.]+)\^\{\\circ\}\$"),
+                 st["travel"], 0.01),
+                ("Sec 4: battery bound (%)",
+                 find(s, r"by at most \$([0-9.]+)\\%\$ over that window"),
+                 _sb, 0.01),
+                ("Discussion: battery bound (%)",
+                 find(s, r"the resulting increase is at\s+most \$([0-9.]+)\\%\$"), _sb, 0.01),
+                ("Sec 4: window start (%)",
+                 find(s, r"between \$([0-9]+)\\%\$ and \$[0-9]+\\%\$ of life"),
+                 100.0 * protocol_constants()["sev_lo"], 0.0),
+                ("Sec 4: window end (%)",
+                 find(s, r"between \$[0-9]+\\%\$ and \$([0-9]+)\\%\$ of life"),
+                 100.0 * protocol_constants()["sev_hi"], 0.0),
+            ]
+            # The same bound on the safety margin of a predictive replacement
+            # policy: the margin scales with the posterior standard
+            # deviation, so by at most 1/cos(arc/2) - 1.
+            _sm = 100.0 * (1.0 / np.cos(np.radians(st["travel"]) / 2.0) - 1.0)
+            rows += [
+                ("contributions: replacement margin (%)",
+                 find(s, r"replacement policy at most \$([0-9.]+)\\%\$\s+wider"),
+                 _sm, 0.01),
+                ("Sec 4: replacement margin (%)",
+                 find(s, r"widens the safety margin of a\s+predictive replacement "
+                         r"policy by at most \$([0-9.]+)\\%\$"), _sm, 0.01),
+            ]
+            # The leave-one-out remaining-life test (Section 6, S1), at the
+            # stated settings and at the four variations S1 reports.
+            print("[Sec 4] remaining-life test on the Severson cells ...",
+                  flush=True)
+            _rl = severson_rul()
+            _rsw = [_rl] + [severson_rul(back=b, nbase=nb) for b, nb in
+                            ((0.20, 50), (0.50, 50), (0.30, 20), (0.30, 100))]
+            _bt = list(_rl["ratio"]["best"].values())
+            _cp = _rl["ratio"]["cap"]
+            _tp = list(_rl["ratio"]["temp"].values())
+            _cb = 100.0 * (1.0 / np.cos(np.radians(_rl["cap_psi"])) ** 2 - 1.0)
+            _pb = [r["pooled"]["best"] for r in _rsw]
+            _pc = [r["pooled"]["cap"] for r in _rsw]
+            _ages = [100.0 * a for a in _rl["tau0"]]
+            rows += [
+                ("Sec 4 RUL test: window (% of elapsed cycles)",
+                 find(s, r"matches the last \$([0-9]+)\\%\$ of a cell's"),
+                 100.0 * _rl["back"], 0.0),
+                ("Sec 4 RUL test: first age (%)",
+                 find(s, r"cycles at\s+\$([0-9]+)\\%\$, \$[0-9]+\\%\$ and \$[0-9]+\\%\$ of life"),
+                 _ages[0], 0.0),
+                ("Sec 4 RUL test: second age (%)",
+                 find(s, r"cycles at\s+\$[0-9]+\\%\$, \$([0-9]+)\\%\$ and \$[0-9]+\\%\$ of life"),
+                 _ages[1], 0.0),
+                ("Sec 4 RUL test: third age (%)",
+                 find(s, r"cycles at\s+\$[0-9]+\\%\$, \$[0-9]+\\%\$ and \$([0-9]+)\\%\$ of life"),
+                 _ages[2], 0.0),
+                ("Sec 4 RUL test: fixed indicator MSE ratio, smallest",
+                 find(s, r"between \$([0-9.]+)\$ and \$[0-9.]+\$ times the\s+mean "
+                         r"squared error"), min(_bt), 0.0),
+                ("Sec 4 RUL test: fixed indicator MSE ratio, largest",
+                 find(s, r"between \$[0-9.]+\$ and \$([0-9.]+)\$ times the\s+mean "
+                         r"squared error"), max(_bt), 0.0),
+                # abstract, contributions, Discussion: "as accurate as" all
+                # channels -- no age may be worse by more than 1%
+                ("fixed indicator as accurate as all channels (largest ratio)",
+                 1.01, max(_bt), "<"),
+                ("fixed indicator within the arc bound on measured cells", 1.0,
+                 float(max(_bt) - 1.0 < _sb / 100.0), 0.0),
+                ("Sec 4 RUL test: capacity angle, largest (deg)",
+                 find(s, r"lies up to \$([0-9]+)\^\{\\circ\}\$ from the informative"),
+                 _rl["cap_psi"], 0.01),
+                # quoted as whole numbers (22 deg, 17%); find() returns 22.0,
+                # whose one decimal would demand 22.2, so the tolerance is
+                # relative, as for the other whole-number rows
+                ("Sec 4 RUL test: bound for capacity alone (%)",
+                 find(s, r"for\s+which the bound allows \$([0-9]+)\\%\$"), _cb, 0.03),
+                ("Sec 4 RUL test: capacity alone at half of life (%)",
+                 find(s, r"raises the mean squared error by \$([0-9]+)\\%\$ at\s+half "
+                         r"of life"), 100.0 * (_cp[0.5] - 1.0), 0.0),
+                ("Sec 4 RUL test: capacity alone costs less later", 1.0,
+                 float(max(_cp[0.7], _cp[0.9]) < _cp[0.5]), 0.0),
+                ("Sec 4 RUL test: capacity alone within its bound", 1.0,
+                 float(100.0 * (max(_cp.values()) - 1.0) < _cb), 0.0),
+                ("Sec 4 RUL test: temperature control, smallest factor",
+                 find(s, r"raises it at least \$([0-9]+)\$-fold"), min(_tp), ">"),
+                ("S1 RUL test: training cells per test cell",
+                 find(s, r"computed from the other \$([0-9]+)\$ cells"),
+                 float(_rl["n"] - 1), 0.0),
+                ("S1 RUL test: baseline cycles",
+                 find(s, r"the median of its first \$([0-9]+)\$\s+cycles"),
+                 float(_rl["nbase"]), 0.0),
+                ("S1 RUL test: reference points",
+                 find(s, r"tabulated at \$([0-9]+)\$\s+points"),
+                 float(_rl["nref"]), 0.0),
+                ("S1 RUL test: window start (fraction of n0)",
+                 find(s, r"observes the cycles\s+from \$([0-9.]+)n_0\$"),
+                 1.0 - _rl["back"], 0.0),
+                ("S1 RUL test: longest life searched",
+                 find(s, r"from \$n_0\+1\$ to \$([0-9]+)\$, for which"),
+                 float(_rl["lmax"]), 0.0),
+                ("S1 RUL test: variation, shorter window (%)",
+                 find(s, r"Observing the last \$([0-9]+)\\%\$ or"),
+                 100.0 * _rsw[1]["back"], 0.0),
+                ("S1 RUL test: variation, longer window (%)",
+                 find(s, r"Observing the last \$[0-9]+\\%\$ or \$([0-9]+)\\%\$"),
+                 100.0 * _rsw[2]["back"], 0.0),
+                ("S1 RUL test: variation, shorter baseline (cycles)",
+                 find(s, r"over the first \$([0-9]+)\$ or"),
+                 float(_rsw[3]["nbase"]), 0.0),
+                ("S1 RUL test: variation, longer baseline (cycles)",
+                 find(s, r"over the first \$[0-9]+\$ or \$([0-9]+)\$\s+cycles"),
+                 float(_rsw[4]["nbase"]), 0.0),
+                ("S1 RUL test: pooled ratio, fixed indicator, lowest",
+                 find(s, r"between \$([0-9.]+)\$ and \$[0-9.]+\$ for the fixed indicator"),
+                 min(_pb), 0.0),
+                ("S1 RUL test: pooled ratio, fixed indicator, highest",
+                 find(s, r"between \$[0-9.]+\$ and \$([0-9.]+)\$ for the fixed indicator"),
+                 max(_pb), 0.0),
+                ("S1 RUL test: pooled ratio, capacity alone, lowest",
+                 find(s, r"between \$([0-9.]+)\$ and \$[0-9.]+\$ for capacity alone"),
+                 min(_pc), 0.0),
+                ("S1 RUL test: pooled ratio, capacity alone, highest",
+                 find(s, r"between \$[0-9.]+\$ and \$([0-9.]+)\$ for capacity alone"),
+                 max(_pc), 0.0),
+            ]
+            # Section 4 (fit-review restructure): errors in cycles, the
+            # indicator's weights and angle, the fusion comparison, the
+            # population's lives, and Table tab:cells.
+            _bw = _rl["best_w"]
+            _fr = _rl["ratio"]["fusion"]
+            rows += [
+                ("Sec 4: lives, shortest (cycles)",
+                 find(s, r"have lives from \$([0-9]+)\$ to"),
+                 float(_rl["lives"][0]), 0.0),
+                ("Sec 4: lives, longest (cycles)",
+                 find(s, r"have lives from \$[0-9]+\$ to \$([0-9]+)\$ cycles"),
+                 float(_rl["lives"][1]), 0.0),
+                ("Sec 4: lives differ more than fourfold", 4.0,
+                 _rl["lives"][1] / _rl["lives"][0], ">"),
+                ("Sec 4: indicator weight, capacity",
+                 find(s, r"temperature as \$\(([0-9.]+),"), float(_bw[0]), 0.0),
+                ("Sec 4: indicator weight, resistance",
+                 find(s, r"temperature as \$\([0-9.]+,([0-9.]+),"), float(_bw[1]), 0.0),
+                ("Sec 4: indicator weight, temperature",
+                 find(s, r"temperature as \$\([0-9.]+,[0-9.]+,([0-9.]+)\)"),
+                 float(_bw[2]), 0.0),
+                ("Sec 4: indicator angle, largest (deg)",
+                 find(s, r"lies at most \$([0-9]+)\^\{\\circ\}\$ from the\s+informative"),
+                 _rl["best_psi"], 0.03),
+                ("Sec 4: all-channel RMS at 50% (cycles)",
+                 find(s, r"root-mean-square error is \$([0-9]+)\$"),
+                 _rl["rms_all_cycles"][0.5], 0.01),
+                ("Sec 4: all-channel RMS at 70% (cycles)",
+                 find(s, r"root-mean-square error is \$[0-9]+\$, \$([0-9]+)\$"),
+                 _rl["rms_all_cycles"][0.7], 0.01),
+                ("Sec 4: all-channel RMS at 90% (cycles)",
+                 find(s, r"root-mean-square error is \$[0-9]+\$, \$[0-9]+\$ and "
+                         r"\$([0-9]+)\$ cycles"),
+                 _rl["rms_all_cycles"][0.9], 0.01),
+                ("Sec 4: fusion angle, smallest (deg)",
+                 find(s, r"over life, in the spirit of~\\cite\{liu2013fusion\}, lies "
+                         r"\$([0-9]+)\^"), _rl["fus_psi_min"], 0.01),
+                ("Sec 4: fusion angle, largest (deg)",
+                 find(s, r"in the spirit of~\\cite\{liu2013fusion\}, lies \$[0-9]+\^"
+                         r"\{\\circ\}\$ to\s+\$([0-9]+)\^"), _rl["fus_psi_max"], 0.01),
+                ("Sec 4: fusion MSE ratio at half of life",
+                 find(s, r"has \$([0-9.]+)\$ times the mean\s+squared error at half"),
+                 _fr[0.5], 0.0),
+                ("Sec 4: fusion MSE ratio near failure",
+                 find(s, r"signal, at \$([0-9.]+)\$ times the three-channel"),
+                 _fr[0.9], 0.0),
+                ("Sec 4: fusion the most accurate signal near failure", 1.0,
+                 float(_fr[0.9] < min(1.0, _rl["ratio"]["best"][0.9],
+                                      _rl["ratio"]["cap"][0.9],
+                                      _rl["ratio"]["temp"][0.9])), 0.0),
+            ]
+            _cells = cells_table(s)
+            _ang = {"fixed indicator": _rl["best_psi"], "capacity": _rl["cap_psi"],
+                    "fusion": _rl["fus_psi_max"], "temperature": _rl["temp_psi"]}
+            _key = {"fixed indicator": "best", "capacity": "cap",
+                    "fusion": "fusion", "temperature": "temp"}
+            rows.append(("Table (cells): rows", 5.0, float(len(_cells)), 0.0))
+            for lab, key in _key.items():
+                c = _cells.get(lab)
+                # angles are printed as whole degrees (14 for 14.39), and the
+                # large temperature ratios as whole numbers (171, 725); find()
+                # returns them as 14.0 / 171.0, whose one decimal would demand
+                # 14.4 / 170.5, so these tolerances are relative
+                rows.append((f"Table (cells) {lab}: angle (deg)",
+                             c and c["psi"], _ang[lab], 0.04))
+                for j, t0 in enumerate((0.5, 0.7, 0.9)):
+                    rows.append((f"Table (cells) {lab}: MSE ratio at {t0}",
+                                 c and c["ratio"][j],
+                                 _rl["ratio"][key][t0], 0.005))
 
-        print("[Sec 7] XJTU-SY ...", flush=True)
+            print("[Sec 4] replacement policy on the Severson cells ...",
+                  flush=True)
+            _po = severson_policy()
+            _o = _po["out"]
+            _pkey = {"all channels": "all", "fixed indicator": "best",
+                     "capacity": "cap", "fusion": "fusion"}
+            for lab, key in _pkey.items():
+                c = _cells.get(lab)
+                rows += [
+                    (f"Table (cells) {lab}: cost per 1000 cycles",
+                     c and c["cost"], 1000.0 * _o[key][10.0]["rate"], 0.0),
+                    (f"Table (cells) {lab}: failures (%)",
+                     c and c["fail"], 100.0 * _o[key][10.0]["fail"], 0.0),
+                    (f"Table (cells) {lab}: unused life (cycles)",
+                     c and c["unused"], _o[key][10.0]["unused"], 0.005),
+                ]
+            _dev10 = max(abs(_o[k][10.0]["rate"] / _o["all"][10.0]["rate"] - 1.0)
+                         for k in ("best", "cap"))
+            _devr = max(abs(_o["best"][r]["rate"] / _o["all"][r]["rate"] - 1.0)
+                        for r in _po["cost_ratios"])
+            rows += [
+                ("Sec 4 policy: inspection interval (cycles)",
+                 find(s, r"inspected every\s+\$([0-9]+)\$ cycles from cycle \$[0-9]+\$ and"),
+                 float(_po["dn"]), 0.0),
+                ("Sec 4 policy: first inspection (cycle)",
+                 find(s, r"inspected every\s+\$[0-9]+\$ cycles from cycle \$([0-9]+)\$ and"),
+                 float(_po["n_first"]), 0.0),
+                ("Sec 4 policy: cost ratio stated in words (ten)", 10.0,
+                 10.0 if 10.0 in _po["cost_ratios"] else None, 0.0),
+                ("Sec 4 policy: fixed indicator and capacity within x% (bound)",
+                 find(s, r"reach the same cost to within \$([0-9.]+)\\%\$"),
+                 100.0 * _dev10, "<"),
+                ("Sec 4 policy: failures, all channels (%)",
+                 find(s, r"with \$([0-9.]+)\\%\$ of cells\s+failing"),
+                 100.0 * _o["all"][10.0]["fail"], 0.0),
+                ("Sec 4 policy: unused life, all channels (cycles)",
+                 find(s, r"about \$([0-9]+)\$ cycles, a fifth"),
+                 _o["all"][10.0]["unused"], 0.01),
+                ("Sec 4 policy: unused life is about a fifth of life", 1.0,
+                 float(abs(_o["all"][10.0]["unused_frac"] - 0.2) < 0.02), 0.0),
+                ("Sec 4 policy: fusion extra cost (%)",
+                 find(s, r"the fusion indicator costs \$([0-9.]+)\\%\$ more"),
+                 100.0 * (_o["fusion"][10.0]["rate"] / _o["all"][10.0]["rate"] - 1.0),
+                 0.0),
+                ("Sec 4 policy: smallest cost ratio",
+                 find(s, r"For cost ratios from\s+\$([0-9]+)\$ to"),
+                 min(_po["cost_ratios"]), 0.0),
+                ("Sec 4 policy: largest cost ratio",
+                 find(s, r"For cost ratios from\s+\$[0-9]+\$ to \$([0-9]+)\$"),
+                 max(_po["cost_ratios"]), 0.0),
+                ("Sec 4 policy: fixed indicator within x% over cost ratios",
+                 find(s, r"the fixed indicator stays within \$([0-9]+)\\%\$ of the"),
+                 100.0 * _devr, "<"),
+                ("S1 policy: horizon searched (cycles)",
+                 find(s, r"life searched from \$n_0\+1\$ to \$n_0\+([0-9]+)\$"),
+                 1500.0, 0.0),
+                ("S1 policy: optimal threshold at r=10, three signals (cycles)",
+                 find(s, r"optimal threshold is \$([0-9]+)\$ cycles"),
+                 _o["all"][10.0]["theta"], 0.0),
+                ("S1 policy: same threshold for indicator and capacity", 1.0,
+                 float(_o["best"][10.0]["theta"] == _o["cap"][10.0]["theta"]
+                       == _o["all"][10.0]["theta"]), 0.0),
+                ("S1 policy: optimal threshold at r=10, fusion (cycles)",
+                 find(s, r"optimal threshold is \$[0-9]+\$ cycles for all three\s+"
+                         r"channels, the fixed indicator and capacity alone, and "
+                         r"\$([0-9]+)\$ cycles"),
+                 _o["fusion"][10.0]["theta"], 0.0),
+                ("S1 policy: matched threshold (cycles)",
+                 find(s, r"which is \$([0-9]+)\$ cycles for every signal"),
+                 _o["all"]["matched"]["theta"], 0.0),
+                ("S1 policy: matched threshold equal for every signal", 1.0,
+                 float(len({_o[k]["matched"]["theta"] for k in _o}) == 1), 0.0),
+                ("S1 policy: unused at matched threshold, all (cycles)",
+                 find(s, r"the mean unused life is \$([0-9]+)\$\s+cycles"),
+                 _o["all"]["matched"]["unused"], 0.01),
+                ("S1 policy: unused at matched threshold, indicator (cycles)",
+                 find(s, r"the mean unused life is \$([0-9]+)\$\s+cycles"),
+                 _o["best"]["matched"]["unused"], 0.01),
+                ("S1 policy: unused at matched threshold, fusion (cycles)",
+                 find(s, r"mean unused life is \$[0-9]+\$\s+cycles for all three "
+                         r"channels, the fixed indicator and capacity alone, and\s+"
+                         r"\$([0-9]+)\$ cycles"),
+                 _o["fusion"]["matched"]["unused"], 0.01),
+            ]
+
+        print("[Sec 6] XJTU-SY ...", flush=True)
         xj = xjtu_stats()
         if xj is None:
             skip("  SKIPPED: not found at", DATA["xjtu"])
@@ -1674,7 +2135,7 @@ def main():
                 ("XJTU cells per condition", 5.0, float(xj["sizes"][0]), 0.0),
             ]
 
-        print("[Sec 7] PRONOSTIA ...", flush=True)
+        print("[Sec 6] PRONOSTIA ...", flush=True)
         pr = pronostia_stats()
         if pr is None:
             skip("  SKIPPED: not found at", DATA["pronostia"])
@@ -1682,7 +2143,7 @@ def main():
             rows += [
             ]
 
-        print("[Sec 7] NASA ...", flush=True)
+        print("[Sec 6] NASA ...", flush=True)
         na = nasa_stats()
         if na is None:
             skip("  SKIPPED: not found at", DATA["nasa"])
@@ -1697,7 +2158,7 @@ def main():
             ]
 
 
-        print("[Sec 7] separability: two-way layout inside engines ...",
+        print("[Sec 6] separability: two-way layout inside engines ...",
               flush=True)
         _ad = None
         try:
@@ -1712,36 +2173,36 @@ def main():
                 # the sentence "in absolute terms it exceeds the regime
                 # main effect" is a claim about the sums of squares, not the
                 # ratios, so it is checked on the sums of squares
-                ("Sec 7 interaction exceeds regime effect", 1.0,
+                ("Sec 6 interaction exceeds regime effect", 1.0,
                  float(_ss_it > _ss_rg), 0.0),
             ]
 
 
-        print("[Sec 7] the same comparison under a second predictor ...",
+        print("[Sec 6] the same comparison under a second predictor ...",
               flush=True)
         try:
             _c1, _c2, _bt, _nf = rul_two_predictors()
             rows += [
                 # the sentence that stops the agreement being read as two
                 # weak estimators failing alike
-                ("Sec 7 fleets where regression is more accurate",
+                ("Sec 6 fleets where regression is more accurate",
                  float(_nf), float(_bt), 0.0),
             ]
         except Exception as exc:
             skip("  SKIPPED Sec 7 second predictor:", exc)
 
-        print("[Sec 7] N-CMAPSS separability (slow) ...", flush=True)
+        print("[Sec 6] N-CMAPSS separability (slow) ...", flush=True)
         try:
             _o, _l, _i, _ratio, _nu = ncmapss_sep()
             _lo, _hi, _minr = ncmapss_sweep()
             rows += [
-                ("Sec 7 NC interaction / main",
+                ("Sec 6 NC interaction / main",
                  # anchored on the following word: DS01 adds a second
                  # occurrence of this phrase further down
                  find(s, r"factor \$([0-9.]+)\$ over the operating-point effect"),
                  _ratio, 0.03),
                 # the sentence that the sweep exists to support
-                ("Sec 7 NC interaction always exceeds the main effect",
+                ("Sec 6 NC interaction always exceeds the main effect",
                  1.0, float(_minr > 1.0), 0.0),
                 # the first review asked whether the interaction is more
                 # than noise; its own measured floor is the answer
@@ -1756,12 +2217,12 @@ def main():
             _o1, _l1, _i1, _r1, _n1 = ncmapss_sep(
                 units=(1, 2, 3, 4, 5, 6), key="ncmapss01")
             rows += [
-                ("Sec 7 NC DS01 interaction / main",
+                ("Sec 6 NC DS01 interaction / main",
                  find(s, r"on DS02 and \$([0-9.]+)\$ on DS01"),
                  _r1, 0.03),
                 # the sentence says DS01 agrees, which means the same
                 # inequality must hold there
-                ("Sec 7 NC DS01 interaction exceeds the main effect",
+                ("Sec 6 NC DS01 interaction exceeds the main effect",
                  1.0, float(_r1 > 1.0), 0.0),
                 ("S1 NC DS01 interaction over its noise floor",
                  find(s, r"and \$([0-9.]+)\$ times on DS01"), _i1, 0.02),
@@ -1783,7 +2244,7 @@ def main():
             ]
         except Exception as exc:
             skip("  SKIPPED N-CMAPSS:", exc)
-        print("[Sec 7] C-MAPSS FD004/FD002 (slow) ...", flush=True)
+        print("[Sec 6] C-MAPSS FD004/FD002 (slow) ...", flush=True)
         c4 = cmapss_stats("train_FD004.txt")
         c2 = cmapss_stats("train_FD002.txt")
         if c4 is None or c2 is None:
@@ -1813,6 +2274,9 @@ def main():
                 ("C-MAPSS engines total",
                  find(s, r"of \$([0-9]+)\$ engines"),
                  float(ntot), 0.0),
+                # Section 6 says "positive in all but three engines"
+                ("C-MAPSS engines with B<=W ('all but three')", 3.0,
+                 float(ntot - npos), 0.0),
                 # "stable over w in {7,9,11}": the smallest effect over the
                 # three windows must still clear the largest control bias
                 ("C-MAPSS weakest B-W over w (deg)",
@@ -1838,7 +2302,7 @@ def main():
     # Section 6.6. The grid sequence takes hours, so dinkelbach_grids.py
     # records it and the checks read the record, as for the sweeps; --full
     # recomputes two of its entries afresh.
-    print("\n[Sec 6.6] fractional optimum from the grid records ...",
+    print("\n[Sec 5.2 / S4] fractional optimum from the grid records ...",
           flush=True)
     dk = dinkelbach_record()
     if dk is None:
@@ -1847,39 +2311,46 @@ def main():
         my = {41: L_ad, 81: grids[81][0], 161: grids[161][0]}
         l41 = dk[41]["lam"]
         rows += [
-            ("6.6 state grids, fewest points",
+            ("S4 optimum: state grids, fewest points",
              find(s, r"state grids of \$([0-9]+)\$ to"),
              float(dk[41]["N"].min()), 0.0),
-            ("6.6 state grids, most points",
+            ("S4 optimum: state grids, most points",
              find(s, r"state grids of \$[0-9]+\$ to \$([0-9]+)\$ points"),
              float(dk[41]["N"].max()), 0.0),
-            ("6.6 fitted order",
+            ("S4 optimum: fitted order",
              find(s, r"the order is \$([0-9.]+)\$"), dk[41]["p"], 0.02),
             ("lambda* extrapolated",
              find(s, r"\\lambda\^\{\\star\}_\\infty=([0-9.]+)"
                      r"\\times10\^\{-4\}"), l41 * 1e4, 0.01),
-            ("6.6 myopic gap at q* (%)",
+            ("S4 optimum: myopic gap at q* (%)",
              find(s, r"sits \$([0-9.]+)\\%\$ above the optimum"),
              (my[41] / l41 - 1.0) * 100.0, 0.05),
             # the spread: both fitting windows on all three control grids
-            ("6.6 gap over windows and control grids, smallest (%)",
+            ("S4 optimum: gap over windows and control grids, smallest (%)",
              find(s, r"puts the gap between \$([0-9.]+)\\%\$ and"),
              min(100.0 * (my[_nu] / dk[_nu][_k] - 1.0)
                  for _nu in (41, 81, 161) for _k in ("lam", "lam_prev")),
              0.05),
-            ("6.6 gap over windows and control grids, largest (%)",
+            ("S4 optimum: gap over windows and control grids, largest (%)",
              find(s, r"puts the gap between \$[0-9.]+\\%\$ and "
                      r"\$([0-9.]+)\\%\$"),
              max(100.0 * (my[_nu] / dk[_nu][_k] - 1.0)
                  for _nu in (41, 81, 161) for _k in ("lam", "lam_prev")),
              0.05),
-            ("6.6 81 points lower the myopic value by more than (%)",
+            # the main text's summary of the same numbers, as a bound
+            ("5.2 optimum within x% of the myopic policy, every grid",
+             find(s, r"lies\s+within \$([0-9.]+)\\%\$ of it on every control "
+                     r"grid"),
+             max(100.0 * (my[_nu] / dk[_nu][_k] - 1.0)
+                 for _nu in (41, 81, 161) for _k in ("lam", "lam_prev")),
+             "<"),
+            ("S4 optimum: 81 points lower the myopic value by more than (%)",
              find(s, r"extrapolated optimum by more than \$([0-9]+)\\%\$"),
              100.0 * (1.0 - my[81] / my[41]), ">"),
-            ("6.6 81 points lower the optimum by more than (%)",
+            ("S4 optimum: 81 points lower the optimum by more than (%)",
              find(s, r"extrapolated optimum by more than \$([0-9]+)\\%\$"),
              100.0 * (1.0 - dk[81]["lam"] / l41), ">"),
-            ("6.6 finest grid above the extrapolant (%)",
+            ("S4 optimum: finest grid above the extrapolant (%)",
              find(s, r"returns a value \$([0-9]+)\\%\$ above it"),
              100.0 * (dk[41]["v"][-1] / l41 - 1.0), 0.03),
         ]
@@ -1887,11 +2358,11 @@ def main():
         # window is fitted, the optimum must lie below the realisable policy
         for _nu in (41, 81, 161):
             for _k in ("lam", "lam_prev"):
-                rows.append((f"6.6 {_k} below the myopic policy, {_nu} points",
+                rows.append((f"S4 optimum: {_k} below the myopic policy, {_nu} points",
                              my[_nu], dk[_nu][_k], "<"))
             # every control grid must carry the same state grids, or the
             # windows compared above are not like for like
-            rows.append((f"6.6 record for {_nu} points has the six grids", 1.0,
+            rows.append((f"S4 optimum: record for {_nu} points has the six grids", 1.0,
                          float(list(dk[_nu]["N"]) == [25, 35, 49, 69, 97, 137]),
                          0.0))
         if args.full:
@@ -1899,7 +2370,7 @@ def main():
             for _N in (49, 69):
                 _fresh = _dg.dinkelbach(_N, 41)[0]
                 _rec = dk[41]["v"][list(dk[41]["N"]).index(_N)]
-                rows.append((f"6.6 record reproduced afresh, N={_N} (rel)",
+                rows.append((f"S4 optimum: record reproduced afresh, N={_N} (rel)",
                              1e-9, abs(_fresh / _rec - 1.0), "<"))
 
     bad = check(rows)
@@ -3059,6 +3530,92 @@ def downstream_rul(nind=12, nunit=160, K=30, span=0.40, seed=5):
     return worst, sp, float(Mv.max() / Mv.min())
 
 
+def _own_indicator(u, restarts=4, seed=3):
+    """(loss, indicator) of the best fixed indicator for the constant input u,
+    with the path and signal-to-noise ratio of that input."""
+    X, DH, d2, Tf = const_curve(u, n=2000)
+
+    def L(v):
+        v = np.abs(v) / np.linalg.norm(v)
+        return float(np.mean(ell(np.arccos(np.clip(DH @ v, -1, 1)), d2)))
+    rng = np.random.default_rng(seed)
+    best = (np.inf, None)
+    for s0 in [DH.mean(0)] + [np.abs(rng.normal(size=3)) + .05
+                              for _ in range(restarts)]:
+        r = minimize(L, s0, method="Nelder-Mead",
+                     options=dict(maxiter=3000, xatol=1e-9, fatol=1e-14))
+        if r.fun < best[0]:
+            best = (float(r.fun), np.abs(r.x) / np.linalg.norm(r.x))
+    return best
+
+
+def arc_bound_plant(us=tuple(np.linspace(0.0, 3.0, 7))):
+    """Section 3.2 on the test plant: for each constant input, the arc the
+    informative direction travels, the bound 1/cos^2(arc/2) - 1 on the excess
+    error variance, and the excess e^{2 l} - 1 the best fixed indicator for
+    that input actually incurs (all in per cent). The bound must hold."""
+    out = []
+    for u in us:
+        X, DH, d2, Tf = const_curve(u, n=2000)
+        arc = float(np.sum(np.arccos(np.clip((DH[1:] * DH[:-1]).sum(1),
+                                             -1, 1))))
+        Lo, _ = _own_indicator(u)
+        out.append((float(np.degrees(arc)),
+                    100.0 * (1.0 / np.cos(arc / 2.0) ** 2 - 1.0),
+                    100.0 * (np.exp(2.0 * Lo) - 1.0)))
+    return np.array(out)
+
+
+def _rul_error(X, Tf, v, nunit=2000, K=30, span=0.40, seed=5, noise=1.0):
+    """Median |RUL error| / Tf of the template-matching estimator of
+    Section 6.8, reading the indicator v, or all whitened channels if v is
+    None, on a time-shifted population along the path X."""
+    n = len(X)
+    tg = np.linspace(0.0, Tf, n)
+
+    def at(t):
+        t = np.atleast_1d(t)
+        return np.stack([np.interp(t, tg, X[:, k]) for k in range(3)], -1)
+    aoff = np.linspace(0.0, span * Tf, K)
+    grid_t = np.linspace(0.0, 0.60 * Tf, 900)
+    cand = grid_t[grid_t + aoff[-1] <= Tf]
+    XC = np.stack([at(t + aoff) for t in cand])
+    rg = np.random.default_rng(seed)
+    taus = rg.uniform(0.0, 0.45 * Tf, nunit)
+    XU = np.stack([at(t + aoff) for t in taus])
+    r2 = np.random.default_rng(seed + 1)
+    if v is None:
+        Z = XU + r2.normal(0.0, noise, XU.shape)
+        dd = ((XC[None] - Z[:, None]) ** 2).sum(axis=(2, 3))
+    else:
+        v = np.abs(v) / np.linalg.norm(v)
+        Z = XU @ v + r2.normal(0.0, noise, (nunit, K))
+        dd = (((XC @ v)[None] - Z[:, None]) ** 2).sum(axis=2)
+    j = np.argmin(dd, axis=1)
+    return float(np.median(np.abs(cand[j] - taus)) / Tf)
+
+
+def policy_table():
+    """Table 1 of the RESS text: what an operating strategy buys and costs.
+
+    Rows: constant u = 0, 1.5, 3 with the indicator best for that input; the
+    myopic policy at q*; the myopic policy at the balanced indicator. Columns:
+    loss, excess error variance e^{2l}-1 (%), RUL error of the indicator and
+    of all channels (% of life), lifetime. The estimator knows nothing of the
+    construction; the table shows the indicator costs it about nothing under
+    every policy, while lifetime moves by an order of magnitude.
+    """
+    rows = []
+    for u in (0.0, 1.5, 3.0):
+        Lo, qo = _own_indicator(u)
+        X, DH, d2, Tf = const_curve(u, n=2000)
+        rows.append((Lo, Tf, _rul_error(X, Tf, qo), _rul_error(X, Tf, None)))
+    for q in (QS, np.ones(3) / np.sqrt(3)):
+        L, Tf, X = greedy(q)
+        rows.append((L, Tf, _rul_error(X, Tf, q), _rul_error(X, Tf, None)))
+    return rows
+
+
 def threshold_sensitivity(xf=1.0):
     """How much of Section 6 rides on the condemnation limit x_f = 0.9?
 
@@ -3722,6 +4279,245 @@ def severson_stats(win):
     return dict(n=len(R), travel=travel, e2e=e2e,
                 allpos=float((M > 0).all(axis=1).mean()),
                 shares=mid)
+
+
+def _severson_setup(win=301, nbase=50, nref=1001):
+    """Cells, per-cell derivative directions and orientation for the
+    Severson remaining-life tests; the same filter, smoothing, whitening and
+    orientation as severson_stats(). None when the data file is absent."""
+    import os
+    if not os.path.exists(DATA["severson"]):
+        return None
+    from scipy.signal import savgol_filter
+    Z = np.load(DATA["severson"], allow_pickle=True)
+    CH = [str(c) for c in Z["channels"]]
+    USE = [CH.index("QDischarge"), CH.index("IR"), CH.index("Tavg")]
+    G = np.linspace(0.15, 0.90, 40)
+    TG = np.linspace(0.0, 1.0, nref)
+    cells = []
+    for k in range(len(Z["data"])):
+        if not np.isfinite(Z["lives"][k]):
+            continue
+        aa = np.asarray(Z["data"][k], dtype=float)
+        n = len(aa)
+        if n < 400 or not np.isfinite(aa[:, USE]).all():
+            continue
+        tau = np.arange(n) / (n - 1.0)
+        w = min(win, (n // 4) * 2 + 1)
+        Y = aa[:, USE]
+        S = np.array([np.std(Y[:, j] - savgol_filter(Y[:, j], w, 3)) + 1e-12
+                      for j in range(3)])
+        D = np.stack([savgol_filter(Y[:, j], w, 3, deriv=1) * (n - 1)
+                      for j in range(3)], 1) / S[None, :]
+        B = np.median(Y[:nbase], axis=0)
+        sm = np.stack([savgol_filter(Y[:, j], w, 3) for j in range(3)], 1) - B
+        cells.append(dict(
+            n=n, Y=Y, S=S, B=B,
+            Dg=np.stack([np.interp(G, tau, D[:, j]) for j in range(3)], 1),
+            ref=np.stack([np.interp(TG, tau, sm[:, j]) for j in range(3)], 1)))
+    DG = np.array([c["Dg"] for c in cells])
+    SG = np.sign(np.median(DG.reshape(-1, 3), axis=0))
+    return dict(cells=cells, DG=DG, SG=SG, nref=nref)
+
+
+def _severson_path(S, idx):
+    """Fleet-mean informative direction over tau in [0.15, 0.90]."""
+    R = S["DG"][idx] * S["SG"][None, None, :]
+    R = R / np.linalg.norm(R, axis=2, keepdims=True)
+    M = R.mean(0)
+    return M / np.linalg.norm(M, axis=1, keepdims=True)
+
+
+def _severson_signals(S, k):
+    """Leave-one-out ingredients for test cell k: the fleet direction path,
+    the noise levels, the whitened reference path and the weight vector of
+    each signal, all computed from the other cells.
+
+    fusion is a data-level fusion indicator in the spirit of Liu et al.
+    (2013): the weights minimise the between-cell variance of the whitened,
+    oriented, baseline-referred indicator at failure relative to its mean
+    change over life, w ~ C^-1 dmu.
+    """
+    cells, SG = S["cells"], S["SG"]
+    tr = [i for i in range(len(cells)) if i != k]
+    M = _severson_path(S, tr)
+    vb = M.mean(0)
+    vb = vb / np.linalg.norm(vb)
+    sig = np.median([cells[i]["S"] for i in tr], axis=0)
+    refw = np.median([cells[i]["ref"] for i in tr], axis=0) / sig * SG
+    Zf = np.array([cells[i]["ref"][-1] / sig * SG for i in tr])
+    wf = np.linalg.solve(np.cov(Zf.T), Zf.mean(0))
+    wf = wf / np.linalg.norm(wf)
+    if wf @ Zf.mean(0) < 0:
+        wf = -wf
+    W = {"all": np.eye(3), "best": vb[:, None],
+         "cap": np.array([[1.0], [0.0], [0.0]]),
+         "temp": np.array([[0.0], [0.0], [1.0]]),
+         "fusion": wf[:, None]}
+    return M, sig, refw, W
+
+
+def _severson_fit(S, c, n0, Wm, refz, sig, back, lmax):
+    """Best-fit life for cell c observed on cycles [floor((1-back) n0), n0]:
+    the L in [n0+1, lmax] whose reference path, evaluated at cycle/(L-1), is
+    closest to the whitened, oriented, baseline-referred observations."""
+    nref = S["nref"]
+    ns = np.arange(int(np.floor((1 - back) * n0)), n0 + 1)
+    z = ((c["Y"][ns] - c["B"]) / sig * S["SG"]) @ Wm
+    Ls = np.arange(n0 + 1, lmax + 1)
+    cost = np.empty(len(Ls))
+    for i0 in range(0, len(Ls), 500):
+        Lb = Ls[i0:i0 + 500]
+        pos = np.clip(ns[None, :] / (Lb[:, None] - 1.0) * (nref - 1),
+                      0, nref - 1.000001)
+        lo = pos.astype(int)
+        fr = pos - lo
+        r = refz[lo] * (1 - fr[..., None]) + refz[lo + 1] * fr[..., None]
+        cost[i0:i0 + 500] = ((z[None] - r) ** 2).sum(axis=(1, 2))
+    return float(Ls[int(np.argmin(cost))])
+
+
+def severson_rul(back=0.30, nbase=50, win=301, tau0=(0.5, 0.7, 0.9),
+                 lmax=4000, nref=1001):
+    """Section 4's remaining-life test on the Severson cells, leave-one-out.
+
+    For each test cell the reference path (median over the other cells of
+    the smoothed, baseline-referred channels against normalised life), the
+    noise levels (median residual standard deviation), the fixed indicator
+    (renormalised mean over tau in [0.15, 0.90] of the fleet-mean informative
+    direction) and the fusion indicator come from the OTHER cells only. At
+    elapsed cycle count n0 = round(tau0 (n-1)) the estimator sees cycles
+    from floor((1-back) n0) to n0, referred to the cell's own baseline (the
+    median of its first nbase cycles), and returns the life L in [n0+1, lmax]
+    whose reference path is closest in whitened least squares. The error is
+    (L - n)/n.
+
+    Signals: all three channels, the fixed indicator, capacity alone,
+    temperature alone (the positive control: a misaligned indicator the
+    comparison must flag) and the fusion indicator. Returns the ratio of each
+    single-signal estimator's mean squared error to that of the all-channel
+    estimator, per age and pooled, the angles of the capacity axis and of the
+    fusion weights to the full-fleet informative direction, and the
+    all-channel root-mean-square error in cycles.
+    """
+    S = _severson_setup(win, nbase, nref)
+    if S is None:
+        return None
+    cells = S["cells"]
+    N = len(cells)
+    names = ("all", "best", "cap", "temp", "fusion")
+    err = {m: {t: [] for t in tau0} for m in names}
+    ecyc = {t: [] for t in tau0}
+    fus = []
+    for k in range(N):
+        M, sig, refw, W = _severson_signals(S, k)
+        fus.append(W["fusion"][:, 0])
+        c = cells[k]
+        for t in tau0:
+            n0 = int(round(t * (c["n"] - 1)))
+            for m in names:
+                L = _severson_fit(S, c, n0, W[m], refw @ W[m], sig, back, lmax)
+                err[m][t].append((L - c["n"]) / c["n"])
+                if m == "all":
+                    ecyc[t].append(L - c["n"])
+
+    def mse(a):
+        return float(np.mean(np.asarray(a) ** 2))
+
+    ratio = {m: {t: mse(err[m][t]) / mse(err["all"][t]) for t in tau0}
+             for m in names[1:]}
+    pooled = {m: mse(sum((err[m][t] for t in tau0), []))
+              / mse(sum((err["all"][t] for t in tau0), []))
+              for m in names[1:]}
+    Mall = _severson_path(S, list(range(N)))
+    cap_psi = float(np.degrees(np.arccos(np.clip(Mall[:, 0], -1, 1))).max())
+    wf = np.mean(fus, axis=0)
+    wf = wf / np.linalg.norm(wf)
+    fpsi = np.degrees(np.arccos(np.clip(Mall @ wf, -1, 1)))
+    vfull = Mall.mean(0)
+    vfull = vfull / np.linalg.norm(vfull)
+    best_psi = float(np.degrees(np.arccos(np.clip(Mall @ vfull, -1, 1))).max())
+    temp_psi = float(np.degrees(np.arccos(np.clip(Mall[:, 2], -1, 1))).max())
+    return dict(n=N, ratio=ratio, pooled=pooled, cap_psi=cap_psi,
+                best_psi=best_psi, temp_psi=temp_psi, best_w=vfull,
+                fus_w=wf, fus_psi_min=float(fpsi.min()),
+                fus_psi_max=float(fpsi.max()),
+                rms_all={t: float(np.sqrt(mse(err["all"][t]))) for t in tau0},
+                rms_all_cycles={t: float(np.sqrt(mse(ecyc[t]))) for t in tau0},
+                lives=(int(min(c["n"] for c in cells)),
+                       int(max(c["n"] for c in cells))),
+                back=back, nbase=nbase, tau0=tau0, lmax=lmax, nref=nref)
+
+
+def severson_policy(n_first=100, dn=25, horizon=1500, back=0.30,
+                    thetas=tuple(range(0, 1001, 5)),
+                    cost_ratios=(5.0, 10.0, 20.0, 50.0)):
+    """Section 4's predictive replacement policy on the Severson cells.
+
+    Each cell is inspected every dn cycles from n_first until its end of
+    life. At every inspection the leave-one-out estimator of severson_rul()
+    (the same window; the life searched from n0+1 to n0+horizon) predicts
+    the remaining life, and the cell is replaced at the first inspection at
+    which the prediction is at most theta cycles. A cell not replaced before
+    its end of life counts as a failure. For a corrective-to-preventive cost
+    ratio r the long-run cost per cycle is (r #failures + #replacements) /
+    (total cycles in service); theta is chosen per signal to minimise it,
+    the same in-sample choice for every signal.
+
+    Returns, per signal and cost ratio: the minimal cost rate, its theta,
+    the failure fraction and the mean unused life in cycles and as a
+    fraction of life; and, per signal, the smallest theta with at most 5%
+    failures and the mean unused life there.
+    """
+    S = _severson_setup()
+    if S is None:
+        return None
+    cells = S["cells"]
+    N = len(cells)
+    lives = np.array([c["n"] for c in cells], dtype=float)
+    names = ("all", "best", "cap", "fusion")
+    pred = {m: [] for m in names}
+    for k in range(N):
+        M, sig, refw, W = _severson_signals(S, k)
+        c = cells[k]
+        insp = np.arange(n_first, c["n"], dn)
+        for m in names:
+            rz = refw @ W[m]
+            pred[m].append(np.array(
+                [[n0, _severson_fit(S, c, int(n0), W[m], rz, sig, back,
+                                    int(n0) + horizon) - n0]
+                 for n0 in insp]).reshape(-1, 2))
+
+    def outcomes(m, th):
+        fail = np.zeros(N, bool)
+        used = np.zeros(N)
+        for k in range(N):
+            P = pred[m][k]
+            hit = np.nonzero(P[:, 1] <= th)[0] if len(P) else []
+            if len(hit):
+                used[k] = P[hit[0], 0]
+            else:
+                fail[k] = True
+                used[k] = lives[k]
+        return fail, used, np.where(fail, 0.0, lives - used)
+
+    out = {m: {} for m in names}
+    for m in names:
+        table = [outcomes(m, th) for th in thetas]
+        for r in cost_ratios:
+            rates = [(f.sum() * r + (~f).sum()) / u.sum() for f, u, _ in table]
+            i = int(np.argmin(rates))
+            f, u, un = table[i]
+            out[m][r] = dict(rate=float(rates[i]), theta=float(thetas[i]),
+                             fail=float(f.mean()), unused=float(un.mean()),
+                             unused_frac=float(np.mean(un / lives)))
+        for th, (f, u, un) in zip(thetas, table):
+            if f.mean() <= 0.05:
+                out[m]["matched"] = dict(theta=float(th), fail=float(f.mean()),
+                                         unused=float(un.mean()))
+                break
+    return dict(n=N, out=out, dn=dn, n_first=n_first, horizon=horizon,
+                cost_ratios=cost_ratios)
 
 
 def dinkelbach_record(k=4):

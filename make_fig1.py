@@ -74,7 +74,7 @@ for lbl, i in zip([r"$e_1$", r"$e_2$", r"$e_3$"], range(3)):
                va="center", xytext=(0, -7 if i < 2 else 6),
                textcoords="offset points")
 px, py = tern(P)
-a.plot(px, py, color="#0072B2", lw=1.6, label=r"plant $p_\tau$", zorder=3)
+a.plot(px, py, color="#0072B2", lw=1.6, label=r"path $p_\tau$", zorder=3)
 a.plot(px[0], py[0], "o", color="#0072B2", ms=3.5, zorder=4)
 a.plot(px[-1], py[-1], "s", color="#0072B2", ms=3.5, zorder=4)
 US = np.linspace(UMIN, UMAX, 120)
@@ -99,7 +99,7 @@ qx, qy = tern(Q ** 2)
 a.plot(qx, qy, "*", color="k", ms=8, zorder=5, label=r"indicator $q^\star$")
 kk = int(0.45 * (len(X) - 1))
 a.plot([px[kk], qx[0]], [py[kk], qy[0]], ":", color="0.35", lw=0.9, zorder=1)
-a.annotate(r"$\beta$", (0.5 * (px[kk] + qx[0]), 0.5 * (py[kk] + qy[0])),
+a.annotate(r"$\psi$", (0.5 * (px[kk] + qx[0]), 0.5 * (py[kk] + qy[0])),
            fontsize=8.0, color="0.2", xytext=(4, 3), textcoords="offset points")
 a.set_xlim(-0.06, 1.06)
 a.set_ylim(-0.09, 0.95)
@@ -139,7 +139,7 @@ b.tick_params(labelsize=7.0)
 b.set_xlim(0.55, 130)
 b.legend(fontsize=6.5, loc="lower right", frameon=False, handlelength=1.8,
          borderpad=0.15, labelspacing=0.3)
-b.set_title(r"(b) what the control buys, against $\rho$", fontsize=8.0, pad=2)
+b.set_title(r"(b) benefit of steering against $\rho$", fontsize=8.0, pad=2)
 b.grid(alpha=0.25, lw=0.5, which="both")
 
 fig.tight_layout(pad=0.35)

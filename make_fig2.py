@@ -41,9 +41,9 @@ h.append(Line2D([], [], ls=":", color="0.4", lw=1.1))
 l.append("quadratic")
 a.legend(h, l, fontsize=6.5, loc="upper left", frameon=False,
          handlelength=1.5, labelspacing=0.18, borderpad=0.1)
-a.set_xlabel(r"misalignment $\beta$ (deg)", fontsize=8.0, labelpad=1)
+a.set_xlabel(r"misalignment $\psi$ (deg)", fontsize=8.0, labelpad=1)
 a.set_ylabel(r"$\ell$ (nat)", fontsize=8.0, labelpad=1)
-a.set_title("(a) exact vs. quadratic", fontsize=8.0, pad=9)
+a.set_title("(a) exact and quadratic loss", fontsize=8.0, pad=9)
 a.tick_params(labelsize=7.0, pad=1.5)
 a.set_xlim(0, 60)
 a.set_ylim(0, 0.62)
@@ -86,8 +86,8 @@ c.plot(qx, qy, "*", color="k", ms=7, zorder=5, label=r"$q$")
 e = Q - (d0 @ Q) * d0
 e /= np.linalg.norm(e)
 o = np.cross(d0, e)
-for vec, col, lab, off in [(e, "#009E73", r"moves $\beta$", (1, 7)),
-                           (o, "#7F7F7F", "free", (4, 4))]:
+for vec, col, lab, off in [(e, "#009E73", r"changes $\psi$", (1, 7)),
+                           (o, "#7F7F7F", r"$\psi$ unchanged", (13, 1))]:
     tgt = np.abs(d0 + 0.40 * vec)
     tgt /= np.linalg.norm(tgt)
     tx, ty = tern(tgt ** 2)
@@ -99,7 +99,7 @@ c.set_xlim(-0.04, 1.10)
 c.set_ylim(-0.10, 0.93)
 c.set_aspect("equal")
 c.axis("off")
-c.set_title("(b) cost of each motion", fontsize=8.0, pad=9)
+c.set_title("(b) components of the rotation", fontsize=8.0, pad=9)
 c.legend(fontsize=6.5, loc="upper left", frameon=False, handlelength=1.1,
          labelspacing=0.18, borderpad=0.05, handletextpad=0.4)
 

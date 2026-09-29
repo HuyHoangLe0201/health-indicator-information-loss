@@ -1,46 +1,25 @@
-\documentclass[10pt,twocolumn]{article}
+\documentclass[final,5p,times,twocolumn]{elsarticle}
 
-% The journal asks for 12-point Times, Helvetica or Courier. Text is set in
-% Times and maths in Latin Modern, both with Type 1 outlines, so pdfTeX never
-% substitutes the Type 3 bitmaps that publisher PDF checks reject. (newtx and
-% mathptmx would give Times maths too, but need fonts this TeX Live lacks.)
 \usepackage{lmodern}
 \usepackage[T1]{fontenc}
-\usepackage{times}
-\usepackage[a4paper,margin=2.5cm]{geometry}
 
 \usepackage{amsmath,amssymb,amsfonts}
-\usepackage{amsthm}
 \usepackage{graphicx}
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta,positioning,calc}
-\usepackage[numbers,sort&compress]{natbib}
 \usepackage{lineno}
 \usepackage{array}         % >{\raggedright} column prefixes, so a
                            % narrow table column breaks instead of
                            % overfilling
 \newcolumntype{R}[1]{>{\raggedright\arraybackslash}p{#1\textwidth}}
-\usepackage{url}           % \url breaks the repository address,
-                           % \texttt would overfull it
-\usepackage{authblk}
+\usepackage{url}           % elsarticle loads neither url nor
+                           % hyperref; \url breaks the repository
+                           % address, \texttt would overfull it
 
-% sub.tex sets the same source in two columns, and a narrow measure full of
-% long technical words overflows. Let TeX stretch the inter-word space
-% instead; harmless in the wide layout, and it clears the overfull boxes in
-% the narrow one.
 \tolerance=1500
 \emergencystretch=2em
 \hyphenpenalty=100
 \hbadness=4000
-
-\theoremstyle{plain}
-\newtheorem{theorem}{Theorem}[section]
-\newtheorem{lemma}[theorem]{Lemma}
-\newtheorem{proposition}[theorem]{Proposition}
-\newtheorem{corollary}[theorem]{Corollary}
-\newtheorem{remark}[theorem]{Remark}
-\theoremstyle{definition}
-\newtheorem{problem}{Problem}
 
 \newcommand{\R}{\mathbb{R}}
 \newcommand{\E}{\mathbb{E}}
@@ -48,441 +27,236 @@
 \newcommand{\dhat}{\hat{\mathbf{d}}}
 \newcommand{\Var}{\mathrm{Var}}
 \newcommand{\Std}{\mathrm{Std}}
-\newcommand{\dFR}{d_{\mathrm{FR}}}
-\newcommand{\DB}{D_{\mathrm{B}}}
 \newcommand{\lloss}{\ell}
 
-\title{Information loss of fixed linear health indicators as a control problem:
-simplex geometry and reachability limits}
-
-\author[1]{Huy Hoang Le}
-\author[2]{Kim-Anh Nguyen}
-\affil[1]{R\&D Department, PowerMore Ltd., Da Nang 550000, Viet Nam}
-\affil[2]{Faculty of Electrical Engineering, University of Science and
-  Technology, The University of Danang, Da Nang 550000, Viet Nam}
-\date{}
+\journal{Reliability Engineering \& System Safety}
 
 \begin{document}
 
-\maketitle
+\begin{frontmatter}
 
-\noindent\textbf{Correspondence:} Kim-Anh Nguyen, Faculty of Electrical
-Engineering, University of Science and Technology, The University of Danang,
-Da Nang 550000, Viet Nam. Email: nkanh@dut.udn.vn\\
-\textbf{Email of the first author:} lhhoang@powermore.vn\\
-\textbf{Running title:} Health indicators as a control problem
+\title{Information loss of fixed linear health indicators under competing
+degradation mechanisms and variable operating conditions}
+
+\author[a]{Huy Hoang Le}
+\ead{lhhoang@powermore.vn}
+\author[b]{Kim-Anh Nguyen\corref{cor}}
+\ead{nkanh@dut.udn.vn}
+\cortext[cor]{Corresponding author}
+\affiliation[a]{organization={R\&D Department, PowerMore Ltd.},
+  city={Da Nang}, postcode={550000}, country={Viet Nam}}
+\affiliation[b]{organization={Faculty of Electrical Engineering, University
+  of Science and Technology, The University of Danang},
+  city={Da Nang}, postcode={550000}, country={Viet Nam}}
 
 \begin{abstract}
-Health indicators combine monitoring channels with fixed weights,
-yet the combination most informative about remaining life rotates as
-degradation mechanisms progress at different rates, so the indicator
-discards information. We treat that loss as a control problem: the operating
-point enters the degradation dynamics and steers the informative
-direction. For a linear indicator, positive degradation rates and Gaussian
-remaining life over a time-shift population, the loss depends on the
-indicator only through one misalignment angle, a distance on a statistical
-simplex where degradation is an input-modulated replicator flow. Zero loss
-confines the state to a segment fixed by the indicator and is attainable
-exactly when admissible inputs align the indicator along it; with fewer
-independent inputs than mechanisms less one, almost no indicator attains it.
-The loss depends on the record's Fisher information only jointly with the
-indicator's own. The best achievable
-loss solves an optimal control problem with a ratio objective and a controlled
-terminal time, the failure time. On one synthetic plant, a myopic steering
-policy lowers the information-loss objective $47$-fold against the best
-constant operating point with its own indicator, within numerical error of the
-optimum. Across $299$ random plants of the separable model, the reachable-set
-width, known before design, provides a moderate screening signal for when
-steering pays (area under the receiver-operating curve $0.73$). Public data
-show the rotation in measured battery cells, leave actuation untested, and
-reject the separable form jointly with its sensor pairing on simulated
-turbofans.
+Health indicators combine condition-monitoring channels through weights
+fixed at design time, whereas the combination most informative about
+remaining useful life, the informative direction, rotates when degradation
+mechanisms progress at different rates. This paper quantifies the
+information a fixed linear indicator discards and whether the operating
+point, which governs those rates, can reduce it. For units differing by a
+time shift, the loss depends only on the angle between the indicator and
+the informative direction, and inflates the error variance of the
+remaining-life estimate by an exact factor. If this direction traverses an
+arc $\Phi$ over life, the best fixed indicator inflates the variance by at
+most $1/\cos^{2}(\Phi/2)$; on $129$ measured battery cells the arc is
+$30.7^{\circ}$, so by at most $7.5\%$. On those cells a remaining-life
+estimator and a replacement policy perform as well with that indicator as
+with all channels. In simulation, steering the operating point reduces the
+information loss by a factor of $47$, yet a practical estimator using the
+indicator stays within $1.2\%$ of an estimator using every channel, while
+lifetime varies $19$-fold.
+Unless the direction rotates widely, a fixed indicator is adequate, and the
+operating point is better selected for lifetime.
 \end{abstract}
 
-\noindent\textbf{Keywords:} fractional optimal control; reachable sets; information geometry; health indicator; prognostics; remaining useful life
+\begin{keyword}
+health indicator \sep remaining useful life \sep prognostics \sep
+predictive maintenance \sep competing degradation mechanisms \sep
+operating conditions \sep information loss
+\end{keyword}
+
+\end{frontmatter}
 
 \linenumbers
 
 \section{Introduction}
 \label{sec:intro}
 
-Condition monitoring rarely feeds raw measurements to a life-prediction
-algorithm. A vibration channel, a temperature, an impedance and a capacity
-reading first go into a single scalar, the health indicator, and the
-life-prediction algorithm sees only that scalar~\cite{lei2018,coble2009}. The
-compression is almost always fixed: the designer picks one set of weights at
-design time, and every unit carries those weights for its whole life, because
-firmware embeds them, certification freezes them, or re-tuning them in the
-field is impractical.
+Condition monitoring seldom supplies raw measurements directly to a
+prognostic algorithm. Channels such as vibration, temperature, impedance and
+capacity are first combined into a scalar health indicator, and the
+prognostic algorithm operates on that scalar alone~\cite{lei2018,coble2009}.
+The weights of the combination are usually fixed at the design stage,
+because they are embedded in firmware, frozen by certification, or
+impractical to re-tune in the field. The indicator therefore determines how
+accurately the remaining useful life can be estimated and, through that
+estimate, how conservatively maintenance must be scheduled.
 
-Fixing the compression has a cost. Real components degrade through several
-mechanisms at once, and those mechanisms do not proceed in step: an early-life
-process may dominate for the first third of the record and then saturate,
-while a late-life process accelerates. The combination of channels that
-carries the most information about remaining life therefore rotates as the
-component ages. A fixed indicator is aligned with that combination at best at
-one moment, and is misaligned for the rest of the record; the information it
-discards is not recoverable downstream, however good the prediction algorithm
-that follows~\cite{le2026jestech}.
+Engineering components commonly degrade through several mechanisms at once,
+and these mechanisms need not progress at the same rate: one may dominate
+early in life and saturate, while another accelerates towards failure.
+Consequently, the combination of channels that carries the most information
+about the remaining useful life rotates as the component ages, and a fixed
+indicator can be aligned with it at a single instant only. Information
+discarded by the indicator cannot be recovered by any subsequent prognostic
+algorithm~\cite{le2026jestech}.
 
-The established response is to make the map better: choose a different
-criterion for it, let it switch between segments of life, or learn it from
-more run-to-failure data~\cite{le2026mst,coble2009}. All of these take the degradation as given and work on the compression. This paper acts on the degradation itself, through the operating point.
+Two questions of practical relevance therefore arise. The first concerns the
+magnitude of the information lost by a fixed indicator, and whether it can be
+assessed before the indicator is designed. The second concerns the operating
+conditions (temperature, load or duty cycle). These vary, either because the
+duty imposes them or because the operator selects them, and in both cases
+they alter the relative rates of the mechanisms; the question is whether a
+selected operating point can keep the indicator aligned and thereby reduce
+the loss.
 
-The rotation is not a property of the instrumentation. The degradation physics
-produces it, and that physics responds to stress: temperature, load and duty
-cycle change the relative rates of the competing mechanisms, not only the
-overall speed. Running a cell hotter does not only age it faster; it also
-shifts the balance between the mechanisms, and therefore moves the direction
-in which information about remaining life arrives.
+Existing work addresses the first question from the perspective of indicator
+construction, and its criteria differ from the one used here. Health
+indicators are constructed from data against criteria such as monotonicity
+and trendability~\cite{coble2009,wen2021generalized}, or by fusing sensors
+into a composite index whose weights are fitted once, for example so that
+the fused index has a consistent value at failure or follows a prescribed
+degradation model~\cite{liu2013fusion,song2018fusion,fang2017multistream,wang2022building,li2025dualpurpose};
+such indices have also been built under several operating
+conditions~\cite{yan2016multiple} and learned by neural
+networks~\cite{guo2017}, and reviews survey the resulting
+pipelines~\cite{lei2018,javed2017}. Once fitted, these mappings are fixed and
+linear in the channels, which is precisely the class of indicators considered
+in this paper, but none of the construction criteria measures the
+information about remaining life that the index discards as the mechanisms
+rotate. State-space fusion~\cite{li2021remaining} avoids a fixed mapping but
+tracks a single degradation state, so that no combination of channels can
+rotate. Section~\ref{sec:cells} compares one fusion criterion with the design
+proposed here on measured cells.
 
-The operating point is, in most applications, something the operator chooses.
-So the misalignment between a fixed indicator and the informative direction is
-not fixed by nature. It is a function of the input, and the operator can steer
-it.
+The second question connects to degradation modelling and to operation.
+Degradation under time-varying operating conditions is well
+modelled~\cite{meeker1998,ye2015,si2011,zhang2018,bian2015degradation,li2019remaining,jahani2021stochastic},
+and several degradation characteristics are known to respond differently to
+the same environment~\cite{lin2025modeling} or to depend on one
+another~\cite{chen2026causal}. A separate body of work selects the operating
+point, or the load or production rate it implies, to extend life or to
+balance performance against
+reliability~\cite{hac2020,rulcontrol2025,salazar2017system,langeron2015modeling,uithetbroek2021joint,zuo2024deterioration},
+and prognostic accuracy has been assessed through its consequences for
+predictive maintenance~\cite{kamariotis2024metric}. These studies treat the
+monitoring signal as given; none asks what the operating point does to the
+information a fixed indicator retains. Our previous work bounded the
+information that any fixed compression retains along a given
+trajectory~\cite{le2026jestech} and the number of run-to-failure units
+required to learn such a compression~\cite{le2026mst}; both analyses treat
+the trajectory as fixed.
 
-That reframing turns a data-analysis question into a control question, and
-control questions come with sharper answers than design heuristics do. One can
-ask what misalignments are reachable at a given operating envelope, whether
-zero loss is attainable at all, how many independent inputs that would take,
-and what the best achievable loss is when it is not. These are the questions
-this paper answers.
+The main contributions of this paper are as follows.
+\begin{itemize}
+\item The information discarded by a fixed linear indicator is shown to be an
+exact function of a single misalignment angle, and the resulting inflation of
+the error variance of the remaining-life estimate, and of the safety margin
+of a predictive replacement policy, is obtained in closed form
+(Section~\ref{sec:model}).
+\item The arc traversed by the informative direction over the service life
+is shown to bound this inflation before any indicator is designed, which
+yields a five-step design procedure that requires run-to-failure data only
+(Section~\ref{sec:arc}).
+\item In a case study on measured battery cells the bound is $7.5\%$, which
+corresponds to a safety margin of a predictive replacement policy at most
+$3.7\%$ wider; a leave-one-out remaining-life estimator and a replacement
+policy using the fixed indicator perform as well as ones using all channels
+(Section~\ref{sec:cells}).
+\item Selecting the operating point to keep the indicator aligned reduces the
+information loss substantially but leaves the error of a practical
+remaining-life estimator essentially unchanged, whereas the operating point
+alters the lifetime by an order of magnitude (Section~\ref{sec:steer}).
+Public run-to-failure data support the rotation premise but do not permit a
+test of the effect of the operating point on degradation
+(Section~\ref{sec:data}).
+\end{itemize}
 
-In the terms of nonlinear control, the plant is a positive system whose input
-enters through the stress factors rather than additively, and the indicator
-is a fixed static functional of its measurements. Zero loss asks that the
-$d-1$ components of the information-carrying vector orthogonal to the
-indicator vanish along the whole trajectory: an output-zeroing problem, with
-direct feedthrough, for $d-1$ outputs and $m$ inputs~\cite{isidori1995}.
-Holding those outputs at zero pins the direction of motion, so the state is
-confined to one segment fixed by the indicator, and zero loss is attainable
-exactly when an admissible input aligns the indicator at every point of it;
-the count of independent inputs is necessary for this and not sufficient. The
-best achievable loss is an optimal control problem whose objective is a
-ratio and whose horizon, the failure time, is set by the input, so a
-fixed-horizon formulation misrepresents it, and whether a policy that aligns
-the indicator as closely as possible at each instant is optimal has to be
-computed rather than assumed. Section~\ref{sec:problems} states the three
-problems formally.
-
-They sit against five bodies of work. Four address parts of the problem and
-the fifth supplies the geometry used in Section~\ref{sec:simplex}; to our knowledge none of them addresses the position taken here.
-
-The prognostics literature treats the compression as a design problem to be
-solved from data: searching genetically over candidate features against monotonicity and trendability criteria~\cite{coble2009}, fusing the
-sensors linearly into a composite health index whose weights are fitted
-once to a degradation model~\cite{liu2013fusion} and analysing that fusion
-statistically~\cite{song2018fusion}, learning it with a recurrent
-network~\cite{guo2017}, or surveying the resulting
-pipelines~\cite{lei2018,javed2017}. The composite indices
-of~\cite{liu2013fusion,song2018fusion} are fixed linear maps of exactly the
-kind studied here. Two limits on that programme are known, information-theoretic bounds on what any fixed compression can retain~\cite{le2026jestech} and the number of run-to-failure units needed to learn one reliably~\cite{le2026mst}. The first is our own, and the boundary is worth drawing explicitly: it takes one degradation trajectory as given and asks how much information a fixed compression must lose along it. The question here is the complementary one, whether that trajectory can itself be steered so that the same fixed map loses less. Both prior limits hold the trajectory fixed; neither asks whether it can be changed.
-
-The predictors downstream are overwhelmingly stochastic --- Wiener, gamma and
-inverse-Gaussian degradation processes with first-passage
-failure~\cite{ye2015,noortwijk2009}, reviewed for remaining-life estimation
-in~\cite{si2011,zhang2018} and embedded in system-level design methodology
-in~\cite{lee2014}. That literature models how damage evolves, not how the
-measurement should be compressed before the model is applied, which is the
-question upstream of it.
-
-A separate literature does treat the operating point as a decision variable,
-but to extend remaining life rather than to preserve
-estimability~\cite{hac2020,rulcontrol2025}; the two aims can conflict, and
-Section~\ref{sec:num} exhibits an instance in which they disagree. Choosing
-inputs to make a state easier to estimate is itself classical, going back to
-dual control~\cite{feldbaum1960}, and its modern forms shape a scalarisation
-of the Fisher information matrix~\cite{oato2021,hooker2015,adt2011}. Our
-Proposition~\ref{prop:blind} shows that the quantity at issue here is not a
-function of the record's Fisher information, which such designs score, but of
-its ratio to the indicator's own, so those methods apply once they score the
-indicator.
-
-The fifth body is information geometry. The reformulation of
-Section~\ref{sec:simplex} rests on the Fisher--Rao geometry of the probability
-simplex and on the Bhattacharyya
-coefficient~\cite{amari2016,bhattacharyya1943}, and the flow it produces is
-the replicator equation of evolutionary
-dynamics~\cite{hofbauer1998,sandholm2010}. These are standard objects; what is
-new here is their identification with the informative direction of a degrading
-component, and the fact that the fitness driving the flow is actuated.
-
-\begin{table*}[t]
-\caption{Where this paper sits. The columns are the axes that separate these
-literatures, not a ranking: each body of work answers a question the others do
-not ask, and the last column is a restriction this paper imposes on itself
-rather than an advantage over the others. ``Input alters degradation'' means
-the operating point enters the degradation dynamics; ``direction'' means the
-informative direction of Section~\ref{sec:prelim} is itself an objective.}
-\label{tab:position}
-\centering
-\footnotesize
-\setlength{\tabcolsep}{3pt}
-\begin{tabular}{@{}R{0.34}cccc@{}}
-\hline
- & input alters & lifetime is & direction is & indicator\\
- & degradation & an objective & an objective & fixed, scalar\\
-\hline
-Indicator design~\cite{coble2009,liu2013fusion,song2018fusion,guo2017} &
-  --- & --- & --- & $\checkmark$\\
-Fixed-indicator limits~\cite{le2026jestech,le2026mst} &
-  --- & --- & --- & $\checkmark$\\
-Stochastic life models~\cite{ye2015,si2011} &
-  --- & --- & --- & ---\\
-Health-aware control~\cite{hac2020,rulcontrol2025} &
-  $\checkmark$ & $\checkmark$ & --- & ---\\
-Observability-aware~\cite{feldbaum1960,oato2021,adt2011} &
-  $\checkmark$ & --- & partly & ---\\
-\hline
-This paper & $\checkmark$ & secondary & $\checkmark$ & $\checkmark$\\
-\hline
-\end{tabular}
-\end{table*}
-
-The contributions are as follows.
-
-\begin{enumerate}
-\item The information a fixed indicator discards is an exact function of one
-misalignment angle (Lemma~\ref{lem:exact}). Placing the channels' shares of
-the Fisher information on a statistical simplex turns the degradation into a
-replicator flow whose rates the operating point modulates, and the optimal
-indicator into a barycentre of the degradation path
-(Section~\ref{sec:simplex}).
-
-\item Zero loss confines the state to one segment fixed by the indicator, and
-is attainable exactly when every state on that segment admits an admissible
-aligning input (Section~\ref{sec:reach}). With fewer independent operating
-variables than mechanisms less one, almost every indicator fails. On a test
-plant, supplying the missing input collapses the peak reachability floor from
-$4.52^{\circ}$ to zero, with the aligning input inside the envelope along the
-whole segment, so the rule prices instrumentation rather than only bounding
-it. The count of inputs is necessary for generic data and not sufficient: the
-envelope condition along the segment decides. Taking logarithms makes every
-reachable set a translate of one fixed set, which turns that condition into a
-containment; the exceptions to the count exist for any number of mechanisms and are too fragile to build on (Section~\ref{sec:translate}). The count separates two objectives that are easily conflated: holding the misalignment at a constant level is a single scalar condition and generically needs one input, whereas freezing the informative direction outright is $d-1$ conditions. That gap is the difference between useful steering and lossless steering, and an installation with one controllable variable can have the first without the second.
-
-\item The loss is not a function of the Fisher information the record carries
-about remaining life: at any fixed value of it the loss can take any value up
-to its maximum, so input design that scores the record cannot rank inputs by
-the loss. The loss is fixed by the record's information together with the
-indicator's own, which is what such design should score instead.
-
-\item The best achievable loss is the value of an optimal control problem
-whose objective is a ratio, and whose terminal time is itself controlled
-(Section~\ref{sec:limit}); we bracket its value numerically, find it
-indistinguishable on the test plant from a myopic policy that ignores the
-controlled horizon, and do not certify it. The actuation authority, measured by the width of the reachable set and computable before any indicator is designed, provides a moderate screening signal for the regime in which steering can have substantial value; on $299$ randomly drawn plants it ranks them as well as its ratio to the drift of the informative direction and fits them better, and the drift matters only in combination with it (Section~\ref{sec:regime}).
-
-\item Robustness to model error is measured rather than assumed
-(Section~\ref{sec:misspec}): an indicator designed from activation energies
-in error by $10\%$ costs a median factor $3.10$ in loss, while an error of
-$2\%$ costs almost nothing, and the plants that escape the counting rule are
-knife edges on which one percent of shape error makes steering worse than
-not steering.
-
-\item The premises are separately testable on public run-to-failure
-data, and Section~\ref{sec:scope} tests three in turn: whether the informative
-direction rotates, whether the operating point moves it by acting on the
-damage, and whether the separable stress model, read through the pairing of
-channels with mechanisms, survives. The first holds on measured fleets. The
-second is untested, because no public fleet lets the operating point act on
-the damage; the simulated turbofans show the observed direction moving with
-the regime through the sensor response alone. The third is rejected, jointly.
-That section therefore reports which hypotheses withstand contact with data
-rather than demonstrating that the method works.
-\end{enumerate}
-
-The results do not all rest on the same assumptions, and it is worth
-separating them before any of them is stated. Lemma~\ref{lem:exact},
-Proposition~\ref{prop:record} and Theorem~\ref{thm:zero} need only the
-observation model of Section~\ref{sec:prelim}: a fixed linear indicator on
-whitened channels, and a scalar latent. Lemma~\ref{lem:sep} and
-Proposition~\ref{prop:contain} need more, namely that the input enters each
-mechanism through a single separable factor, and Section~\ref{sec:scope}
-reports that the highest-fidelity turbofan data reject that form jointly with
-the pairing of channels with mechanisms in \eqref{eq:obs}, on which the
-positivity of the informative direction also rests. The
-empirical readings of Section~\ref{sec:scope} need more again, since
-estimating one informative direction from a fleet presumes the units differ by
-a time shift rather than by their degradation coefficients.
-Fig.~\ref{fig:scope} is the map, and the reader who wants to know which branch
-a given result sits on should consult it rather than infer it.
-
-Section~\ref{sec:prelim} states the model. Sections~\ref{sec:simplex}
-to~\ref{sec:limit} develop the theory, Section~\ref{sec:num} exercises the
-three of its claims that are stated sharply enough to be refuted, and
-Section~\ref{sec:scope} reports what public fleet data can and cannot
-establish about the premises the theory rests on.
-
-\paragraph{Notation} $S^{d-1}$ is the unit sphere in $\R^{d}$,
-$\|\cdot\|$ the Euclidean norm and $\angle(a,b)\in[0,\pi]$ the angle
-between non-zero vectors $a$ and $b$. The state $x$ lies in the closed
-positive orthant and the input $u$ in a compact set
-$\mathcal U\subset\R^{m}$; an admissible input is a measurable function
-$u(\cdot)$ with values in $\mathcal U$ for which \eqref{eq:plant} has an
-absolutely continuous solution that reaches the condemnation limit in finite
-time, so the failure time $T_f$ is a functional of the input. The indicator
-is a unit weight vector $\mathbf v$; from Section~\ref{sec:simplex} on it is
-identified with its share vector $q$, $q_i=\mathbf v_i^{2}$, through the
-isometry between the simplex and the positive part of $S^{d-1}$, and $q$
-denotes both. The misalignment $\angle(\dhat,\mathbf v)$ is written $\psi$
-in Section~\ref{sec:prelim} and $\beta$ thereafter.
+The remainder of the paper is organised as follows.
+Section~\ref{sec:model} formulates the degradation model and the information
+loss. Section~\ref{sec:arc} derives a bound on the loss in terms of the
+rotation arc and the design procedure that follows from it.
+Section~\ref{sec:cells} applies the procedure to measured lithium-ion cells.
+Section~\ref{sec:steer} examines whether selecting the operating point is
+worthwhile, and Section~\ref{sec:data} examines the premises of the model on
+public run-to-failure data. Section~\ref{sec:discussion} discusses the
+implications and concludes the paper. Derivations are given in
+\ref{app:derivations}.
 
 \section{Problem formulation}
-\label{sec:prelim}
+\label{sec:model}
 
-This section states the degradation model, says precisely what a prognostic
-algorithm is being asked to estimate and where the uncertainty in that
-quantity comes from, derives the direction along which information about it
-arrives, and defines the fixed indicator whose information loss the rest of
-the paper studies. Readers familiar with~\cite{le2026jestech} will recognise
-the model; the derivation is given in full here because the geometry of
-Section~\ref{sec:simplex} depends on several of its details.
+\subsection{Degradation model with operating-point dependence}
 
-\subsection{Degradation driven by a controlled operating point}
-
-A component degrades through $d$ distinct mechanisms acting at once. In a
-lithium-ion cell these might be loss of cyclable lithium, growth of the
-solid-electrolyte interphase and mechanical fatigue of the electrode; in a
-rolling bearing, spalling, wear and lubricant degradation. We write $x_i(t)
-\ge 0$ for the damage accumulated by mechanism $i$ up to time $t$, and collect
-these into the state $x=(x_1,\dots,x_d)$.
-
-One externally chosen operating point drives all $d$ mechanisms. It collects
-the temperature, the mechanical or electrical load, and the duty cycle at
-which the operator runs the component. We write that operating point as
+A component degrades through $d$ mechanisms, with damage states
+$x=(x_1,\dots,x_d)$, $x_i\ge0$. A single operating point
+$u(t)\in\mathcal U\subset\R^{m}$, comprising variables such as temperature,
+load and duty cycle within a compact envelope $\mathcal U$, drives all of
+them:
 \begin{equation}
-u(t)\in\mathcal U\subset\R^{m},
-\label{eq:input}
-\end{equation}
-with $\mathcal U$ compact, representing the operating envelope the application
-permits. Throughout this paper $u$ is the control input: it is the decision
-variable, and the question we ask is what choosing it well can buy. The number
-of independent inputs, $m$, turns out to decide what is achievable, and it is
-usually much smaller than the number of mechanisms $d$.
-
-The damage states evolve according to
-\begin{equation}
-\dot x_i=\varphi_i(u)\,h_i(x_i),\qquad i=1,\dots,d,
+\dot x_i=\varphi_i(u)\,h_i(x_i),\qquad i=1,\dots,d.
 \label{eq:plant}
 \end{equation}
-in which the two factors play different roles:
-\begin{itemize}
-\item $\varphi_i(u)>0$ is the stress-acceleration factor of mechanism
-$i$: how much faster that mechanism runs at operating point $u$ than at a
-reference point. It carries all the dependence on the input.
-\item $h_i(x_i)>0$ is the intrinsic shape of mechanism $i$: how its
-rate depends on the damage it has already done. It carries all the dependence
-on the state.
-\end{itemize}
-This separation is the standard accelerated-life form and covers the stress
-models in routine use~\cite{meeker1998}. In the Arrhenius model the input is
-absolute temperature and $\varphi_i(u)=A_i\exp\!\big(-E_i/(k u)\big)$, with
-$A_i>0$ a pre-exponential constant, $E_i>0$ the activation energy of mechanism
-$i$ and $k$ Boltzmann's constant. In the inverse-power-law model the input is
-a mechanical or electrical stress and $\varphi_i(u)=\kappa_i u^{\,n_i}$, with
-$\kappa_i>0$ a scale factor and $n_i>0$ the stress exponent. Choosing $h_i$
-recovers the exponential, power-law and stretched-exponential degradation
-classes~\cite{le2026jestech}; the results below use only $\varphi_i>0$ and
-$h_i>0$.
-
-The within-unit dynamics are deterministic, where most of the degradation
-literature places the randomness inside a single unit's
-path~\cite{ye2015,noortwijk2009,zhang2018}. We put it between units instead
-(Section~\ref{sec:R}). The object of study is the direction along which
-information arrives, which is fixed by the relative rates of the competing
-mechanisms: a within-unit diffusion would jitter that direction without
-altering its systematic motion, whereas dispersion in the rate parameters
-across a population is what makes remaining life uncertain and therefore worth
-estimating.
-
-We measure damage on a scale normalised so that mechanism $i$ exhausts the component's tolerance when $x_i$ reaches unity. A component is withdrawn at a condemnation limit at or below that point, so we write the end of life as the first passage of any one mechanism to a threshold $x_f\in(0,1]$:
+The stress factor $\varphi_i(u)>0$ expresses the acceleration of mechanism $i$ at
+$u$ relative to a reference operating point, and the shape function
+$h_i(x_i)>0$ describes the dependence of its rate on the damage already
+accumulated. This is the standard accelerated-life form~\cite{meeker1998}: in
+the Arrhenius model $\varphi_i(u)=A_i\exp(-E_i/(kT))$ with activation energy
+$E_i$, and suitable choices of $h_i$ yield exponential, power-law and
+stretched-exponential degradation~\cite{le2026jestech}. Damage is normalised
+such that each mechanism exhausts the component at unity, and the component
+is withdrawn from service at a condemnation limit $x_f\in(0,1]$:
 \begin{equation}
 T_f=\inf\{t\ge0:\textstyle\max_i x_i(t)\ge x_f\}.
 \label{eq:tf}
 \end{equation}
-No result below depends on the value of $x_f$, which enters only by fixing where a trajectory stops. The computed quantities of Section~\ref{sec:num} do depend on it, and the value used there is stated with the rest of the test plant.
 
-\subsection{What is to be estimated, and why it is uncertain}
-\label{sec:R}
+\subsection{Remaining useful life and the informative direction}
 
-The quantity a prognostic system must report is the remaining useful life
+The quantity of interest is the remaining useful life $R(t)=T_f-t$. For a
+single unit with known parameters, \eqref{eq:plant} would determine it
+exactly; the uncertainty arises from variability between
+units~\cite{meeker1998}. The units of the population are assumed to differ
+in their position along a common degradation path, that is, by a time shift,
+and $R$ is taken to be Gaussian over the population with variance $\Var[R]$.
+Since $R$ decreases at unit rate, the sensitivity of mechanism $i$ to the
+remaining life is
 \begin{equation}
-R(t):=T_f-t,
-\label{eq:R}
+\frac{\partial x_i}{\partial R}=-\frac{\partial x_i}{\partial t}
+=-\varphi_i(u)\,h_i(x_i).
+\label{eq:sens}
 \end{equation}
-the time left before failure.
+Populations whose units differ in their degradation coefficients rather than
+in their timing are not covered: for the system of Section~\ref{sec:case},
+dispersing the coefficients rotates the regression of damage on remaining
+life by about $45^{\circ}$ relative to \eqref{eq:sens} (Supplementary
+Section~S4). Section~\ref{sec:cells} examines the practical consequence on
+measured cells whose lives differ more than fourfold.
 
-We must say where the uncertainty in $R$ lies, because \eqref{eq:plant} is a
-deterministic differential equation: for one component whose initial damage
-and parameters were known exactly, $T_f$ and hence $R$ would be known exactly,
-and there would be nothing to estimate. The uncertainty is between components,
-not within one. Units built to the same specification differ in initial damage
-and in the coefficients of \eqref{eq:plant}, which is the unit-to-unit
-variability that reliability engineering treats as the primary source of
-scatter in life data~\cite{meeker1998}. A prognostic algorithm observes one
-unit drawn from that population and must infer its remaining life.
-
-We therefore treat $R$, at any given observation instant, as a random variable
-over the population of units, with prior variance $\Var[R]>0$. This variance
-is the uncertainty the algorithm exists to reduce, and it is the reason the
-estimation problem is not trivial. Everything below is written for a nominal
-trajectory of \eqref{eq:plant}, with the fleet spread entering only through
-$\Var[R]$.
-
-\subsection{Observations and the informative direction}
-\label{sec:dvec}
-
-Each damage state reaches the record through its own noisy channel,
+Each mechanism is observed through a dedicated channel,
 \begin{equation}
 y_i=x_i+\sigma_i\epsilon_i,\qquad i=1,\dots,d,
 \label{eq:obs}
 \end{equation}
-with $\sigma_i>0$ the noise level of channel $i$ and $\epsilon_i$ independent standard normal variables. The record available to the algorithm is the collection of these measurements over the observation window.
-
-Equation~\eqref{eq:obs} pairs each mechanism with a channel of its own. Condition monitoring in general returns $y=H(x,u)+\epsilon$, with sensors that mix mechanisms, and the pairing is an assumption rather than a description. It is load-bearing: the positivity of $\dvec$ that Remark~\ref{rem:pos} shows the results to need follows from $\varphi_i>0$ and $h_i>0$ in these coordinates and need not survive an arbitrary $H$. Where $H$ is known, invertible and positivity-preserving the construction carries over to $H^{-1}y$; the general case does not reduce to it.
-
-Two assumptions carry the sensitivity, and both are stated here rather than left to be inferred.
-
-\paragraph{The prior on $R$} We take $R$ to be Gaussian over the population with variance $\Var[R]$. Linearising the record about the nominal trajectory, following~\cite{le2026jestech}, then makes the record and $R$ jointly Gaussian, and the mutual informations below are exact. Linearisation alone would not do it: with a non-Gaussian prior of the same variance the Gaussian value is an upper bound on what a channel carries, and Lemma~\ref{lem:exact} becomes an inequality rather than an identity. The information geometry that follows is exact under this Gaussian prior and the time-shift population described next; it is not a model of population variability in general.
-
-\paragraph{How units differ} We take the population spread to be a reparametrisation of a single degradation path: units differ in where they sit on the trajectory of \eqref{eq:plant}, not in its shape. This is what makes $R$ a coordinate along that path, and it is what the next display uses. Dispersion in the coefficients of \eqref{eq:plant} is a different matter, because it moves $\partial x/\partial\theta$ rather than sliding along $\partial x/\partial R$, and Remark~\ref{rem:shift} records what it costs.
-
-The sensitivity of channel $i$ to remaining life then follows from \eqref{eq:R}: because $R$ falls at unit rate as $t$ advances,
+with independent standard normal noise $\epsilon_i$. This pairing of channels
+with mechanisms is an assumption: condition monitoring in general yields
+$y=H(x,u)+\epsilon$, with sensors that mix mechanisms, and
+Section~\ref{sec:data} shows that raw turbofan sensors violate it. Whitening
+each channel by its noise level gives the signal vector and its direction,
 \begin{equation}
-\frac{\partial x_i}{\partial R} =-\frac{\partial x_i}{\partial t}
-=-\varphi_i(u)\,h_i(x_i).
-\label{eq:sens}
-\end{equation}
-\begin{remark}[what the time-shift assumption costs]\label{rem:shift}
-Equation~\eqref{eq:sens} is exact when the population spread slides along one path, and only then. On the plant of Section~\ref{sec:testplant}, with units instead drawn by dispersing the degradation coefficients, the direction that the population regression of $x$ on $R$ actually returns stands about $45^{\circ}$ from $-\varphi(u)h(x)$, across two families of dispersed coefficient and every spread tried; a control whose units are started on the reference trajectory, where \eqref{eq:sens} holds by construction, returns the same regression to within $0.2^{\circ}$. The misalignments this paper is about are a few degrees. Extending the construction to populations dispersed in $\theta$, where the observation carries scatter that no value of $R$ explains, is open.
-\end{remark}
-
-Dividing each channel by its own noise level puts them on a common scale, and
-taking magnitudes gives the whitened signal direction
-\begin{equation}
-\dvec(t)=\big[\sigma_i^{-1}\varphi_i(u)h_i(x_i)\big]_{i=1}^{d}, \qquad
-\dhat=\dvec/\|\dvec\| .
+\dvec=\big[\sigma_i^{-1}\varphi_i(u)h_i(x_i)\big]_{i=1}^{d},\qquad
+\dhat=\dvec/\|\dvec\|.
 \label{eq:dvec}
 \end{equation}
-In words: $\dvec$ says how strongly, and in what combination of channels, the
-measurement responds to a change in remaining life. Its direction $\dhat$ is
-the \emph{informative direction}, the combination a health indicator has to be
-aligned with and the object named informally in Section~\ref{sec:intro}. Its length $\|\dvec\|$ is the strength of that signal. The two objects carry the paper: $\|\dvec\|$ is how much information arrives and $\dhat$ is where it arrives from. The loss of a fixed indicator depends on the second through the misalignment, and on the first only through a weight that saturates as the signal grows (Lemma~\ref{lem:exact}). Experiment design in the observability tradition scores the first, and Proposition~\ref{prop:blind} shows that the first does not determine the loss.
-
-We use two properties of \eqref{eq:dvec} repeatedly below.
-
-\paragraph{Positivity} Every entry of $\dvec$ is strictly positive, because
-$\varphi_i>0$ and $h_i>0$ in \eqref{eq:plant}. This is a consequence of the
-degradation model rather than an assumption imposed for convenience, and
-Remark~\ref{rem:pos} shows that the results below would fail without it.
-
-\paragraph{Actuation} $\dvec$ is an explicit algebraic function of the state
-and the input. The direction along which information about $R$ arrives is
-therefore not a fixed property of the instrumentation: it moves when the
-operating point moves. That is the observation this paper is built on, and
-Fig.~\ref{fig:framework} places it: the operating point reaches $\dhat$ twice,
-once through the state and once directly.
+The norm $\|\dvec\|$ measures the sensitivity of the record to the remaining
+life, and $\dhat$ is the combination of channels along which this sensitivity
+acts, referred to as the \emph{informative direction}. All entries of
+$\dvec$ are positive, and $\dhat$ depends on both the state and the operating
+point. The operating point affects $\dhat$ through two paths: indirectly,
+through the damage it produces, and directly, through $\varphi_i(u)$
+(Fig.~\ref{fig:framework}).
 
 \begin{figure*}[tb]
 \centering
@@ -498,10 +272,8 @@ once through the state and once directly.
   th/.style={-{Latex[length=2mm]}, thick},
   lbl/.style={font=\scriptsize, inner sep=1pt}]
 
-% ---------------- the operating point ------------------------------------
 \node[lev] (u) at (0,0) {operating point\\$u(t)\in\mathcal U\subset\R^{m}$};
 
-% ---------------- the d mechanism tracks: dynamics and channel -----------
 \foreach \i/\y in {1/15mm, 2/0mm, 3/-15mm} {
   \node[b] (m\i) at (46mm,\y)
         {$\dot x_{\i}=\varphi_{\i}(u)\,h_{\i}(x_{\i})$\\[1pt]
@@ -512,14 +284,12 @@ once through the state and once directly.
 \node[lbl, anchor=north, align=center] at (46mm,-21mm)
       {$d$ mechanisms and their channels,\\ all driven by one operating point};
 
-% ---------------- whitening and the direction ----------------------------
 \node[ob] (d) at (92mm,0)
       {$\dvec_i=\sigma_i^{-1}\varphi_i h_i$\\[1pt]$\dhat=\dvec/\|\dvec\|$};
 \foreach \i in {1,2,3} { \draw[a] (m\i.east) -- (d.west); }
 
-% ---------------- indicator, angle, loss ---------------------------------
 \node[ob] (v) at (18mm,-33mm)
-      {fixed indicator\\$z=\mathbf v^{\top}y$, $\|\mathbf v\|=1$};
+      {fixed indicator\\$z=\mathbf v^{\top}\tilde y$, $\|\mathbf v\|=1$};
 \node[ob] (l) at (92mm,-33mm)
       {$\lloss=-\tfrac12\log\!\big(1-w\sin^{2}\psi\big)$};
 
@@ -527,1244 +297,391 @@ once through the state and once directly.
 \draw[a] (v) -- node[above, font=\scriptsize]
       {$\psi=\angle(\dhat,\mathbf v)$} (l);
 
-% ---------------- the second path ----------------------------------------
 \draw[th, dashed] (u.north) to[out=42, in=138]
       node[above, font=\scriptsize]
-      {directly, through $\varphi_i(u)$: this is what makes $\psi$ controllable}
+      {direct path through $\varphi_i(u)$, which makes $\psi$ controllable}
       (d.north);
-
-\node[lbl, align=left, anchor=north west, text width=105mm] at (0mm,-41mm)
-      {Alignment asks $\dhat(x,u)=q$: $d-1$ scalar equations on $m$ unknowns,
-       whence the counting rule of Theorem~\ref{thm:zero}.};
 \end{tikzpicture}
-\caption{The construction. The operating point enters twice, through the plant and directly through $\varphi_i(u)$; the second path is what makes the misalignment $\psi$ a control variable. One input drives all $d$ mechanisms.}
+\caption{Overview of the problem formulation. The operating point affects the informative direction both through the damage and directly through the stress factors $\varphi_i(u)$; the direct path makes the misalignment $\psi$ controllable. A single operating point drives all $d$ mechanisms.}
 \label{fig:framework}
 \end{figure*}
 
-Because $R$ is scalar, a single signal-to-noise ratio governs the information
-the record carries about it, namely the squared sensitivity times the prior
-uncertainty,
+\subsection{Information loss of a fixed linear indicator}
+\label{sec:loss}
+
+A fixed linear indicator maps the whitened record $\tilde y=\Sigma^{-1/2}y$,
+$\Sigma=\mathrm{diag}(\sigma_i^{2})$, through a weight vector selected once
+at the design stage:
 \begin{equation}
-\gamma=\|\dvec\|^{2}\,\Var[R].
-\label{eq:gamma}
-\end{equation}
-
-Rates in \eqref{eq:dvec} are taken with respect to clock time,
-whereas~\cite{le2026jestech} differentiates with respect to age normalised by
-$T_f$. The two conventions differ by a factor common to all $d$ channels, so
-they give the same $\dhat$, and hence the same geometry in
-Sections~\ref{sec:simplex}--\ref{sec:reach}, while rescaling $\gamma$. Every
-computation below uses clock time, including those of
-Section~\ref{sec:limit}, where lifetime enters the objective.
-
-\subsection{The fixed health indicator and its information loss}
-
-A health indicator compresses the $d$ measured channels into one scalar before
-any life prediction is made. We take it to be a fixed linear map. Since \eqref{eq:dvec} already measures each channel in units of its own noise, we write the indicator in those same coordinates: with $\Sigma:=\mathrm{diag}(\sigma_1^{2},\dots,\sigma_d^{2})$ and $\tilde y:=\Sigma^{-1/2}y$ the whitened record,
-\begin{equation}
-z=\mathbf v^{\top}\tilde y,\qquad \|\mathbf v\|=1,
+z=\mathbf v^{\top}\tilde y,\qquad \|\mathbf v\|=1 .
 \label{eq:hi}
 \end{equation}
-with the weight vector $\mathbf v$ chosen once, at design time, and held for
-the whole life of the component. Fixing it is not a modelling convenience: the
-map is typically embedded in firmware or frozen by certification, so it cannot be re-tuned as the component ages. An indicator specified on the raw measurements, $z=\mathbf w^{\top}y$, is the same map under $\mathbf v\propto\Sigma^{1/2}\mathbf w$, and the normalisation $\|\mathbf v\|=1$ only fixes the scale of $z$; it restricts nothing. The distinction matters because the angle below is measured after whitening: unless the $\sigma_i$ are equal, a unit vector in raw coordinates is not a unit vector in whitened ones, and the two readings of $\psi$ disagree.
-
-We compute the cost of fixing $\mathbf v$ as follows. Write $\psi(t)$ for the
-angle between the informative direction $\dhat(t)$ and the indicator weights
-$\mathbf v$. After whitening, the signal in the record points along $\dhat$
-and has magnitude $\|\dvec\|\sqrt{\Var[R]}$, while the noise is isotropic of
-unit scale. Projecting onto a unit vector $\mathbf v$ therefore keeps the
-fraction $\cos\psi$ of the signal and all of the noise, so the indicator's
-signal-to-noise ratio is
+An indicator defined on raw measurements is the same mapping with
+$\mathbf v\propto\Sigma^{1/2}\mathbf w$. Let $\psi$ denote the angle between
+$\mathbf v$ and $\dhat$, and $\gamma=\|\dvec\|^{2}\Var[R]$ the
+signal-to-noise ratio of the record. Linearising the record about the
+nominal path renders it jointly Gaussian with $R$; the indicator retains the
+fraction $\cos^{2}\psi$ of the signal and all of the noise. The information
+about $R$ that it discards relative to the complete record is therefore
+(\ref{app:loss})
 \begin{equation}
-\gamma\cos^{2}\psi
-\label{eq:snrhi}
-\end{equation}
-against the $\gamma$ of \eqref{eq:gamma} available to an oracle that is free
-to re-aim its projection at $\dhat(t)$ at every instant. Since a scalar
-Gaussian channel of signal-to-noise ratio $s$ carries $\tfrac12\log(1+s)$ nats
-about $R$~\cite{cover2006}, the information the fixed indicator forfeits, at
-each instant, is
-\begin{equation}
-\lloss=\tfrac12\big[\log(1+\gamma)-\log(1+\gamma\cos^{2}\psi)\big]\ \ \ge 0 ,
-\label{eq:lossraw}
-\end{equation}
-The design objective throughout is its average over the life of the component,
-\begin{equation}
-\bar\lloss:=\frac{1}{T_f}\int_{0}^{T_f}\lloss(t)\,dt ,
-\label{eq:objective}
-\end{equation}
-a loss per unit time. We optimise this rate rather than the information the whole observation record forfeits, because \eqref{eq:objective} is unaffected by how densely the record is sampled and is therefore a property of the indicator rather than of the measurement schedule. The two are different quantities, and Proposition~\ref{prop:record} gives the second in closed form.
-
-A third quantity is the one an operator actually pays for: the error of whatever remaining-life estimator runs downstream. It is neither of the first two and is not a function of them. The loss is a logarithmic information quantity and the error is a time, and an estimator holding a whole history recovers much of what any single instant discards, so a large spread in \eqref{eq:objective} does not imply a comparable spread in error. What the theory can offer downstream is therefore an ordering rather than a conversion, and Section~\ref{sec:downstream} tests that ordering against an estimator built from none of this construction: it survives, with a spread in error much smaller than the spread in loss. Equation~\eqref{eq:objective} should be read accordingly, as an information-geometric objective whose ranking carries downstream, not as a surrogate for prognostic accuracy.
-
-Two remarks on what \eqref{eq:lossraw} does and does not say. It is a loss
-relative to an oracle that no fixed map can realise, so it measures the price
-of the time-invariance constraint rather than of a bad design; a perfectly
-chosen $\mathbf v$ still pays it whenever $\dhat$ moves. And it depends on the
-indicator only through the single angle $\psi$: two indicators that make the
-same angle with $\dhat$ are equally good, whatever else distinguishes them.
-
-The next lemma replaces \eqref{eq:lossraw} by a closed form that will be more
-convenient throughout, and records how it behaves at small misalignment.
-
-\begin{lemma}\label{lem:exact}
-Let $w:=\gamma/(1+\gamma)\in(0,1)$. Then
-\begin{equation}
-\lloss=-\tfrac12\log\!\big(1-w\sin^{2}\psi\big),
+\lloss=\tfrac12\log\frac{1+\gamma}{1+\gamma\cos^{2}\psi}
+=-\tfrac12\log\!\big(1-w\sin^{2}\psi\big),
 \label{eq:exact}
 \end{equation}
-exactly and at every signal-to-noise ratio, and
+with $w=\gamma/(1+\gamma)$, and the error variance of the optimal estimate of
+$R$ based on the indicator exceeds that based on the complete record by the
+factor
 \begin{equation}
-\lloss=\tfrac{w}{2}\psi^{2}+\tfrac{w(3w-2)}{12}\psi^{4}+O(\psi^{6}).
-\label{eq:expansion}
+\frac{\Var[R\mid z]}{\Var[R\mid\tilde y]}=\frac{1+\gamma}{1+\gamma\cos^{2}\psi}
+=e^{2\lloss}.
+\label{eq:mmse}
 \end{equation}
-\end{lemma}
-
-\begin{proof}
-Substituting $\cos^{2}\psi=1-\sin^{2}\psi$ into \eqref{eq:lossraw} gives
-\[
-\lloss=-\tfrac12\log\frac{1+\gamma-\gamma\sin^{2}\psi}{1+\gamma}
-=-\tfrac12\log\big(1-w\sin^{2}\psi\big).
-\]
-For \eqref{eq:expansion}, use
-$-\tfrac12\log(1-s)=\tfrac{s}{2}+\tfrac{s^{2}}{4} +O(s^{3})$ with
-$s=w\sin^{2}\psi$ and $\sin^{2}\psi=\psi^{2}-\psi^{4}/3+O(\psi^{6})$;
-collecting the $\psi^{4}$ terms gives $-w/6+w^{2}/4=w(3w-2)/12$.
-\end{proof}
-
-The quadratic term of \eqref{eq:expansion} is the bound obtained in
-\cite[Thm.~1]{le2026jestech}, which is therefore the leading term of an exact
-identity rather than an approximation of unknown quality. The quartic
-coefficient $w(3w-2)/12$ changes sign at $w=2/3$, that is at $\gamma=2$: below
-that signal-to-noise ratio the quadratic model overstates the loss, above it
-the model understates it. This matters in practice because prognostic problems
-sit on both sides of $\gamma=2$: an early-life measurement with a weak signal
-on one side, a well-instrumented component near failure on the other.
-Fig.~\ref{fig:mech}(a) plots the exact loss against its quadratic
-approximation on both sides of that ratio.
-
-
-\begin{proposition}\label{prop:record}
-Let the record consist of measurements \eqref{eq:obs} at instants $t_1,\dots,t_N$, with the noise independent across channels and across instants, and write $\dvec_k:=\dvec(t_k)$ and $\psi_k$ for the angle between $\dhat_k$ and $\mathbf v$. Put
-\begin{gather*}
-G:=\Var[R]\sum_{k=1}^{N}\|\dvec_k\|^{2},\qquad
-W:=\frac{G}{1+G},\\
-S:=\frac{\sum_{k}\|\dvec_k\|^{2}\sin^{2}\psi_k}{\sum_{k}\|\dvec_k\|^{2}} .
-\end{gather*}
-Then the information about $R$ that the fixed indicator forfeits over the whole record is
+The loss thus depends on the indicator only through a single angle, and for
+small misalignment $\lloss\approx\tfrac{w}{2}\psi^{2}$. The design objective
+is its average over the service life,
 \begin{equation}
-\lloss_{\mathrm{rec}}=-\tfrac12\log\big(1-W S\big).
-\label{eq:record}
+\bar\lloss=\frac{1}{T_f}\int_{0}^{T_f}\lloss(t)\,dt .
+\label{eq:objective}
 \end{equation}
-\end{proposition}
+The same reduction applies to the information discarded over a complete
+record, with $\gamma$ summed over the measurement instants and
+$\sin^{2}\psi$ averaged with weights $\|\dvec\|^{2}$ (Supplementary
+Section~S2).
 
-\begin{proof}
-See Supplementary Section~S2.
-\end{proof}
+The factor \eqref{eq:mmse} has a direct consequence for maintenance. Under
+the Gaussian posterior of the model, a predictive replacement policy that
+replaces a unit once its probability of failing within a lead time $h$
+reaches $\alpha$ does so when the estimated remaining life falls to
+$h+z_{1-\alpha}\sigma$, where $\sigma$ is the posterior standard deviation
+and $z_{1-\alpha}$ the standard normal quantile. The safety margin
+$z_{1-\alpha}\sigma$ is, on average, remaining life discarded at replacement
+beyond the lead time, and a fixed indicator multiplies it by $e^{\lloss}$
+relative to the complete record. Decision-oriented assessments of prognostic
+algorithms weigh precisely this margin against the risk of
+failure~\cite{kamariotis2024metric}.
 
-Equation \eqref{eq:record} is \eqref{eq:exact} again, with the instantaneous signal-to-noise ratio $\gamma$ replaced by its sum $G$ over the record, and $\sin^{2}\psi$ by the mean $S$ weighted by the signal energy $\|\dvec_k\|^{2}$. The reduction to one angle therefore survives the passage from an instant to a record. What does not survive is the averaging: $\bar\lloss$ averages the loss, whereas \eqref{eq:record} averages $\sin^{2}\psi$ inside it, and the two differ. They also select different indicators. Minimising \eqref{eq:record} over $\|\mathbf v\|=1$ maximises $\mathbf v^{\top}\big(\sum_k\dvec_k\dvec_k^{\top}\big)\mathbf v$, so the best fixed indicator for the record is the leading eigenvector of the integrated Fisher matrix, while the minimiser of $\bar\lloss$ is the barycentre of Proposition~\ref{prop:bary}. Every result below is stated for $\bar\lloss$.
+Equation \eqref{eq:exact} also identifies the relevant Fisher information.
+The design of accelerated degradation tests and of inputs for estimability
+usually maximises the Fisher information of the record~\cite{adt2011}, here
+$I_{\mathrm{rec}}=\|\dvec\|^{2}$ per unit prior variance about $R$; the loss,
+however, is determined by this quantity together with the Fisher information
+of the indicator itself, $I_z=(\mathbf v^{\top}\dvec)^{2}$:
+\begin{equation}
+\lloss=\tfrac12\log\big(1+\Var[R]\,I_{\mathrm{rec}}\big)
+-\tfrac12\log\big(1+\Var[R]\,I_z\big).
+\label{eq:fisherpair}
+\end{equation}
+For a fixed value of $I_{\mathrm{rec}}$ the loss still ranges from zero to
+$\tfrac12\log(1+\gamma)$ as $\psi$ varies. Maximising the information in the
+record therefore does not minimise the loss of a fixed indicator, whereas
+including $I_z$ in the criterion does. Supplementary Section~S4 illustrates
+this on the system of Section~\ref{sec:case}.
 
-\begin{corollary}[what the loss costs an estimator]\label{cor:mmse}
-In the model of Section~\ref{sec:prelim}, the minimum-variance estimate of $R$ formed from the fixed indicator carries mean-squared error
-\[
-\frac{\Var[R\mid z]}{\Var[R\mid\tilde y]}=\frac{1+\gamma}{1+\gamma\cos^{2}\psi}=e^{2\lloss}
-\]
-times that of the estimate formed from the whole whitened record, at each instant. The same identity holds over a record with $\lloss$ replaced by $\lloss_{\mathrm{rec}}$ of Proposition~\ref{prop:record}.
-\end{corollary}
+\section{Rotation of the informative direction and a bound on the loss}
+\label{sec:arc}
 
-\begin{proof}
-Write $\tilde y=\dvec R+\epsilon$ with $\epsilon\sim N(0,I_d)$ and $R$ Gaussian. The indicator returns $z=(\mathbf v^{\top}\dvec)R+\mathbf v^{\top}\epsilon$, whose noise is standard normal because $\|\mathbf v\|=1$, so its signal-to-noise ratio is $\gamma\cos^{2}\psi$ and $\Var[R\mid z]=\Var[R]/(1+\gamma\cos^{2}\psi)$. The record's sufficient statistic is $\dvec^{\top}\tilde y$, with ratio $\gamma$, giving $\Var[R\mid\tilde y]=\Var[R]/(1+\gamma)$. Their quotient is $e^{2\lloss}$ by \eqref{eq:lossraw}. The record statement is the same computation with $G$ and $S$ in place of $\gamma$ and $\sin^{2}\psi$.
-\end{proof}
+\subsection{Rotation rate of the informative direction}
 
-The loss is therefore not a score standing in for estimation error: it is the logarithm of the factor by which that error inflates. What the corollary does not settle is whether the ordering survives an estimator other than the one the model prescribes, and Section~\ref{sec:downstream} checks that separately.
+Let $g_i=\log\dvec_i$ denote the logarithmic rate of channel $i$ and
+$p_i=\dhat_i^{2}$ the share of the record's Fisher information carried by
+channel $i$. Differentiating \eqref{eq:dvec} along \eqref{eq:plant} gives
+(\ref{app:rotation})
+\begin{equation}
+\|\dot{\dhat}\|=\Std_p[\dot g],\qquad
+\dot g_i=\varphi_i(u)h_i'(x_i)+\nabla_{u}\log\varphi_i(u)\cdot\dot u .
+\label{eq:repl}
+\end{equation}
+The informative direction thus rotates at a speed equal to the
+information-weighted spread of the logarithmic rates of the mechanisms. If
+all mechanisms accelerate in proportion, the direction remains fixed however
+rapidly the component degrades; rotation arises only from differences
+between the mechanisms. The second term of $\dot g_i$ represents the
+influence of the operating point: a change in the operating point alters the
+rates that rotate the direction. Only the component of this rotation along
+the great circle towards $\mathbf v$ changes $\psi$; the remaining $d-2$
+components rotate the direction without affecting the information retained
+by the indicator (Fig.~\ref{fig:mech}(b)).
 
-\subsection{The control problems}
-\label{sec:problems}
+\subsection{A bound in terms of the rotation arc}
 
-The plant \eqref{eq:plant} is a nonlinear system driven by the operating
-point, and the fixed indicator is a static output functional of its
-measurements. The paper studies three problems on it, stated here so that
-each result below can be placed.
+Suppose that the informative direction traverses a total arc $\Phi<\pi$ over
+the service life. The direction at the midpoint of this arc lies within
+$\Phi/2$ of every point on it, so a fixed indicator placed at the midpoint
+satisfies $\psi\le\Phi/2$ throughout. Since the loss increases with $\psi$,
+the best fixed indicator satisfies, at every instant,
+\begin{equation}
+e^{2\lloss}\le\frac{1}{1-w\sin^{2}(\Phi/2)}\le\frac{1}{\cos^{2}(\Phi/2)} .
+\label{eq:arcbound}
+\end{equation}
+The bound requires only the arc, which can be estimated from run-to-failure
+data before any indicator is designed. An arc of $30^{\circ}$ allows at most
+$7.2\%$ additional error variance, $60^{\circ}$ at most $33\%$, and
+$90^{\circ}$ a doubling; the right-hand bound corresponds to the limit of
+high signal-to-noise ratio and is independent of $\gamma$. Correspondingly,
+the safety margin of the replacement policy of Section~\ref{sec:loss} grows
+by at most the factor $1/\cos(\Phi/2)$. The best fixed indicator lies close
+to the midpoint of the arc; Supplementary Section~S2 characterises it as a
+barycentre of the path of the informative direction. For the system of
+Section~\ref{sec:case} under constant inputs, the arc is between
+$24.8^{\circ}$ and $35.6^{\circ}$, the bound allows between $4.8\%$ and
+$10.3\%$, and the best fixed indicator for each input incurs between $1.6\%$
+and $3.4\%$; the bound therefore holds and overestimates the excess by a
+factor of about three.
 
-\begin{problem}[attainability]\label{prob:zero}
-Given the plant \eqref{eq:plant}, the envelope $\mathcal U$ and an initial
-state $x_0$, characterise the indicators and admissible inputs for which
-$\bar\lloss=0$, and count the independent inputs this requires.
-\end{problem}
-
-\begin{problem}[best achievable loss]\label{prob:frac}
-For a fixed indicator, find the infimum of $\bar\lloss$ over admissible
-inputs, the horizon $T_f$ being determined by the input, and certify it.
-\end{problem}
-
-\begin{problem}[screening before design]\label{prob:screen}
-From the plant model and $\mathcal U$ alone, before any indicator is chosen,
-decide whether steering can reduce $\bar\lloss$ substantially below its
-value under the best constant input.
-\end{problem}
-
-Theorem~\ref{thm:zero} answers Problem~\ref{prob:zero} exactly, as
-membership of the reachable direction set at every point of one segment that
-the indicator fixes, and gives the count of inputs as a necessary condition
-for generic data; Corollary~\ref{cor:tri} separates it from the weaker task of
-holding the misalignment constant, and Proposition~\ref{prop:contain} restates
-the exact criterion on the separable subclass. Problem~\ref{prob:frac} is the
-fractional optimal control problem of Section~\ref{sec:limit}. Its value is
-bracketed numerically in Section~\ref{sec:frac}, and
-Proposition~\ref{prop:converse} reduces its certification to exhibiting one
-verification function, which remains open; Section~\ref{sec:misspec} measures
-how much of the computed benefit survives an error in the model the design is
-built on. Problem~\ref{prob:screen} is addressed empirically, across random
-plants of the separable model, in Section~\ref{sec:regime}.
-Proposition~\ref{prop:blind} shows that the objective of
-Problems~\ref{prob:zero} and~\ref{prob:frac} cannot be read from the record's
-Fisher information about remaining life, only from its ratio to the
-indicator's own, so neither problem reduces to input design that scores the
-record.
-
+Figure~\ref{fig:mech}(a) shows the dependence of the loss on the
+misalignment angle, and Fig.~\ref{fig:mech}(c) the rotation measured on a
+battery fleet (Section~\ref{sec:cells}).
 
 \begin{figure}[t]
 \centering \includegraphics[width=\linewidth]{fig2.pdf}
-\caption{(a)~Lemma~\ref{lem:exact}: the exact loss (solid) against its quadratic model (dotted), whose quartic coefficient changes sign at $\gamma=2$. (b)~Theorem~\ref{thm:beta}: of the replicator velocity, only the component along the geodesic towards $q$ moves $\beta$. (c)~The rotation, measured on the Severson fleet at two differentiation windows.}
+\caption{(a)~The exact loss \eqref{eq:exact} (solid) and its quadratic approximation (dotted), whose quartic correction changes sign at $\gamma=2$. (b)~Only the component of the rotation of the informative direction along the great circle towards the indicator changes the misalignment. (c)~Rotation measured on the Severson fleet for two differentiation windows.}
 \label{fig:mech}
 \end{figure}
 
-\section{The information simplex and its replicator flow}
-\label{sec:simplex}
+\subsection{Design procedure}
+\label{sec:procedure}
 
-Lemma~\ref{lem:exact} reduced the loss to one angle. This section shows that
-the angle lives on a familiar object, the probability simplex, and that the
-degradation traces a flow along it that the operating point drives. The payoff is threefold: the loss becomes a recognised statistical distance, the optimal indicator becomes a barycentre, and the effect of the input becomes a single interpretable quantity. Two of the results here are load-bearing for what follows --- the replicator form of Theorem~\ref{thm:repl} and the misalignment rate of Theorem~\ref{thm:beta}, which Section~\ref{sec:reach} builds the reachability argument on. The Bhattacharyya identity and the barycentre are interpretation: they say what the loss and the optimal indicator already are in recognised terms, and nothing later depends on them.
-
-\subsection{Information shares}
-
-Because every entry of $\dvec$ is positive (Section~\ref{sec:dvec}), the
-squared components of the unit vector $\dhat$ form a probability vector:
-\begin{equation}
-p_i:=\dhat_i^{2},\qquad p_i>0,\qquad \textstyle\sum_i p_i=1 .
-\label{eq:shares}
-\end{equation}
-The interpretation is direct. The total Fisher information the record carries
-about $R$ is $\|\dvec\|^{2}\Var[R]$ by \eqref{eq:gamma}, and channel $i$
-contributes $\dvec_i^{2}\Var[R]$ of it. So $p_i$ is exactly the share of the
-total information about remaining life that arrives through channel $i$. A
-component in which one mechanism dominates the degradation has $p$ near a
-vertex of the simplex; one in which three mechanisms contribute equally sits
-near its centre.
-
-The same map applied to the indicator, $q_i:=\mathbf v_i^{2}$, is legitimate
-because an optimal indicator may be taken with non-negative weights.
-
-\begin{remark}[positivity is load-bearing]\label{rem:pos}
-If $\dhat\ge0$ then $\dhat^{\top}|\mathbf v|\ge|\dhat^{\top}\mathbf v|$ at
-every instant, so replacing $\mathbf v$ by $|\mathbf v|$ never increases
-\eqref{eq:lossraw}: non-negative weights are without loss of generality. This
-argument uses the positivity of $\dvec$ inherited from $\varphi_i,h_i>0$, and
-it fails without it: in random trials with sign-indefinite $\dhat$, taking
-absolute values was worse than the signed vector about a third of the time.
-The results therefore require the positive-orthant structure of the
-degradation model; it is not only a notational convenience.
-\end{remark}
-
-\subsection{The loss as a Bhattacharyya distance}
-
-The identification below is used twice in what follows: it gives ``the average
-of a curve on the simplex'' an unambiguous meaning (Section~\ref{sec:bary}),
-and it lets the high-signal limit of the loss be read off as a known
-divergence.
-
-\begin{proposition}\label{prop:bhat}
-$\cos\psi=\sum_i\sqrt{p_iq_i}$ is the Bhattacharyya coefficient of $p$ and
-$q$. Consequently $\psi=\tfrac12\dFR(p,q)$, where $\dFR$ is the Fisher--Rao
-distance on the simplex, and, writing $\DB(p,q)=-\log\sum_i\sqrt{p_iq_i}$ for
-the Bhattacharyya divergence,
-\begin{equation}
-\lloss=-\tfrac12\log\!\big[(1-w)+w\,e^{-2\DB(p,q)}\big].
-\label{eq:bhat}
-\end{equation}
-As $\gamma\to\infty$, $\lloss\to\DB(p,q)$.
-\end{proposition}
-
-\begin{proof}
-By construction,
-\[
-\cos\psi=\dhat^{\top}\mathbf v=\sum_i\sqrt{p_i}\sqrt{q_i},
-\]
-which is precisely the Bhattacharyya coefficient of $p$ and $q$. The map
-$p\mapsto\sqrt p$ is the classical isometry between the simplex under the
-Fisher--Rao metric and the positive orthant of the unit sphere, under which
-the geodesic distance is twice the spherical
-angle~\cite{amari2016,bhattacharyya1943}; hence $\psi=\tfrac12\dFR$. Then
-$\cos^{2}\psi=e^{-2\DB}$, and substituting into \eqref{eq:exact} gives
-\eqref{eq:bhat}. Letting $w\to1$ gives the limit.
-\end{proof}
-
-The square root is a bijection between the simplex and the non-negative part
-of the unit sphere, carrying $p$ to $\dhat$ and $q$ to $\mathbf v$, and by the
-proposition it is an isometry. We use the two descriptions interchangeably
-from here on: a statement such as $q\in\mathcal D(x)$ in
-Section~\ref{sec:reach} says that $\mathbf v$ is a reachable direction, and a
-distance between points of the simplex is the angle between the corresponding
-unit vectors.
-
-The resulting picture is the one the rest of the paper develops. The degrading
-component is a curve on the simplex, the health indicator is a single point on
-it, and the information lost depends only on the distance between them. Design
-of the indicator is the choice of one point; control of the operating point is
-the shaping of the curve.
-
-\subsection{The optimal indicator as a barycentre}
-\label{sec:bary}
-
-If the indicator is one point and the plant is a curve, the best point should
-be some kind of average of the curve. It is, but of two different kinds in two
-different limits.
-
-\begin{proposition}\label{prop:bary}
-Let $q^{\star}$ minimise the time-averaged loss.
+The results above yield a design procedure that requires run-to-failure data
+only.
 \begin{enumerate}
-\item[(i)] As $\gamma\to\infty$, $\lloss\to\DB$ pointwise, so $q^{\star}$
-tends to the Bhattacharyya barycentre $\arg\min_q\int\DB(p_\tau,q)\,d\tau$.
-\item[(ii)] As the curve shortens, $\lloss=\tfrac{w}{2}\psi^{2}+O(\psi^{4})$,
-so $q^{\star}$ tends to the $w$-weighted Fisher--Rao barycentre, and
-$\bar\lloss=\tfrac18\bar w\,\mathrm{Var}^{\mathrm{FR}}+O(\psi^{4})$ where
-$\mathrm{Var}^{\mathrm{FR}}:=\min_q\E_\mu[\dFR^{2}(p_\tau,q)]$ is the
-$\mu$-weighted Fr\'echet variance of the curve.
+\item Estimate the informative direction along normalised life as the time
+derivative of the monitoring channels, each whitened by its measurement
+noise, averaged over the fleet.
+\item Compute the arc $\Phi$ that the direction traverses and the bound
+\eqref{eq:arcbound}; if the bound is acceptable, a fixed indicator suffices.
+\item Place the fixed indicator at the barycentre of the path, in practice
+the renormalised mean direction.
+\item Validate the indicator with a leave-one-out remaining-life estimator,
+against the same estimator run on all channels.
+\item Evaluate the maintenance decision that the estimate supports.
 \end{enumerate}
-\end{proposition}
-
-\begin{proof}
-See Supplementary Section~S2.
-\end{proof}
-
-The two limits are taken in different parameters, signal-to-noise ratio in (i)
-and arc length in (ii), and they do not coincide. On a curve of angular span
-$82.7^{\circ}$ the two barycentres lie $0.72^{\circ}$ apart, and $q^{\star}$
-crosses from the Fisher--Rao side to the Bhattacharyya side between $0$ and
-$10$~dB, reaching $3\times10^{-5}$ degrees of the latter by $50$~dB. For
-design purposes the practical consequence is mild: either barycentre of a
-nominal degradation path is a good starting indicator.
-
-\subsection{The replicator flow and the role of the input}
-
-We now ask how fast the informative direction moves and what the operating
-point does to that motion.
-
-\begin{theorem}\label{thm:repl}
-Let $g_i=\log\dvec_i$ denote the logarithmic rate of channel $i$. Along
-\eqref{eq:plant},
-\begin{equation}
-\dot{\dhat}_i=\dhat_i\big(\dot g_i-\E_p[\dot g]\big),
-\label{eq:dhatdot}
-\end{equation}
-so the information shares obey the replicator equation of evolutionary
-dynamics, in which each share grows in proportion to the amount by which its
-own rate exceeds the average, the average being taken over the shares
-themselves:
-\begin{equation}
-\dot p_i=2p_i\big(\dot g_i-\E_p[\dot g]\big),
-\label{eq:replicator}
-\end{equation}
-and
-\begin{equation}
-\|\dot{\dhat}\|=\Std_p[\dot g],\qquad \dot g=\big[\varphi_i(u)h_i'(x_i)\big]_i
-+\,\nabla_{\!u}\!\log\varphi\;\dot u .
-\label{eq:repl}
-\end{equation}
-\end{theorem}
-
-\begin{proof}
-From $\dvec_i=e^{g_i}$ we have $\dot\dvec_i=\dvec_i\dot g_i$, so
-$\dot{\dhat}=\|\dvec\|^{-1}\big(\dot\dvec-\dhat(\dhat^{\top}\dot\dvec)\big)$
-has components $\dhat_i\dot g_i-\dhat_i\sum_j\dhat_j^{2}\dot g_j$, which is
-\eqref{eq:dhatdot}; squaring and summing gives $\Var_p[\dot g]$. Since
-$p_i=\dhat_i^{2}$, $\dot p_i=2\dhat_i\dot{\dhat}_i=2p_i(\dot g_i-\E_p[\dot
-g])$. Differentiating $g_i=\log\varphi_i(u)+\log h_i(x_i)-\log\sigma_i$ along
-\eqref{eq:plant} gives $\dot g_i=\nabla_{\!u}\log\varphi_i\cdot\dot
-u+(h_i'/h_i)\varphi_ih_i$, and $(h_i'/h_i)\varphi_ih_i=\varphi_ih_i'$.
-\end{proof}
-
-Equation \eqref{eq:repl} has a compact reading. The speed at which the
-informative direction rotates equals the information-weighted spread of the
-mechanisms' logarithmic rates. If all mechanisms accelerate at the same
-proportional rate the direction does not move at all, however fast the
-component is degrading; it is disagreement among the mechanisms that rotates
-it. The identity is the Fisher--Rao/Shahshahani geometry of the simplex
-combined with Fisher's fundamental theorem of natural
-selection~\cite{amari2016,hofbauer1998,sandholm2010}. What is new here is its
-identification with the informative direction of a degrading component, and,
-decisively, that the quantity playing the role of fitness, the logarithmic
-rate $\dot g_i$ of channel $i$, is actuated: the second summand in
-\eqref{eq:repl} is the operator's lever.
-
-\begin{remark}[contrast with Oja's flow]
-Oja's flow for online principal-component extraction has the same algebraic
-form; for a diagonal covariance it reduces to a replicator equation with
-fitness twice the eigenvalues~\cite{oja1982}. The roles are opposite. There
-the flow is an algorithm, run to fixation in order to find a direction, with
-constant fitness. Here it is the plant, its fitness is time-varying and
-actuated, and the aim is to prevent fixation from carrying the direction away
-from a fixed indicator.
-\end{remark}
-
-Only one scalar matters for the loss. Fix the indicator $q$ and write
-$\beta:=\angle(\dhat,\mathbf v)=\tfrac12\dFR(p,q)$ for the misalignment. This
-is the angle $\psi$ of Lemma~\ref{lem:exact} under a new name, and the change
-of name marks a change of role: $\psi$ was a fixed angle between two
-directions, whereas $\beta=\beta(x_t,u_t)$ is followed along the trajectory
-and is the quantity the input acts on. Every loss expression below may
-therefore be read as a function of $\beta$.
-
-\begin{theorem}\label{thm:beta}
-Let the operating-point trajectory $u(\cdot)$ be absolutely continuous, and let $\hat e$ be the unit tangent at $\dhat$ along the geodesic towards $\mathbf v$. Then $\dot\beta=-\langle\dot{\dhat},\hat e\rangle$, which is
-affine in the input rate: $\dot\beta=\alpha_0(x,u)+\alpha(x,u)^{\top}\dot u$.
-In particular $|\dot\beta|\le\|\dot{\dhat}\|$, with equality only for motion
-along that geodesic.
-\end{theorem}
-
-\begin{proof}
-$\cos\beta=\dhat^{\top}\mathbf v$ gives
-$-\sin\beta\,\dot\beta=\dot{\dhat}^{\top}\mathbf v$. Also $\hat e=(\mathbf
-v-\cos\beta\,\dhat)/\sin\beta$ and $\dot{\dhat}^{\top}\dhat=0$, so
-$\langle\dot{\dhat},\hat e\rangle=\dot{\dhat}^{\top}\mathbf v/\sin\beta
-=-\dot\beta$. Affinity follows because $\dot g$ is affine in $\dot u$ by
-\eqref{eq:repl} and $\dot{\dhat}$ is linear in $\dot g$.
-\end{proof}
-
-The hypothesis is needed only to write $\dot u$; nothing in Section~\ref{sec:reach} depends on it, since the reachable sets \eqref{eq:reachset} are defined pointwise in $u$ and the limits below hold for every measurable admissible input. Theorem~\ref{thm:beta} is a local kinematic description of smooth steering, not a restriction on the controls the rest of the paper admits.
-
-The component of the replicator velocity orthogonal to $\hat e$ is therefore free: the informative direction may rotate in a $(d-2)$-dimensional subspace
-at no cost in information. Fig.~\ref{fig:mech}(b) shows the decomposition at
-one state. This is the observation that separates the two objectives of the
-next section.
-
-\section{Reachability limits on the misalignment}
-\label{sec:reach}
-
-Controlling the rate $\dot\beta$ is not the same as reaching a value of
-$\beta$. The distinction is the subject of this section, and it is what
-decides whether a fixed indicator can be made lossless at all.
-
-For a state $x$, the set of informative directions the operator can produce by
-choosing the operating point is
-\begin{equation}
-\mathcal D(x):=\{\dhat(x,u):u\in\mathcal U\}\subset S^{d-1},
-\label{eq:reachset}
-\end{equation}
-the reachable direction set, and the closest the indicator can be brought at
-that state is the reachable misalignment floor
-\begin{equation}
-\beta_{\min}(x,q):=\mathrm{dist}\big(q,\mathcal D(x)\big).
-\label{eq:floor}
-\end{equation}
-For a single input, $\mathcal D(x)$ is an arc traced out as $u$ sweeps
-$\mathcal U$; its length measures the actuation authority available at $x$,
-and it shrinks to a point when the mechanisms respond identically to the
-input.
-
-Zero loss leaves the trajectory almost no freedom. Once $\dhat$ is pinned to
-$\mathbf v$, the state can only advance along one fixed direction, because
-$\dot x=\Sigma^{1/2}\dvec=\|\dvec\|\,\Sigma^{1/2}\mathbf v$ by
-\eqref{eq:dvec}, and the input is left to choose only the speed. Write
-\begin{equation}
-\mathcal S_q:=\{x_0+s\,\Sigma^{1/2}\mathbf v:\ 0\le s\le s_f\}
-\label{eq:segment}
-\end{equation}
-for the segment from $x_0$ in that direction, stopped at the value $s_f$ at
-which it meets the condemnation surface $\{\max_ix_i=x_f\}$ of \eqref{eq:tf}.
-
-\begin{theorem}\label{thm:zero}
-Fix an indicator $\mathbf v$, with share vector $q$, and let each $h_i$ be
-locally Lipschitz.
-\begin{enumerate}
-\item[(i)] An admissible input attains $\bar\lloss=0$ only if its trajectory
-runs along $\mathcal S_q$, and zero loss is attainable with $q$ if and only if
-$q\in\mathcal D(x)$ for every $x\in\mathcal S_q$.
-\item[(ii)] If $m<d-1$ and $u\mapsto\dhat(x_0,u)$ is continuously
-differentiable, the indicators that attain zero loss form a null subset of the
-unit sphere, which almost every $q$ misses.
-\item[(iii)] Along any admissible trajectory,
-$\bar{\lloss}\ge\frac{1}{T_f}\int_0^{T_f}\lloss\big(\beta_{\min}(x_t,q)\big)\,dt$,
-with the weight $w$ of Lemma~\ref{lem:exact} evaluated at $(x_t,u_t)$.
-\end{enumerate}
-\end{theorem}
-
-\begin{proof}
-(i) By Lemma~\ref{lem:exact}, $\lloss=0$ iff $\sin\beta=0$, so $\bar\lloss=0$
-iff $\dhat(x_t,u_t)=\mathbf v$ for almost every $t$. Then $\dot x_t=\|\dvec_t\|\Sigma^{1/2}\mathbf v$ almost everywhere, so
-$x_t=x_0+s(t)\Sigma^{1/2}\mathbf v$ with $s(t)=\int_0^t\|\dvec_\tau\|\,d\tau$
-continuous and strictly increasing: the trajectory runs along $\mathcal S_q$
-and fails where $\mathcal S_q$ meets the condemnation surface. As
-$q\in\mathcal D(x_t)$ for almost every $t$, $q$ lies in $\mathcal D(x)$ for $x$
-in a dense subset of $\mathcal S_q$. The set $\{x:q\in\mathcal D(x)\}$ is
-closed, since $\mathcal U$ is compact and $\dhat$ continuous, so it contains
-all of $\mathcal S_q$. Conversely, let $q\in\mathcal D(x)$ for every
-$x\in\mathcal S_q$. The map $s\mapsto\{u\in\mathcal U:\dhat(x_0+s\Sigma^{1/2}\mathbf v,u)=\mathbf v\}$ has non-empty compact values and a closed graph, so it
-admits a measurable selection $\bar u(s)$~\cite[Thm.~8.1.3]{aubin2009}. On the
-compact set $\mathcal S_q\times\mathcal U$ the norm $\|\dvec\|$ is continuous
-and positive, hence bounded below, so
-$t(s)=\int_0^{s}\|\dvec(x_0+\sigma\Sigma^{1/2}\mathbf v,\bar u(\sigma))\|^{-1}d\sigma$
-is finite, absolutely continuous and strictly increasing. With $s(t)$ its
-inverse, the input $u(t)=\bar u(s(t))$ is measurable, and
-$x(t)=x_0+s(t)\Sigma^{1/2}\mathbf v$ satisfies
-$\dot x=\|\dvec\|\Sigma^{1/2}\mathbf v=\Sigma^{1/2}\dvec(x,u)$, which is
-\eqref{eq:plant}, almost everywhere. Because $h$ is locally Lipschitz, this is
-the trajectory the input generates. It reaches the condemnation surface at the
-finite time $t(s_f)$ with $\beta=0$ throughout.
-(ii) By (i), zero loss needs $q\in\mathcal D(x_0)$. For $m<d-1$ that set, the
-image of the $m$-dimensional compact set $\mathcal U$ under a continuously
-differentiable map, is a null subset of the $(d-1)$-dimensional sphere, which
-almost every $q$ misses.
-(iii) $\beta_t\ge\beta_{\min}(x_t,q)$ for every admissible input by definition
-of $\beta_{\min}$ as a minimum over $\mathcal U$, and $\lloss$ is increasing
-in $\beta$ on $[0,\pi/2]$ at fixed $w$.
-\end{proof}
-
-The condition in (i) has to be read along $\mathcal S_q$ and not along the
-trajectory of an input one happens to hold. An aligning input generates its
-own trajectory, and reachability along any other trajectory says nothing.
-
-\begin{remark}[reachable along a trajectory, unattainable on the segment]\label{rem:segment}
-Take $d=2$, $m=1$, unit noise, $\varphi_i(u)=e^{\theta_i-E_iu}$ with
-$\theta=(0,0.5)$, $E=(1,2)$ and $\mathcal U=[0,1.3]$, shapes $h_1=1$ and
-$h_2(x)=e^{x}$, $x_0=0$, $x_f=0.9$, and the indicator with
-$\log(\mathbf v_2/\mathbf v_1)=-0.2$. It is aligned at state $x$ by the input
-$u=0.7+x_2$, which is admissible exactly when $x_2\le0.6$. Under the constant
-input $u=1.3$ the plant fails with $x_2=0.52$, so the indicator is reachable at
-every state that trajectory visits. Zero loss is nevertheless unattainable:
-along $\mathcal S_q$, $x_2=e^{-0.2}x_1$, and $x_2$ reaches $0.6$ at
-$x_1=0.73$, before failure.
-\end{remark}
-
-The bound (iii) is state-conditioned. No input violates it, but it holds along
-the trajectory the input has chosen, and that trajectory is itself steered.
-Optimising over trajectories is deferred to Section~\ref{sec:limit}. The two
-levels are the structure of the argument: a state-conditioned limit here, a
-trajectory-level limit there.
-
-The practical reading is a counting rule, and its parts have different
-standing. The measure statement is proved: with fewer than $d-1$ independently
-adjustable operating variables, almost every indicator already fails at $x_0$,
-by (ii). That no indicator at all can then be held is a count of dimensions
-rather than a theorem. Along $\mathcal S_q$, membership of $q$ in a reachable
-set of dimension $m$ inside the $(d-1)$-dimensional sphere imposes $d-1-m$
-conditions at every point of a segment. Generic plant data do not meet them, and
-Remark~\ref{rem:family} constructs plants that do, which we do not prove rare.
-Conversely, $m\ge d-1$ is not sufficient. It lets the aligning equation be
-solved locally, but zero loss also needs the aligning input to stay inside
-$\mathcal U$ along the whole of $\mathcal S_q$. That envelope condition is
-part (i) itself and has to be checked on the segment.
-Section~\ref{sec:counting} checks it for a plant with two inputs. For a
-generic plant under this model, three mechanisms and a single temperature
-setpoint will not do it. Proposition~\ref{prop:contain} states the condition
-exactly on the separable subclass. But a weaker and much cheaper objective is
-available.
-
-\begin{corollary}[what actuation is actually required]\label{cor:tri}
-Two objectives that are easily conflated carry different requirements.
-\begin{enumerate}
-\item[(i)] Driving $\bar\lloss$ to zero is equivalent to freezing $\dhat$ at
-  $q$, and needs $d-1$ conditions on $\dot u$, hence generically $m\ge d-1$.
-\item[(ii)] Holding $\beta$ at a constant level, not necessarily zero, is
-the single scalar equation $\alpha_0+\alpha^{\top}\dot u=0$, solvable whenever
-$\alpha\ne0$ and the resulting $u(\cdot)$ stays in $\mathcal U$; generically
-$m\ge1$ suffices, at least locally in time.
-\end{enumerate}
-\end{corollary}
-
-\begin{proof}
-(i) By Theorem~\ref{thm:zero}, $\bar\lloss=0$ iff $\dhat(x_t,u_t)=q$ for almost
-every $t$, so $\dhat$ is constant; by Theorem~\ref{thm:repl} that forces $\dot
-g_i=\E_p[\dot g]$ for every $i$, which is $d-1$ independent conditions on
-$\dot u\in\R^{m}$. (ii) is one equation in $\dot u$ by Theorem~\ref{thm:beta}.
-The gap between them is the content of that theorem: $\dot\beta$ sees only the
-component of $\dot{\dhat}$ along $\hat e$, so the remaining $d-2$ directions
-of rotation are unconstrained by (ii) and constrained by (i).
-\end{proof}
-
-Minimising $\bar\lloss$ is neither of these: it trades the level of $\beta$
-against the trajectory that carries it, and is the problem of
-Section~\ref{sec:limit}.
-
-\subsection{The reachable sets are translates of one set}
-\label{sec:translate}
-
-Theorem~\ref{thm:zero} counts equations against unknowns and hedges with
-``generic''. The hedge is not idle, and the following observation says exactly
-what it covers.
-
-\begin{lemma}[separability]\label{lem:sep}
-Write $\xi(x,u)$ for the class of $\log\dvec(x,u)$ modulo the all-ones vector,
-which is what $\dhat$ retains. Then
-\begin{equation}
-\begin{aligned}
-\xi(x,u) &= a(x)+b(u),\\
-a_i(x) &= \log\frac{h_i(x_i)}{\sigma_i},\qquad
-b_i(u) = \log\varphi_i(u),
-\end{aligned}
-\label{eq:sep}
-\end{equation}
-both taken modulo the all-ones vector. Consequently every reachable direction
-set is the same set translated: $\mathcal D(x)=a(x)+\mathcal B$ with $\mathcal
-B:=b(\mathcal U)$ fixed.
-\end{lemma}
-
-\begin{proof}
-Immediate from $\dvec_i=\sigma_i^{-1}\varphi_i(u)h_i(x_i)$ in \eqref{eq:dvec}:
-the logarithm turns the product into a sum, and the normalisation of $\dhat$
-removes any component along the all-ones vector.
-\end{proof}
-
-The decomposition separates the two parties. The set $\mathcal B$ is fixed by the stress model $\varphi$ and the envelope $\mathcal U$ alone (Fig.~\ref{fig:sep}(a)). An operator's authority can therefore be computed offline from the accelerated-life model, with no degradation record at all. The curve $\mathcal A:=\{a(x_t)\}$ is fixed by the damage shapes $h$ and the noise levels $\sigma$, and every reachable set is that one set carried along it (Fig.~\ref{fig:sep}(b)). What the geometry of Section~\ref{sec:simplex} measures is how far
-the plant's demand $\mathcal A$ sticks out of the operator's authority
-$\mathcal B$.
-
-That offline route is the most useful consequence drawn in this paper and also
-the most restrictive. It holds on the separable subclass and not beyond it,
-and the best high-fidelity turbofan data we have reject it jointly with the
-channel pairing of \eqref{eq:obs} (Section~\ref{sec:scope}). This subsection and Proposition~\ref{prop:contain}
-should therefore be read as describing a structured subclass that is
-convenient when it applies, not as a general account of real machinery.
-Fig.~\ref{fig:scope} marks the one branch of the development that depends on it.
-
-
-\begin{figure*}[tb]
-\centering
-\begin{tikzpicture}[
-  font=\small,
-  auth/.style={very thick},
-  crv/.style={thick},
-  a/.style={-{Latex[length=1.7mm]}, semithick},
-  lbl/.style={font=\scriptsize, inner sep=1pt},
-  cp/.style={font=\scriptsize, align=center, inner sep=1pt}]
-
-% =================== (a) the authority set is built from U ===============
-\begin{scope}
-  % the admissible input set
-  \draw[very thick] (0,12mm) -- (16mm,12mm);
-  \foreach \x in {0,16mm} { \draw (\x,11mm) -- (\x,13mm); }
-  \node[lbl, anchor=east] at (-1mm,12mm) {$\mathcal U$};
-  \fill (6mm,12mm) circle (0.9pt);
-  \node[lbl, anchor=south] at (6mm,13mm) {$u$};
-
-  \draw[a] (8mm,9mm) -- node[right, font=\scriptsize]
-        {$b_i=\log\varphi_i$} (8mm,3mm);
-
-  \draw[auth] plot[smooth, tension=0.8] coordinates
-      {(1mm,-4mm) (8mm,0mm) (15mm,-5mm)};
-  \fill (8.4mm,-1.2mm) circle (0.9pt);
-  \node[lbl, anchor=west] at (16mm,-5mm) {$\mathcal B$};
-
-  \node[cp, anchor=north] at (8mm,-9mm)
-        {fixed by $\varphi$ and $\mathcal U$\\alone: no data needed};
-  \node[cp, anchor=north] at (8mm,-21mm) {(a) the operator's authority};
-\end{scope}
-
-% =================== (b) every reachable set is that set, translated =====
-\begin{scope}[xshift=40mm]
-  \draw[crv, black!55] plot[smooth, tension=0.8] coordinates
-      {(0mm,10mm) (12mm,2mm) (25mm,-4mm) (36mm,-1mm)};
-  \node[lbl, anchor=south west] at (19mm,7mm) {$\mathcal A=\{a(x_t)\}$};
-
-  \foreach \sx/\sy in {0mm/10mm, 14mm/1.6mm, 33mm/-2.2mm} {
-    \begin{scope}[shift={(\sx,\sy)}]
-      \draw[auth] plot[smooth, tension=0.8] coordinates
-          {(-4mm,-1mm) (0mm,2.2mm) (4mm,-1.6mm)};
-    \end{scope}
-  }
-  \draw[fill=white, thick] (0mm,10mm) circle (1.2pt);
-  \fill (33mm,-2.2mm) +(-1.2pt,-1.2pt) rectangle +(1.2pt,1.2pt);
-
-  \fill (14mm,3.8mm) circle (1.1pt);
-  \node[lbl, anchor=west] at (16mm,6.0mm) {$\kappa$};
-  \draw[a, black!60] (16mm,5.7mm) -- (14.6mm,4.3mm);
-
-  \node[cp, anchor=north] at (22mm,-9mm)
-        {one set, shifted by $a(x_t)$;\\
-         $\kappa$ meets the mid-life copy\\
-         only: reachable there alone};
-  \node[cp, anchor=north] at (22mm,-21mm)
-        {(b) $\mathcal D(x_t)=a(x_t)+\mathcal B$};
-\end{scope}
-
-% =================== (c) the containment test ============================
-\begin{scope}[xshift=86mm]
-  \draw[fill=black!8, draw=black!50] (14mm,2mm) ellipse
-      [x radius=13mm, y radius=6.5mm];
-  \node[lbl] at (14mm,-6mm) {$\kappa-\mathcal B$};
-
-  \draw[crv] plot[smooth, tension=0.9] coordinates
-      {(1mm,10mm) (10mm,1mm) (20mm,5mm) (27mm,-4mm)};
-  \draw[fill=white, thick] (1mm,10mm) circle (1.2pt);
-  \fill (27mm,-4mm) +(-1.2pt,-1.2pt) rectangle +(1.2pt,1.2pt);
-  \node[lbl, anchor=south] at (4mm,10mm) {$\mathcal A_q$};
-
-  \node[cp, anchor=north] at (14mm,-9mm)
-        {a curve escapes any\\
-         translate of dimension\\
-         below $d-1$};
-  \node[cp, anchor=north] at (14mm,-21mm)
-        {(c) zero loss $\iff\mathcal A_q\subseteq\kappa-\mathcal B$};
-\end{scope}
-\end{tikzpicture}
-\caption{How the counting rule becomes a containment. (a)~The operator's authority $\mathcal B=b(\mathcal U)$, fixed by the stress model and the envelope alone. (b)~Every reachable set is that one set translated, $\mathcal D(x_t)=a(x_t)+\mathcal B$ (circle: start of life, square: failure). (c)~Zero loss asks the image $\mathcal A_q=a(\mathcal S_q)$ of the segment that the indicator fixes to lie in one translate (Proposition~\ref{prop:contain}).}
-\label{fig:sep}
-\end{figure*}
-
-\begin{proposition}[exact criterion]\label{prop:contain}
-Write $\kappa$ for the quotient class of $\log\mathbf v$ and
-$\mathcal A_q:=a(\mathcal S_q)$ for the image of the segment
-\eqref{eq:segment}. Zero loss is attainable with $q$ if and only if
-$\mathcal A_q\subseteq\kappa-\mathcal B$. In particular the curve
-$\mathcal A_q$ must lie in a translate of $-\mathcal B$, a set of dimension at
-most $m$, which for a curve in the $(d-1)$-dimensional quotient fails
-generically unless $m\ge d-1$. When it does not fail, $m<d-1$ suffices.
-\end{proposition}
-
-\begin{proof}
-By Theorem~\ref{thm:zero}(i), zero loss is attainable iff $q\in\mathcal D(x)$
-for every $x\in\mathcal S_q$. By Lemma~\ref{lem:sep} that reads
-$\kappa-a(x)\in\mathcal B$ for every $x\in\mathcal S_q$, that is
-$\mathcal A_q\subseteq\kappa-\mathcal B$. The dimension statement holds because
-$\mathcal B=b(\mathcal U)$ is the image of an $m$-dimensional set; when $b$ is
-affine in $u$, as for Arrhenius factors written in reciprocal temperature, it
-spans an affine subspace of dimension at most $m$.
-\end{proof}
-
-The containment is drawn in Fig.~\ref{fig:sep}(c), and the mechanism the count
-obscures is now visible. The indicator fixes the curve $\mathcal A_q$ before
-any input is chosen. Alignment at a state then fixes the input outright, since
-$b(u)=\kappa-a(x)$ determines it, and the only question left is whether that
-input is admissible all the way along. One input can carry the whole burden
-only when $\mathcal A_q$ already lies along $\mathcal B$.
-
-\begin{remark}[a family with $m=1$ and any $d$]\label{rem:family}
-Take exponential shapes $h_i(x)=e^{\nu_i(x_i-x_i^0)}$, which \eqref{eq:plant}
-admits, and Arrhenius factors written in reciprocal temperature,
-$\varphi_i(u)=e^{\theta_i-E_iu}$ with $u=1/(kT)$, so that $b$ is affine in
-$u$. Under the ramp $u(t)=u_0+rt$ the damage rates
-are constant, $x_i(t)=x_i^0+\varphi_i^0t$ with $\varphi_i^0=\varphi_i(u_0)$,
-so $a(x_t)$ moves at constant velocity $\nu_i\varphi_i^0$. Choosing
-$\nu_i=rE_i/\varphi_i^0$ makes that velocity parallel to $E$, which is the
-direction of $\mathcal B$, and $b(u_t)$ retreats along $\mathcal B$ at the
-same rate. The two cancel and $\dhat$ is frozen. Supplementary Section~S4 integrates the construction for $d=2$ to $8$.
-\end{remark}
-
-This bears on the sharpness of Theorem~\ref{thm:zero}. The family of Remark~\ref{rem:family} is a knife
-edge. At one percent of error in its shape coefficients, steering is already worse than not steering (Supplementary Section~S4). A designer should read
-Proposition~\ref{prop:contain} as an explanation of when the counting rule
-binds, and Theorem~\ref{thm:zero} as the rule to design against.
-
-\subsection{The loss and Fisher-information criteria}
-
-A natural objection is that all of this should follow from designing the input
-to maximise the Fisher information about $R$, as in the observability-aware
-literature discussed in Section~\ref{sec:intro}. Two Fisher informations are in
-play, and they answer the objection differently. The record's,
-$I_{\mathrm{rec}}:=\|\dvec\|^{2}$ per unit prior variance, is what that
-literature scores. The indicator's own is $I_z:=(\mathbf v^{\top}\dvec)^{2}$,
-the information about $R$ in the scalar $z$ of \eqref{eq:hi}.
-
-\begin{proposition}[the record's information does not fix the loss]\label{prop:blind}
-The loss of a fixed indicator is
-\begin{equation}
-\lloss=\tfrac12\log\big(1+\Var[R]\,I_{\mathrm{rec}}\big)
--\tfrac12\log\big(1+\Var[R]\,I_z\big),
-\label{eq:fisherpair}
-\end{equation}
-so it is a function of the pair $(I_{\mathrm{rec}},I_z)$. It is not a function
-of $I_{\mathrm{rec}}$ alone: at any fixed value of $I_{\mathrm{rec}}$, $\lloss$
-takes every value in $[0,\tfrac12\log(1+\gamma))$ as the misalignment ranges
-over $[0,\pi/2)$. No scalarisation of the record's Fisher information
-therefore determines the loss, and an input chosen to maximise one need not
-reduce it.
-\end{proposition}
-
-\begin{proof}
-Equation \eqref{eq:fisherpair} is \eqref{eq:lossraw} with
-$\gamma=\Var[R]\,I_{\mathrm{rec}}$ and
-$\gamma\cos^{2}\psi=\Var[R]\,(\mathbf v^{\top}\dvec)^{2}$. For a scalar latent
-the record's Fisher information is the number $I_{\mathrm{rec}}$, so trace,
-determinant and least eigenvalue coincide and every scalarisation is a strictly
-monotone function of it. Hold $I_{\mathrm{rec}}$, and hence $\gamma$ and the
-weight $w$ of Lemma~\ref{lem:exact}, fixed. Then
-$\lloss=-\tfrac12\log(1-w\sin^{2}\psi)$ is continuous and strictly increasing
-in $\psi$ on $[0,\pi/2)$, from $0$ towards $\tfrac12\log(1+\gamma)$.
-\end{proof}
-
-Stated in engineering terms, the record's information measures the strength of
-the signal, and the loss depends also on its direction relative to the
-indicator. The proposition is not a limitation of Fisher criteria as such. It
-says which one to use: $I_z$, compared with $I_{\mathrm{rec}}$, carries the
-loss exactly, so observability-aware input design applies to a fixed indicator
-once it scores the indicator's information rather than the record's.
-Section~\ref{sec:num} exhibits the difference: with the record's score held
-equal to seven digits, the loss still spans a factor of $9.4$, and $I_z$ orders
-the configurations as the loss does.
-
-\section{The best achievable loss as a fractional control problem}
-\label{sec:limit}
-
-Theorem~\ref{thm:zero} bounds the loss along a given trajectory. But the input
-steers the trajectory as well as the misalignment on it, so the best achievable loss requires optimising over both at once. This changes the structure of the
-problem.
-
-The objective is a time average over a lifetime that the input itself
-determines:
-\begin{equation}
-\bar{\lloss}^{\star}(q)=\min_{u(\cdot)\in\mathcal U}
-\frac{\int_0^{T_f}\lloss(\beta(x_t,u_t))\,dt}{T_f}.
-\label{eq:frac}
-\end{equation}
-Both the integrand and the upper limit $T_f$ depend on $u(\cdot)$. This makes
-\eqref{eq:frac} a fractional optimal control problem, meaning that the
-objective is a ratio rather than that the dynamics carry a fractional-order
-derivative. The fraction is not a technicality: it is the source of the
-trade-off, as follows.
-
-Were the horizon fixed, the input would only have to keep $\beta$ small over a
-known interval. Because $T_f$ is itself controlled, the denominator of
-\eqref{eq:frac} enters as well. The operating point that aligns the indicator
-is in general not the operating point that prolongs life, so aligning now
-changes the interval over which the alignment is averaged. The optimum must
-trade the two. Section~\ref{sec:steer} measures how steep that trade is on a
-concrete plant, and Section~\ref{sec:frac} how much a policy that ignores it
-loses. A fixed-horizon formulation represents none of it, which is why one
-was tried and discarded (Section~\ref{sec:frac}).
-
-\subsection{A converse bound uniform over trajectories}
-\label{sec:converse}
-
-Before computing anything we record a certificate that removes the
-conditioning. Theorem~\ref{thm:zero} bounds the loss along a trajectory the
-input has already chosen; the following proposition bounds it over all of them
-at once, and it is what would make the number computed below a limit rather than an observation, were a function satisfying it exhibited; none is, for reasons given below.
-
-\begin{proposition}[verification certificate]\label{prop:converse}
-Fix an indicator $q$ and a constant $\lambda\ge0$. Suppose there is a
-continuously differentiable $V$ on a neighbourhood of the admissible state
-region such that
-\begin{enumerate}
-\item[(i)] $V(x)\le0$ for every admissible $x$ on the condemnation surface
-  $\{\max_i x_i=x_f\}$ of \eqref{eq:tf}, and
-\item[(ii)] writing $D_i(x,u)=\varphi_i(u)h_i(x_i)$ for the drift of
-\eqref{eq:plant}, for every admissible state $x$ and every $u\in\mathcal U$,
-\begin{equation}
-\lloss\big(\beta(x,u)\big)-\lambda+\nabla V(x)^{\top}D(x,u)\ \ge\ 0 .
-\label{eq:cert}
-\end{equation}
-\end{enumerate}
-Then every admissible input satisfies $\bar{\lloss}\ge\lambda+V(x_0)/T_f$. In
-particular, if $V(x_0)\ge0$ then $\bar{\lloss}^{\star}(q)\ge\lambda$,
-uniformly over all admissible inputs and hence over all trajectories.
-\end{proposition}
-
-\begin{proof}
-Let $u(\cdot)$ be any admissible input and $x_t$ its trajectory. Since $V$ is
-$C^{1}$ and $t\mapsto x_t$ is absolutely continuous, $t\mapsto V(x_t)$ is
-absolutely continuous and the chain rule gives $\tfrac{d}{dt}V(x_t)=\nabla
-V(x_t)^{\top}\dot x_t =\nabla V(x_t)^{\top}D(x_t,u_t)$ for almost every $t$.
-Applying \eqref{eq:cert} at $(x_t,u_t)$ gives
-$\lloss(\beta(x_t,u_t))-\lambda+\tfrac{d}{dt}V(x_t)\ge0$ a.e., and integrating
-over $[0,T_f]$,
-\[
-\int_0^{T_f}\!\big(\lloss-\lambda\big)\,dt
-\;\ge\;V(x_0)-V(x_{T_f})\;\ge\;V(x_0),
-\]
-the last step by (i), since $x_{T_f}$ lies on the condemnation surface by
-\eqref{eq:tf}. Dividing by $T_f>0$ gives the claim.
-\end{proof}
-
-This is the standard verification argument for exit-time problems, applied to
-the Dinkelbach-transformed running cost $\lloss-\lambda$~\cite{bardi1997}; the
-proposition records it in the form the fractional problem needs. Condition
-\eqref{eq:cert} constrains the plant data alone: it quantifies over every
-state and every admissible input, and mentions no trajectory. Any $V$ one can
-exhibit therefore certifies a limit, and the search for a converse becomes the
-search for a verification function.
-
-Continuous differentiability is a convenience of the proof, not a requirement
-of the argument. A continuous viscosity subsolution of the corresponding
-Hamilton--Jacobi--Bellman equation that satisfies (i) lies below the value
-function by the comparison principle, since the drift points out of the state
-region across the condemnation surface, and a Lipschitz $V$ satisfying
-\eqref{eq:cert} with Clarke's generalised gradient certifies in the same
-way~\cite{bardi1997}. The natural candidate is the value function of the
-Dinkelbach problem below, which satisfies \eqref{eq:cert} with equality in the
-viscosity sense. What is available in practice, however, is a grid
-approximation of it, and Supplementary Section~S3 finds that candidate
-violating \eqref{eq:cert} on a finer grid by amounts that are discretisation
-error rather than a defect of the candidate. A certificate therefore needs
-either a discrete value function shifted by a bound on its own residual, or an
-error estimate for the monotone scheme that produced it. We do not construct
-one here, and the optimum computed below remains a computation; what
-Proposition~\ref{prop:converse} buys is the replacement of an open problem
-without shape by a concrete object with a checkable property.
-
-Problems of the form \eqref{eq:frac} are handled by Dinkelbach's
-transform~\cite{dinkelbach1967}: setting
-\begin{equation}
-F(\lambda)=\min_{u(\cdot)\in\mathcal U}\int_0^{T_f}
-\big(\lloss-\lambda\big)\,dt ,
-\label{eq:dink}
-\end{equation}
-the map $F$ is decreasing in $\lambda$ and vanishes exactly at the optimal
-ratio, because every admissible lifetime lies between the shortest and the
-longest the envelope allows, both positive and finite. The inner problem in
-\eqref{eq:dink} has free terminal time and an absorbing set, hence a
-stationary Hamilton--Jacobi--Bellman equation on the state alone, with no time
-argument. We discretise it by a semi-Lagrangian scheme with multilinear
-interpolation~\cite{falcone2014}, which is monotone and consistent, so its
-solutions converge to the viscosity solution as the grid is
-refined~\cite{falcone2014}. Because $\dot x>0$, the interpolation cell of every
-foot point has all its corners other than the node itself at a larger index
-sum, so the discrete equation is solved exactly by one sweep in decreasing
-index sum, with one scalar equation per node for its own weight, and
-$\lambda^{\star}$ by Dinkelbach's own iteration, which terminates because the
-discrete policies are finite. One implementation detail matters: the scheme
-must use a fixed spatial step rather than a fixed time step, because
-degradation speeds vary by orders of magnitude across $\mathcal U$ and a fixed
-time step is unusable at one end of the envelope or the other.
-
-\section{Numerical study}
-\label{sec:num}
-
-Sections~\ref{sec:simplex}--\ref{sec:limit} are analytical, and three of their
-claims are stated sharply enough to be tested rather than illustrated: that
-the record's Fisher information does not fix the loss, that zero loss fails
-with one input and is attained with two when the envelope condition holds
-along the segment, and that the best achievable loss is a finite number one
-can bracket. This section instantiates the model on a
-synthetic three-mechanism plant on which every quantity is available in closed
-form, checks those three claims against it, measures what steering is worth, asks which quantity, available in
-advance, says whether it will repay the effort, and measures how much of
-the benefit survives an error in the stress model. Section~\ref{sec:scope} then reports what measured fleets
-can and cannot establish about the premises.
-
-\subsection{The test plant}
-\label{sec:testplant}
-
-We take $d=3$ mechanisms with Arrhenius factors
-$\varphi_i(u)=e^{\theta_i-E_iu}$, in which the input $u$ is the reciprocal
-temperature $1/(kT)$, so that this is the Arrhenius form of
-Section~\ref{sec:prelim} with $e^{\theta_i}$ the pre-exponential constant
-$A_i$. We set $\theta=(0,0.3,-0.2)$ and $E=(0.6,1.1,0.8)$, and shapes
-$h_i(x)=1+c_ix$ with $c=(-0.5,2.0,0.8)$, giving one decelerating and two
-accelerating mechanisms. There is a single input $u\in[0,3]$, so $m=1<d-1=2$,
-and Theorem~\ref{thm:zero} puts zero loss out of reach unless this plant is
-one of the exceptions of Remark~\ref{rem:family}; Section~\ref{sec:floor}
-computes the floor and finds that it is not. Noise is unit and the prior variance is $\Var[R]=10^{3}$, so the weight $w=\gamma/(1+\gamma)$ of Lemma~\ref{lem:exact} is evaluated at the plant's own $\gamma=\|\dvec\|^{2}\Var[R]$ at each state rather than held fixed; $\gamma$ varies along a trajectory because $\|\dvec\|$ does. Every trajectory starts from $x_i(0)=5\times10^{-3}$ and runs to the condemnation limit $x_f=0.9$ of \eqref{eq:tf}. Raising $x_f$ to unity leaves every qualitative conclusion below intact and moves the constants: the peak floor of Section~\ref{sec:floor} rises from $4.52^{\circ}$ to $5.41^{\circ}$, and the factor of Section~\ref{sec:steer} at the steering indicator falls from $68$ to $58$. No constant reported below should be read across thresholds.
-
-\paragraph{Verification of the identities} The analytical identities were checked numerically before use, and the residuals are reported in Supplementary Section~S4.
-
-\subsection{A Fisher level set of varying loss}
-
-Proposition~\ref{prop:blind} is easy to demonstrate on this plant. For a
-constant input, a common gain on $\dvec$ moves $\|\dvec\|$ without rotating
-$\dhat(\tau)$, so the record's score can be equalised across inputs while the
-misalignment is left to the input. Write $\delta(u)$ for the gain that
-equalises the score, fixed by $\delta(u)^{2}\,\overline{\|\dvec\|^{2}}(u)=F$
-with $F$ its value at $u=1.5$. It is realised by rescaling how long the
-component runs under load, which is why it does not rotate $\dhat$. By
-construction $\delta=1$ at $u=1.5$, and $\delta>1$ wherever the raw score is
-smaller, so it is a multiplier on exposure rather than a fraction of it.
-Table~\ref{tab:levelset} does exactly that, holding the record's score equal to
-seven digits by tuning the exposure factor $\delta$. The loss still spans a factor
-$9.4$. The indicator's own information, averaged the same way, orders the five
-inputs exactly as the loss does, which is what \eqref{eq:fisherpair} leads one
-to expect.
+Section~\ref{sec:cells} carries out the five steps on measured lithium-ion
+cells.
+
+\section{Case study: lithium-ion cells}
+\label{sec:cells}
+
+The procedure is applied to the lithium-ion cells of Severson et
+al.~\cite{severson2019}, cycled to failure under different fast-charging
+protocols. The monitoring channels are discharge capacity, internal
+resistance and mean cell temperature. The $129$ cells that meet the selection
+criteria of the protocol in Supplementary Section~S1 have lives from $447$ to $1932$ cycles;
+because the lives differ more than fourfold across protocols, the population
+is far from a time shift, and the case study also probes that assumption.
+Supplementary Section~S1 gives the protocol and parameters of every step.
+
+\subsection{Rotation and the bound}
+
+The fleet-mean informative direction moves through an arc of $30.7^{\circ}$
+between $15\%$ and $90\%$ of life (Fig.~\ref{fig:mech}(c)). By
+\eqref{eq:arcbound}, the fixed indicator at its barycentre therefore
+inflates the error variance of the remaining-life estimate by at most
+$7.5\%$ over that window, irrespective of the signal-to-noise ratio, and
+widens the safety margin of a predictive replacement policy by at most
+$3.7\%$. In whitened units the indicator weights capacity, resistance and
+temperature as $(0.99,0.10,0.12)$ and lies at most $14^{\circ}$ from the
+informative direction.
+
+\subsection{Remaining-life estimation}
+
+A similarity-based estimator matches the last $30\%$ of a cell's elapsed
+cycles against the fleet reference path in normalised life and returns the
+life that fits best; everything it uses, including the fixed indicator, is
+computed without the cell being tested. With all three channels its
+root-mean-square error is $148$, $83$ and $49$ cycles at $50\%$, $70\%$ and
+$90\%$ of life. Run on the fixed indicator at the barycentre of the measured
+direction, the same estimator attains between $0.96$ and $1.00$ times the
+mean squared error of the three-channel estimator at these ages
+(Table~\ref{tab:cells}). Capacity alone, the conventional battery health
+indicator, lies up to $22^{\circ}$ from the informative direction, for
+which the bound allows $17\%$, and raises the mean squared error by $5\%$ at
+half of life and by less later. Temperature alone, a deliberately misaligned
+control, raises it at least $40$-fold, so the test is able to detect a poorly
+chosen indicator. A data-level fusion indicator, whose weights minimise the
+between-cell spread of the indicator at failure relative to its mean change
+over life, in the spirit of~\cite{liu2013fusion}, lies $75^{\circ}$ to
+$82^{\circ}$ from the informative direction and has $28.9$ times the mean
+squared error at half of life. Near failure, the stage its construction
+targets, it is the most accurate signal, at $0.81$ times the three-channel
+error: it suppresses between-cell differences in the level of the channels
+at failure, a source of error that the time-shift population of
+Section~\ref{sec:model} does not contain.
 
 \begin{table*}[t]
-\caption{Loss of the fixed indicator at a record Fisher score held equal. The exposure factor $\delta$, defined in the text, holds $\delta^{2}\overline{\|\dvec\|^{2}}$ fixed and leaves $\dhat(\tau)$ unaffected; $\overline{I_z}=\delta^{2}\,\overline{(\mathbf v^{\top}\dvec)^{2}}$ is the indicator's own information, and rms $\beta$ the root-mean-square misalignment. Losses use $\gamma=\|\dvec\|^{2}\Var[R]$ with $\Var[R]=10^{3}$.}
-\label{tab:levelset}
-\centering
-\begin{tabular}{cccccc}
-\hline
-$u$ & $\delta$ & $\delta^{2}\overline{\|\dvec\|^{2}}$ & $\overline{I_z}$
-& rms $\beta$ (deg) & $\bar{\lloss}$ (nat)\\
-\hline
-$0.0$ & $0.235$ & $0.4307565$ & $0.4055$ & $11.80$ & $0.0215$\\
-$1.0$ & $0.628$ & $0.4307565$ & $0.4207$ & $8.98$ & $0.0123$\\
-$1.5$ & $1.000$ & $0.4307565$ & $0.4170$ & $11.61$ & $0.0208$\\
-$2.0$ & $1.564$ & $0.4307565$ & $0.4050$ & $15.60$ & $0.0379$\\
-$3.0$ & $3.769$ & $0.4307565$ & $0.3421$ & $26.98$ & $0.1161$\\
-\hline
-\end{tabular}
-\end{table*}
-
-The two objectives also disagree on which input to prefer: the raw score,
-before $\delta$ equalises it, is largest at $u=0$, which is why $\delta$ is
-smallest there, and the loss is $1.7$ times its value at $u=1$. How far they
-disagree is a property of the instance; what is structural is only the
-blindness.
-
-\subsection{The reachability floor with a single input}
-\label{sec:floor}
-
-With $m=1<d-1$ no direction lies on every reachable set at once. Along the
-closed loop at $q^{\star}$ the floor is largest at the start of life, where
-$\beta_{\min}=4.52^{\circ}$; it falls through mid-life to below the
-$0.01^{\circ}$ resolution of our sampling, where the indicator is momentarily reachable, and rises again towards failure (Fig.~\ref{fig:floor}(a)). Zero loss with
-$q^{\star}$ would need $q^{\star}$ reachable at every point of
-$\mathcal S_{q^{\star}}$, beginning with $x_0$, where the floor is at its
-largest. It is therefore unattainable however the input is steered, by
-Theorem~\ref{thm:zero}(i).
-Fig.~\ref{fig:main}(a) shows the geometry: the reachable set sweeps across
-$q^{\star}$ as the plant ages, so the mid-life arc passes close to the
-indicator while the arcs at $\tau=0.05$ and $\tau=0.9$ stand off it.
-
-\begin{figure}[t]
-\centering \includegraphics[width=\linewidth]{fig1.pdf}
-\caption{(a)~The information-share curve $p_\tau$ on the 2-simplex (circle: start, square: failure), the reachable sets $\mathcal D(x_\tau)$ at $\tau=0.05$, $0.45$ and $0.9$, and the optimal indicator $q^{\star}$, which lies off the arcs near birth and failure; zero loss would need it on the arc of every state along $\mathcal S_{q^{\star}}$, beginning at birth (Theorem~\ref{thm:zero}). (b)~What steering buys against the best constant input at the same indicator, plotted against $\rho$, the drift of the reachable arc over its length.}
-\label{fig:main}
-\end{figure}
-
-\subsection{The counting rule, tested in both directions}
-\label{sec:counting}
-
-Theorem~\ref{thm:zero} is an equivalence, and the paragraph above tests only
-its necessary half: with too few inputs the floor stays positive at $x_0$. The
-sufficient half is the more useful claim for a practitioner deciding how many
-operating variables to instrument, and it is also the more demanding one,
-because supplying $d-1$ inputs is not enough by itself: the aligning input has
-to stay inside the envelope along the whole of $\mathcal S_q$. We test it
-directly.
-
-Give the same three-mechanism plant a second independent input by writing
-$\varphi_i(u)=\exp(\theta_i-E_iu_1-G_iu_2)$ with $G=(0.9,0.3,1.2)$, so that
-$m=2=d-1$ and each input acts on the mechanisms in a different pattern. Then
-$\log\dvec_i$ is affine in $(u_1,u_2)$, and matching a target direction fixes
-the $d-1=2$ differences of logarithms: two linear equations in two unknowns,
-with a coefficient matrix of determinant $0.27$ here, hence a unique solution
-at every state.
-
-Take as target the direction the plant occupies at mid-life under the central
-operating point $(1.5,1.5)$ of the box. Zero loss with that indicator confines
-the state to $\mathcal S_q$, and at every one of $600$ points of that segment
-the aligning input lies inside the admissible box $[0,3]^{2}$, at least
-$0.52$ from its boundary. Along the segment it sweeps $u_1$ from $0.55$ to
-$2.48$ while $u_2$ stays between $1.32$ and $1.70$
-(Fig.~\ref{fig:floor}(b)). Driving the plant by that feedback keeps the state
-on $\mathcal S_q$ to machine precision and the misalignment below $10^{-6}$
-degrees, zero to numerical precision, up to failure. An independent
-$90\times90$ grid search over the box along the segment returns a floor of at
-most $0.152^{\circ}$, which is the resolution of the grid rather than a
-property of the plant.
-
-The contrast with the single-input case is the content of the theorem: the
-same mechanisms, the same shapes, the same envelope on each input, and the
-peak floor moves from $4.52^{\circ}$ to zero, with zero loss attained along
-the whole closed loop, on the addition of one operating variable. On this
-plant $d-1$ inputs are enough. In general they are necessary for generic data
-and not sufficient, and the envelope condition along $\mathcal S_q$ decides.
-Within the adopted model this fixes how many independent control degrees of
-freedom the plant must offer. How those degrees of freedom correspond to
-physical actuators, and how the mechanisms are individuated in the first
-place, are modelling questions this paper does not settle.
-Proposition~\ref{prop:contain} says which plants escape the count, and
-Remark~\ref{rem:family} says why a designer should not count on being one of
-them.
-
-\begin{figure}[t]
-\centering \includegraphics[width=\linewidth]{fig4.pdf}
-\caption{(a)~With $m=1$ the floor against $q^{\star}$ is largest at birth and dips below the sampling grid near mid-life. (b)~With $m=2$ the mid-life direction is held exactly along the closed loop, which runs on the segment $\mathcal S_q$; plotted against the closed loop's own normalised age is the operating point this requires, which never leaves $\mathcal U$.}
-\label{fig:floor}
-\end{figure}
-
-\subsection{The value of steering}
-\label{sec:steer}
-
-The policy used throughout this section is the myopic one: at each state it
-applies the input that minimises $\beta$, searched on a grid of $41$ points of
-$\mathcal U$. It is a state feedback and ignores the denominator of
-\eqref{eq:frac}; Section~\ref{sec:frac} measures what that costs. Minimising
-its loss over the indicator gives $q^{\star}$, with weight vector
-$\mathbf v^{\star}=(0.466,0.771,0.435)$, at which the myopic policy attains
-$1.68\times10^{-4}$ against $1.15\times10^{-2}$ under the best constant input, a factor of $68$.
-
-That comparison holds the indicator at the one designed for steering. An
-operator who will not steer would design an indicator of its own, and
-minimising over the indicator and the constant input together gives
-$7.95\times10^{-3}$, at the hot end $u=0$ of the envelope. Against that
-baseline steering is worth a factor of $47$, and this is the figure we take as
-the value of steering on this plant. Both factors depend on how finely
-$\mathcal U$ is discretised for the policy: on $81$ points they become $72$
-and $50$, and on $161$ points $72$ and $50$ again.
-
-The factor is a ratio of information losses, not of information, and a large
-ratio of small losses. By Corollary~\ref{cor:mmse}, a loss of
-$7.95\times10^{-3}$ already means an error variance only $1.6\%$ above that of
-the whole record, and steering removes almost all of that excess. Nor is
-steering neutral in reliability terms. The myopic loop at $q^{\star}$ lives
-$1.66$ times as long as the best constant input at the same indicator, and
-$3.8$ times as long as the fair baseline, which buys its alignment at the hot
-end. The myopic loop aimed at a balanced indicator, which calls for far less
-steering, outlives it in turn: the two differ by a factor $3.4$ in lifetime.
-Aligning a given indicator and prolonging the component are therefore
-competing objectives, which is the tension anticipated in
-Section~\ref{sec:limit} and the reason the horizon cannot be fixed in
-advance.
-
-\subsection{The computed fractional optimum}
-\label{sec:frac}
-
-We solve the discrete Dinkelbach problem at $q^{\star}$ on state grids of
-$25$ to $137$ points per axis, with the control grid of the policy. The values
-converge at first order in the mesh width: fitted to the four finest grids,
-the order is $0.99$. Extrapolated from those four,
-$\lambda^{\star}_\infty=1.65\times10^{-4}$. The myopic policy attains
-$1.68\times10^{-4}$ and is realisable, so it bounds the optimum from above,
-and the optimum lies between the two. The myopic policy therefore sits
-$1.4\%$ above the optimum as extrapolated. Fitting the four next-finest grids instead, or
-repeating the computation on control grids of $81$ and $161$ points, puts the
-gap between $1.4\%$ and $2.0\%$, while refining the control grid from $41$ to
-$81$ points lowers both the myopic value and the extrapolated optimum by more
-than $4\%$.
-
-On this plant, then, the fraction in \eqref{eq:frac} shapes the statement of
-the problem and its certification, and not measurably its solution: a policy
-that attends only to the numerator is optimal to within the resolution of the
-computation. The lower end of the interval rests on the extrapolation and is
-not a bound, since even the finest grid returns a value $27\%$ above it. Three
-checks guard the number: $F$ must vanish at the computed $\lambda^{\star}$,
-$\lambda^{\star}$ must not exceed a realisable policy, and the grid sequence
-must extrapolate consistently. A fixed-horizon formulation failed the second
-and third and was discarded, as did a first attempt with mismatched control
-grids. A converse bound uniform over trajectories, which would replace this
-computation by a theorem, remains open.
-
-\subsection{Authority, drift, and how far they screen}
-\label{sec:regime}
-
-For a practitioner the first question is not how to steer but whether to
-bother. The reachable set $\mathcal D(x)$ is an arc, and it offers two natural answers: its mean length, which is the actuation authority available to chase the informative direction, and the drift of its midpoint over the life, which is how far that direction wanders. Write $\rho$ for the drift divided by the length, which weighs the two against each other.
-
-Table~\ref{tab:regime} varies the spread of the activation energies, which by
-\eqref{eq:repl} is what sets that authority. As the arc collapses, the
-attainable loss $L^{\star}$ rises by a factor $25$ and the value of control
-falls from $68$ to $2.7$ against the best constant input at the same
-indicator, and from $47$ to $1.9$ against a constant design with its own:
-with weak authority there is little left to steer.
-Fig.~\ref{fig:main}(b) plots the two against $\rho$. In this family the drift barely moves, staying between $24^{\circ}$ and $30^{\circ}$ while the arc spans nearly two decades, so $\rho$ is the reciprocal of the arc in all but name and the table cannot say which of the two matters. Both can be computed from a nominal degradation model before any indicator is designed.
-
-Three plants differing only in their activation energies are not a screening
-law, so the index was tested on $299$ further plants drawn at random: two to
-five mechanisms, one or two independently adjustable inputs, and the
-pre-exponentials, activation energies, shape coefficients, input envelope,
-initial state and signal-to-noise ratio varied together. The gain is measured
-as in the first gain column of Table~\ref{tab:regime}, against the best
-constant input at the steering indicator, which on the three plants of that
-table overstates it by factors of $1.3$ to $1.4$ relative to a constant design
-with its own indicator. The rank correlation between $\rho$ and the gain is $-0.36$, with a
-bootstrap $95\%$ interval from $-0.46$ to $-0.24$, and it keeps its sign inside
-every stratum of the mechanism count and of the input count, so it is not an
-artefact of either.
-
-Read as a classifier of whether steering repays a factor of five, which
-$32\%$ of the plants do, $\rho$ has an area under the receiver-operating curve
-of $0.73$, with interval $0.67$ to $0.79$. The reachable arc alone scores
-$0.73$ as well, and the drift alone $0.53$, with interval $0.46$ to $0.60$,
-which includes the $0.5$ of a coin toss.
-
-Equal areas do not make the two equally good, and the question is settled by a
-model that contains both as special cases: a logistic regression on the
-logarithms of arc and drift as separate terms, of which the arc alone and the
-ratio $\rho$ are each a constrained case. The drift adds nothing to the arc as
-a main effect ($p=0.47$), and constraining the two to enter as a ratio fits
-significantly worse than the arc alone ($p=7.7\times10^{-5}$; Akaike
-information $351$ against $336$). Both results hold in each input count
-separately. The drift does carry information, but through the arc
-($p=3.0\times10^{-4}$ for their interaction), and in opposite directions at the
-two ends. Among plants of low authority the share repaying fivefold falls from
-$0.18$ to $0.08$ as the drift rises from its lowest to its highest third; among
-plants of high authority it rises from $0.48$ to $0.61$. Drift that outruns the
-authority defeats steering, and drift that the authority can follow is what
-gives steering something to do. The ratio encodes only the first of these. It
-is also why the lowest tenth of $\rho$ repays fivefold only $43\%$ of the time:
-there the drift is small, a median of $2.7^{\circ}$ against $14^{\circ}$ over
-the sample.
-
-Out of sample the ranking agrees. Over repeated ten-fold cross-validation the
-arc and $\rho$ each rank unseen plants with an area of $0.72$, and a model
-adding the drift and its interaction with the arc reaches $0.74$, higher in
-every repeat. The quantity to screen with is therefore the arc, the authority
-itself, refined by the drift only through that interaction; $\rho$ remains a
-convenient description of the family of Table~\ref{tab:regime}, where the drift
-is nearly fixed. The first row of that table is not typical of its own regime:
-among sampled plants within a factor $1.4$ of its $\rho$, the median gain is
-$5.2$ rather than $68$.
-
-\begin{table*}[t]
-\caption{Authority and drift in a one-parameter family. The activation energies $E$ set the actuation authority; $c$, the noise and $\mathcal U$ are held fixed. $L^{\star}$ is the loss under the myopic policy at the indicator optimised for it. The first gain is its ratio to the best constant input at that indicator, the second to the best constant input with the indicator optimised for it.}
-\label{tab:regime}
+\caption{Case study on the Severson cells. $\psi_{\max}$ is the largest angle between the signal and the fleet-mean informative direction over $\tau\in[0.15,0.90]$; the MSE ratios compare the leave-one-out remaining-life estimator run on the signal with the same estimator run on all three channels, at $50\%$, $70\%$ and $90\%$ of life; the replacement columns give the minimal long-run cost per $1000$ cycles, in units of a preventive replacement, when a failure costs ten times as much, with the fraction of cells failing and the mean life left unused at replacement, in cycles.}
+\label{tab:cells}
 \centering
 \small
 \setlength{\tabcolsep}{4pt}
-\begin{tabular}{lccccc}
+\begin{tabular}{lccccccc}
 \hline
-$E$ & arc & $\rho$ & $L^{\star}$ & gain & own-indicator gain\\
+ & & \multicolumn{3}{c}{MSE ratio} & \multicolumn{3}{c}{replacement policy} \\
+signal & $\psi_{\max}$ & $50\%$ & $70\%$ & $90\%$ & cost & failures & unused\\
 \hline
-$(0.60,1.10,0.80)$ & $33.9^{\circ}$ & $0.88$ & $1.7\times10^{-4}$ & $68\times$ & $47\times$\\
-$(0.80,0.82,0.79)$ & $1.93^{\circ}$ & $12.5$ & $3.6\times10^{-3}$ & $2.9\times$ & $2.2\times$\\
-$(0.80,0.805,0.798)$ & $0.45^{\circ}$ & $53.1$ & $4.2\times10^{-3}$ & $2.7\times$ & $1.9\times$\\
+all channels & --- & $1$ & $1$ & $1$ & $1.689$ & $1.6\%$ & $134$\\
+fixed indicator & $14^{\circ}$ & $0.960$ & $0.972$ & $0.999$ & $1.688$ & $1.6\%$ & $133$\\
+capacity & $22^{\circ}$ & $1.050$ & $1.014$ & $0.986$ & $1.690$ & $1.6\%$ & $134$\\
+fusion & $82^{\circ}$ & $28.9$ & $8.43$ & $0.807$ & $1.731$ & $1.6\%$ & $150$\\
+temperature & $90^{\circ}$ & $43.7$ & $171$ & $725$ & --- & --- & ---\\
 \hline
 \end{tabular}
 \end{table*}
 
-\subsection{What the loss buys a downstream estimator}
-\label{sec:downstream}
+\subsection{Replacement decisions}
 
-Corollary~\ref{cor:mmse} prices the loss in the error of the estimate the model itself prescribes. A practitioner does not use that estimate, so the ordering is worth checking against a procedure that uses none of the construction: sample the indicator over the last $40\%$ of life, match the observed history against the indicator's own reference curve, and read remaining life off the best-fitting time offset. That estimator sees a scalar signal and nothing else --- not $\dhat$, not $\gamma$, not the loss.
+The last step evaluates the decision directly. Each cell is inspected every
+$25$ cycles from cycle $100$ and is replaced at the first inspection at which
+the predicted remaining life is at most a threshold $\theta$; a cell not
+replaced before its end of life counts as a failure. For a failure ten times
+as costly as a preventive replacement, the threshold that minimises the
+long-run cost per cycle~\cite{kamariotis2024metric} gives the costs of
+Table~\ref{tab:cells}. The fixed indicator, capacity alone and all three
+channels reach the same cost to within $0.1\%$, with $1.6\%$ of cells
+failing and about $134$ cycles, a fifth of a cell's life, left unused at
+replacement; the fusion indicator costs $2.5\%$ more. For cost ratios from
+$5$ to $50$ the fixed indicator stays within $1\%$ of the three-channel
+cost. The thresholds are chosen on the same cells for every signal, so the
+absolute costs are optimistic but the comparison is not. The case study thus
+confirms, on measured data and at the level of a maintenance decision, what
+the bound predicts: for this fleet a fixed indicator is adequate.
 
-Over twelve indicators spanning $\bar\lloss$ from $0.012$ to $0.37$, its median absolute error --- one of the standard prognostic accuracy measures~\cite{saxena2008metrics} --- rises with the loss, at Spearman correlation $0.89$, and the best-aligned indicator beats the worst by a factor $1.5$. Twelve indicators is a small sample, so both are given with intervals obtained by resampling the $160$ units behind each median: $0.34$ to $0.90$ for the correlation, and $1.40$ to $2.03$ for the factor. The ordering is not in doubt --- a one-sided permutation test gives $p=1.5\times10^{-4}$ --- but its strength is, and the point estimate sits near the top of its own interval. The factor is far smaller than the $31$-fold spread in $\bar\lloss$, and it should be: the loss is a logarithmic information quantity, the error is a time, and an estimator with the whole history recovers much of what any one
-instant discards.
+\section{Selecting the operating point}
+\label{sec:steer}
 
-The same protocol on $120$ further plants, drawn at random as in
-Section~\ref{sec:regime}, gives correlations between $0.87$ and $0.99$, with
-the plant above among the weaker. That design tilts every indicator toward the
-same direction, however, so loss and error both grow with one parameter and
-their agreement is close to structural. Tilting instead by a random amount of
-up to $60^{\circ}$ in a random direction weakens the median correlation to
-$0.74$, with the interval excluding zero on $84\%$ of plants. It also exposes
-what the experiment cannot show. On these plants the angle between an
-indicator and the mid-life informative direction ranks the indicators
-identically to the loss on $82\%$ of plants, with neither consistently better
-on the rest, because the direction rotates little beside how far the
-indicators differ. The experiment is therefore evidence that the ordering of
-the loss carries over to an estimator built from none of this construction; it
-is not evidence that the time-averaged loss improves on a mid-life snapshot of
-the misalignment, which would need a plant whose direction rotates by more
-than its candidate indicators differ.
+The operating point sets the relative rates of the mechanisms and therefore
+moves the informative direction. This section asks whether selecting it so as
+to keep a fixed indicator aligned, referred to as steering, is worthwhile.
 
-\subsection{Robustness to model error}
+\subsection{Limits of steering}
+\label{sec:limit}
+
+At a state $x$, the directions attainable through the operating point form
+the set
+\begin{equation}
+\mathcal D(x)=\{\dhat(x,u):u\in\mathcal U\},
+\label{eq:reachset}
+\end{equation}
+and the smallest misalignment achievable at $x$ is the floor
+$\beta_{\min}(x)=\angle(\mathbf v,\mathcal D(x))$. Steering has two structural
+limits, derived in Supplementary Section~S4. Holding the misalignment at a
+constant, non-zero level is a single scalar condition and needs only one
+adjustable operating variable. Removing the loss altogether confines the
+state to a straight segment in damage space and, except in special cases,
+needs one fewer independent operating variable than there are mechanisms,
+together with an aligning input that remains admissible along that segment.
+A component with three mechanisms and a single temperature setpoint can
+therefore reduce the loss but, generically, not remove it.
+
+When the loss cannot be removed, the relevant quantity is the smallest
+achievable average loss,
+\begin{equation}
+\bar\lloss^{\star}=\min_{u(\cdot)}\frac{1}{T_f}\int_{0}^{T_f}\lloss\,dt .
+\label{eq:frac}
+\end{equation}
+Both the integral and the lifetime $T_f$ depend on the operating point, so
+the objective is a ratio: the operating point that aligns the indicator is in
+general not the one that prolongs life. The simplest policy disregards the
+lifetime and applies, at each state, the input that minimises the
+misalignment; it is referred to as the myopic policy.
+
+\subsection{A numerical study}
+\label{sec:case}
+\label{sec:testplant}
+
+The study considers $d=3$ mechanisms with Arrhenius factors
+$\varphi_i(u)=e^{\theta_i-E_iu}$, in which the input $u$ is a scaled
+reciprocal temperature, $u=3\,(1/(kT)-1/(kT_{60}))/(1/(kT_{25})-1/(kT_{60}))$
+with $T_{60}$ and $T_{25}$ the absolute temperatures of $60$ and
+$25\,^{\circ}$C, so that $u=0$ corresponds to $60\,^{\circ}$C and $u=3$ to
+$25\,^{\circ}$C. The parameters are $\theta=(0,0.3,-0.2)$ and
+$E=(0.6,1.1,0.8)$, which in these units are activation energies of $0.44$,
+$0.81$ and $0.59$~eV, with shape functions $h_i(x)=1+c_ix$ and
+$c=(-0.5,2.0,0.8)$, which give one decelerating and two accelerating
+mechanisms. Time is measured in units of the characteristic time of the
+first mechanism at $60\,^{\circ}$C, where $\varphi_1=1$. There is a single
+input $u\in[0,3]$, so by Section~\ref{sec:limit} the loss can be reduced but,
+generically, not removed; Supplementary Section~S4 confirms this for the
+present system. The noise has unit variance and the prior variance is
+$\Var[R]=10^{3}$, so the weight $w=\gamma/(1+\gamma)$ of \eqref{eq:exact} is evaluated at the system's own $\gamma=\|\dvec\|^{2}\Var[R]$ at each state rather than held fixed. Every trajectory starts from $x_i(0)=5\times10^{-3}$ and runs to the condemnation limit $x_f=0.9$; the values of the reported constants at $x_f=1$ are given in Supplementary Section~S4. The identities used below were verified numerically (Supplementary Section~S3).
+
+The myopic policy applies, at each state, the input that minimises the
+misalignment, searched on a grid of $41$ points of $\mathcal U$. Minimising
+its loss over the indicator yields the steering indicator $q^{\star}$, with
+weight vector
+$\mathbf v^{\star}=(0.466,0.771,0.435)$, at which the myopic policy attains
+$1.68\times10^{-4}$ against $1.15\times10^{-2}$ under the best constant input, a factor of $68$. This comparison holds the indicator fixed at the one
+designed for steering. For operation without steering, the indicator would
+instead be designed for the constant input, and minimising over the indicator
+and the constant input jointly gives $7.95\times10^{-3}$, at the
+high-temperature end $u=0$ of the envelope. Relative to this baseline, the
+reduction achieved by steering is a factor of $47$. With control grids of
+$81$ points the two factors become $72$ and $50$, and on $161$ points $72$
+and $50$ again. The myopic policy is also close to the best achievable by any
+policy: the fractional optimum of \eqref{eq:frac}, computed on state grids of
+up to $137$ points per axis, lies within $2.1\%$ of it on every control grid
+(Supplementary Section~S4).
+
+Table~\ref{tab:policy} reports the practical consequences. By
+\eqref{eq:mmse}, a loss of $7.95\times10^{-3}$ already corresponds to an
+error variance only $1.6\%$ above that of the complete record, and steering
+removes almost all of this excess. A practical estimator, however, is largely
+insensitive to it. A time-shifted population is simulated along the path of
+each policy and observed at $30$ instants over the last $40\%$ of a window
+with unit channel noise, and the remaining life is estimated from the offset
+that best matches the reference path of the policy, once from the indicator
+and once from all three channels. Under every policy the two estimators
+differ by less than $1.2\%$, and the error as a fraction of life stays between
+$8.4\%$ and $10.7\%$, being determined by the path rather than by the
+indicator. The operating point does, however, change the lifetime
+substantially. Across the constant designs of the table it varies $19$-fold;
+the myopic loop at $q^{\star}$ attains a lifetime $1.66$ times that of the
+best constant input at the same indicator and $3.8$ times that of the
+constant design with the smallest loss; and a myopic loop aimed at a balanced
+indicator, which requires far less steering, extends the lifetime by a
+further factor of $3.4$.
+
+\begin{table*}[t]
+\caption{Information loss, remaining-life estimation error and lifetime of the test system under different operating strategies. $\bar\lloss$ is the information loss \eqref{eq:objective}; $e^{2\bar\lloss}-1$ the corresponding excess error variance \eqref{eq:mmse}; the RUL errors are the median absolute error of a template-matching remaining-life estimator over $2000$ units, as a percentage of life, based on the indicator or on all three channels; $T_f$ is the lifetime. Constant designs use the indicator that is best for their own input.}
+\label{tab:policy}
+\centering
+\small
+\begin{tabular}{lccccc}
+\hline
+ & & & \multicolumn{2}{c}{RUL error (\% of life)} & \\
+operating strategy & $\bar\lloss$ & $e^{2\bar\lloss}-1$ & indicator & all channels & $T_f$\\
+\hline
+constant, $60\,^{\circ}$C & $7.95\times10^{-3}$ & $1.6\%$ & $10.7\%$ & $10.8\%$ & $0.378$\\
+constant, $41.5\,^{\circ}$C & $1.44\times10^{-2}$ & $2.9\%$ & $8.9\%$ & $8.8\%$ & $1.967$\\
+constant, $25\,^{\circ}$C & $1.26\times10^{-2}$ & $2.6\%$ & $8.8\%$ & $8.7\%$ & $7.203$\\
+myopic, $q^{\star}$ & $1.68\times10^{-4}$ & $0.03\%$ & $9.5\%$ & $9.5\%$ & $1.433$\\
+myopic, balanced & $4.08\times10^{-3}$ & $0.8\%$ & $8.4\%$ & $8.5\%$ & $4.928$\\
+\hline
+\end{tabular}
+\end{table*}
+
+\subsection{Sensitivity to model misspecification}
 \label{sec:misspec}
 
-Everything above assumes the designer knows $\varphi_i$ and $h_i$. In practice
-the activation energies are estimated from accelerated tests and carry error,
-so the question a robust design must answer is how much of the benefit
-survives a wrong model. We answer it by direct computation on the test plant
-rather than by a perturbation bound.
-
-For each level $\varepsilon$ we draw a perturbed energy vector
-$E(1+\varepsilon\eta)$, with $\eta$ standard normal, and build the barycentre
-indicator of Proposition~\ref{prop:bary} from that wrong plant along the
-trajectory of a constant input, as a designer following this paper would. We
-then evaluate it on the true plant under the myopic policy, which brings it as
-close to the informative direction as the envelope allows at each state, with
-every loss at the plant's own $\gamma$. That policy is computed from the true
-plant, so the table prices an error in the indicator alone; an error that
-also reached the controller would cost more. Table~\ref{tab:misspec} reports
-the ratio of that loss to the loss of the indicator designed from the true
-model, over $40$ draws per level, so a ratio of $1$ means the error cost
-nothing.
+An indicator designed from a model inherits the errors of that model. For
+each level $\varepsilon$, a perturbed energy vector $E(1+\varepsilon\eta)$ is
+drawn, with $\eta$ standard normal, and the barycentre indicator is
+constructed from this misspecified system along the trajectory of a constant
+input, as the design procedure of this paper prescribes. The indicator is
+then evaluated on the true system under the myopic policy, with every loss
+evaluated at the system's own $\gamma$. Since the policy is computed from the
+true system, the table isolates the cost of an error in the indicator; an
+error that also affected the controller would be more costly.
+Table~\ref{tab:misspec} reports the ratio of this loss to that of the
+indicator designed from the true model, over $40$ draws per level; a ratio of
+$1$ indicates that the error has no cost.
 
 \begin{table}[t]
 \caption{Cost of designing the indicator from a misspecified stress model.
-Entries are the loss on the true plant relative to that of the indicator
+Entries are the loss on the true system relative to that of the indicator
 designed from the true model, over $40$ draws per level; $\varepsilon$ is the
 relative standard deviation of the error in the activation energies. The
-steering policy uses the true plant.}
+steering policy uses the true system.}
 \label{tab:misspec}
 \centering
 \begin{tabular}{cccc}
@@ -1780,146 +697,52 @@ $0.35$ & $36.0$ & $94.1$ & $195$\\
 \end{tabular}
 \end{table}
 
-An error of $2\%$ in the energies is almost free. At $5\%$ the median cost is a
-factor $1.40$. At $10\%$ the median cost is $3.10$ and the worst of forty draws
-costs $67.7$, comparable in size to the whole benefit of steering in
-Section~\ref{sec:steer}; beyond that every column grows monotonically, to a
-median of $36.0$ at $\varepsilon=0.35$. The design therefore tolerates an
-error of two percent in the energies almost entirely and one of five percent
-in the median, but not one of ten percent, so the accuracy of the stress model
-bounds what steering can deliver in practice.
+An error of $2\%$ in the energies has a negligible cost. At $5\%$ the median
+cost is a factor $1.40$. At $10\%$ the median cost is $3.10$ and the worst of forty draws
+costs $67.7$, comparable in magnitude to the entire benefit of steering;
+beyond this level every column increases monotonically, to a
+median of $36.0$ at $\varepsilon=0.35$. The loss to which these ratios apply
+is small, however, so that even a tenfold increase leaves the indicator's
+excess error variance below $1\%$.
 
-The structural counterpart is the knife edge of Remark~\ref{rem:family}: the
-plants that escape the counting rule do so only at exact parameter values, and
-at one percent of error in their shape coefficients steering is already worse
-than not steering, a fragility that closing the loop halves but does not
-remove (Supplementary Section~S4). Both results point the same way: the counting
-rule of Theorem~\ref{thm:zero}, necessary for generic data, is the one to
-design against, and the model it is applied to has to be known to within a
-few percent.
+\section{Evidence from public run-to-failure data}
+\label{sec:data}
 
-\section{What public data can say about the premises}
-\label{sec:scope}
-
-The construction rests on three modelling choices, and each is empirically
-testable. They do not carry equal weight, and Fig.~\ref{fig:scope} separates
-what depends on which. Two are premises about the plant: that the informative
-direction rotates along the trajectory, and that the input moves it by acting
-on the degradation, through $\varphi(u)$. The third is the separability of
-Lemma~\ref{lem:sep}, which is what makes the operator's authority computable
-offline, and it is tested together with the pairing of channels with
-mechanisms in \eqref{eq:obs}. Table~\ref{tab:fleets} summarises what six
-public run-to-failure fleets currently settle. Supplementary Section~S1 gives
-the protocol behind every row, and its Table~S1 lists the parameters of the
-code that produced it.
-
-How a fleet was generated decides what it can test, and for the two turbofan
-simulations it decides against the actuation premise. C-MAPSS imposes its
-flow and efficiency losses as exponential functions of time, from a random
-initial deterioration, and the operating regime enters only through the
-thermodynamic response of the sensors~\cite{saxena2008}. N-CMAPSS imposes a
-linear normal degradation followed by a steeper abnormal one, and the
-operating history enters only through the onset of the abnormal
-phase~\cite{arias2022fusing}; within a flight the damage does not respond to
-the operating point at all. A contrast between operating points inside one
-engine therefore reads the observation map $H(x,u)$ that \eqref{eq:obs}
-excludes, not the stress factor $\varphi(u)$.
-
-
-\begin{figure*}[tb]
-\centering
-\begin{tikzpicture}[
-  font=\small,
-  n/.style={draw, rounded corners=1.5pt, align=center, inner sep=2.5pt,
-            font=\scriptsize, fill=black!3, minimum height=8mm,
-            text width=27mm},
-  hyp/.style={n, fill=black!14, thick},
-  bad/.style={n, fill=black!14, thick, draw=black, densely dashed},
-  e/.style={-{Latex[length=1.6mm]}, semithick, black!65},
-  lbl/.style={font=\scriptsize, inner sep=1.5pt}]
-
-% columns at 15 / 55 / 95 mm, so the picture spans 0..110mm
-\node[hyp] (mod) at (35mm,0mm)
-      {plant \eqref{eq:plant} with $\varphi_i>0$, $h_i>0$, read through
-       \eqref{eq:obs}};
-\node[n] (lem) at (35mm,-12mm)
-      {Lemma~\ref{lem:exact}: the loss is one angle};
-
-\node[n] (bha) at (15mm,-24mm)
-      {Prop.~\ref{prop:bhat}: that angle lives on the simplex};
-\node[n] (bar) at (15mm,-36mm)
-      {Prop.~\ref{prop:bary}: the optimum is a barycentre};
-\node[n] (bli) at (15mm,-48mm)
-      {Prop.~\ref{prop:blind}: the record's Fisher information does not fix
-       the loss};
-
-\node[n] (rep) at (55mm,-24mm)
-      {Thm.~\ref{thm:repl}: a replicator flow the input drives};
-\node[n] (bet) at (55mm,-36mm)
-      {Thm.~\ref{thm:beta}: only one component moves $\beta$};
-\node[n] (cor) at (55mm,-48mm)
-      {Cor.~\ref{cor:tri}: holding $\beta$ needs $1$, freezing $\dhat$ needs
-       $d-1$};
-
-\node[n] (con) at (95mm,-12mm)
-      {Prop.~\ref{prop:converse}: a certificate for the converse};
-\node[n] (zer) at (35mm,-62mm)
-      {Thm.~\ref{thm:zero}: zero loss iff $q\in\mathcal D(x)$ along
-       $\mathcal S_q$};
-
-\draw[e] (mod) -- (lem);
-\draw[e] (lem) -- (bha);
-\draw[e] (lem) -- (rep);
-\draw[e] (bha) -- (bar);
-\draw[e] (rep) -- (bet);
-\draw[e] (bet) -- (cor);
-\draw[e] (lem.east) -- (con.west);
-\draw[e] (cor) -- (zer);
-\draw[e] (bli) -- (zer);
-
-% --------------------------------- the branch that needs more than that ---
-\node[bad] (sep) at (95mm,-62mm)
-      {separability, Lemma~\ref{lem:sep}, with \eqref{eq:obs}\\[1pt]
-       \textbf{rejected} jointly on N-CMAPSS};
-\node[n] (cnt) at (95mm,-81mm)
-      {Prop.~\ref{prop:contain}, Rem.~\ref{rem:family}, and $\mathcal B$
-       computed offline};
-
-\draw[e] (zer) -- node[above, font=\scriptsize, align=center] {and\\additionally} (sep);
-\draw[e] (sep) -- (cnt);
-
-\end{tikzpicture}
-\caption{What rests on what. The spine needs only the positivity of $\dvec$, which the degradation model gives in the channel coordinates of \eqref{eq:obs}. The dashed branch adds separability. Section~\ref{sec:scope} reports the two rejected jointly on raw turbofan sensors, which keeps those sensors off the spine as well until the observation map is inverted.}
-\label{fig:scope}
-\end{figure*}
+Three premises of the model can be tested on public run-to-failure data:
+that the informative direction rotates; that the operating point moves it by
+acting on the degradation; and that the separable stress model, interpreted
+through the pairing of channels with mechanisms, holds.
+Table~\ref{tab:fleets} summarises what six public run-to-failure fleets establish and what they leave open. Supplementary Section~S1 gives the
+protocol behind every row, and its Table~S1 lists the parameters of the code
+that produced it.
 
 \begin{table*}[tb]
-\caption{What the six public fleets settle, and what they cannot. Only the two
-turbofan simulations vary the operating point within a unit, and neither lets
-it act on the damage, so the actuation premise is untested on every public
-fleet.}
+\caption{Premises of the model examined on six public run-to-failure fleets.
+Only the two turbofan simulations vary the operating point within a unit, and
+neither allows it to act on the damage; the actuation premise is therefore
+untested on every public fleet.}
 \label{tab:fleets}
 \centering
 \footnotesize
 \setlength{\tabcolsep}{3pt}
 \begin{tabular}{@{}R{0.16}R{0.14}R{0.31}R{0.34}@{}}
 \hline
-fleet & premise & what is measured & reading\\
+fleet & premise & quantity measured & finding\\
 \hline
 Severson lithium-ion~\cite{severson2019} & rotation &
 arc of an empirically constructed informative direction, the fleet mean, over $\tau\in[0.15,0.9]$, on
 $129$ Severson lithium-ion cells &
 travels $30.7^{\circ}$ of arc and ends $21^{\circ}$ from its start
-(Fig.~\ref{fig:mech}(c)); stays in the open positive orthant once the
+(Fig.~\ref{fig:mech}(c)); remains in the open positive orthant once the
 window reaches $301$ cycles\\[3pt]
 XJTU-SY~\cite{xjtu2020}, PRONOSTIA~\cite{pronostia2012} & actuation &
 --- & the operating condition is fixed per unit, so condition and group of
 units cannot be separated\\[3pt]
-NASA batteries~\cite{saha2007} & actuation & --- & four cells\\[3pt]
+NASA batteries~\cite{saha2007} & actuation & --- & only four cells\\[3pt]
 C-MAPSS~\cite{saxena2008} & actuation: not testable &
 between-regime minus within-regime angle, each engine serving as its own
 control &
-by $7.9^{\circ}$ (FD004) and $10.8^{\circ}$ (FD002), positive for $436$ of $439$ engines; fake regimes give $\lvert B-W\rvert\le0.5^{\circ}$; the damage is regime-free by construction, so this reads the sensor map\\[3pt]
+by $7.9^{\circ}$ (FD004) and $10.8^{\circ}$ (FD002), positive for $436$ of $439$ engines; surrogate regimes give $\lvert B-W\rvert\le0.5^{\circ}$; the damage is independent of the regime by construction, so the contrast reflects the sensor map\\[3pt]
 N-CMAPSS DS02, DS01~\cite{arias2021} & separability with pairing~\eqref{eq:obs} &
 interaction against both main effects, in a two-way layout inside engines &
 larger by a factor $1.65$ over the operating-point effect on DS02 and $1.84$ on DS01, under every clustering and staging tried: \textbf{rejected} jointly\\
@@ -1927,179 +750,156 @@ larger by a factor $1.65$ over the operating-point effect on DS02 and $1.84$ on 
 \end{tabular}
 \end{table*}
 
-Four readings qualify the table. The Severson channels are capacity fade,
-resistance growth and mean temperature, and mean temperature is a monitoring
-channel rather than a damage state --- it is the operating variable itself in
-the Arrhenius form of Section~\ref{sec:prelim}. That row therefore reads the
-rotation of a direction formed from three measured series, which is what the
-premise asserts, and does not need \eqref{eq:obs}'s pairing of channels with
-mechanisms. On the four measured fleets the obstacle to testing actuation is
-the design of the fleet and not the physics: the operating point never changes
-within a unit, or there are too few units. On the two simulated fleets it is
-the generator, as set out above, so the premise is untested everywhere. What
-C-MAPSS does show is that the observed direction depends on the regime through
-the sensor response alone. A fixed indicator's loss depends on the observed
-direction however it moves, so that is a channel through which an operating
-point matters for indicator design, but it is one \eqref{eq:obs} excludes and
-it is not evidence for $\varphi(u)$. Both the Severson and the C-MAPSS rows estimate the direction by differentiating each channel along normalised life, which reads a time derivative as the sensitivity of Eq.~\eqref{eq:sens} and so presumes the time-shift population of Section~\ref{sec:prelim}. And the C-MAPSS contrast is reported against a negative control --- fake regimes cut from a single real one, where no contrast exists
-by construction --- because a procedure that returned a positive contrast
-regardless would produce the same table entry.
+Rotation of the informative direction is observed on the battery cells of
+Section~\ref{sec:cells}. That analysis and the turbofan contrasts below
+interpret a time derivative as the sensitivity \eqref{eq:sens}, and
+therefore presuppose the time-shift population of Section~\ref{sec:model}.
 
+The effect of the operating point on degradation remains untested. The
+measured fleets either do not vary the operating point within a unit or
+contain too few units. The two turbofan simulations do vary it, but their
+generators preclude the test. C-MAPSS imposes its flow and efficiency losses
+as exponential functions of time, from a random initial deterioration, and
+lets the regime act only on the thermodynamic response of the
+sensors~\cite{saxena2008}. N-CMAPSS imposes a linear normal degradation
+followed by a steeper abnormal one, with the operating history entering
+through the onset of the abnormal phase~\cite{arias2022fusing}, and the health
+parameters supplied with the data are constant within every flight. The
+C-MAPSS contrast, positive in all but three engines against a negative
+control that returns none, therefore shows that the observed direction
+depends on the regime through the sensor response alone. Variable operating
+conditions thus rotate the observed direction even when they do not act on
+the damage. Because the loss of a fixed indicator depends on the observed
+direction regardless of the cause of its motion, this finding is relevant to
+indicator design; it is not, however, evidence that the operating point acts
+on the damage.
 
-The consequence is the scope of the results above, and it is wider than
-separability alone. The damage the N-CMAPSS simulator imposes is constant
-within every flight, as the protocol of Supplementary Section~S1 checks in the
-files themselves, so the dependence on the operating point that the two-way
-layout measures belongs to the sensor map and not to a stress factor. What the test rejects is therefore the pairing
-\eqref{eq:obs} for raw turbofan sensors; separability of $\varphi$ on its own
-is untested there. The pairing is what delivers the positivity of
-$\dvec$, so the geometry of Sections~\ref{sec:simplex} and~\ref{sec:reach}
-applies to such sensors only once the observation map has been inverted, as
-Section~\ref{sec:dvec} anticipates; where \eqref{eq:obs} holds it needs only
-$\varphi_i>0$ and $h_i>0$. What separability buys is
-Proposition~\ref{prop:contain} and the offline route to $\mathcal B$: those
-describe a model class, and a plant must be shown to belong to it before they
-are used. The two-way layout above is the test, and it costs one pass over
-data a reliability programme already holds.
+The separable model fails on raw turbofan sensors. On both N-CMAPSS datasets
+the interaction between operating point and life stage exceeds the main
+effect of the operating point, and since the simulated damage does not
+respond to the operating point within a flight, the interaction is
+attributable to the sensor map: the sensors mix mechanisms with weights that
+depend on the operating point, in violation of \eqref{eq:obs}. The pairing is
+what makes the informative direction positive, so the geometry of
+Sections~\ref{sec:arc} and~\ref{sec:steer} applies to such sensors only after
+the observation map has been inverted, and the offline computation of the
+actuation authority described in Supplementary Section~S4 is available only
+where the separable form has been shown to hold. The two-way layout, whose
+protocol is given in Supplementary Section~S1, provides this test at the cost
+of a single pass over data that a reliability programme typically already
+holds.
 
-\section{Discussion}
+\section{Discussion and conclusions}
 \label{sec:discussion}
 
-Four practical readings follow from the results above. The first two hold
-whatever the plant is, because one is a test and the other an identity. The
-last two assume the separable form of \eqref{eq:plant} read through
-\eqref{eq:obs}, which Section~\ref{sec:scope} reports as rejected jointly on
-the only data able to test it, so they apply where that form does and not
-otherwise.
+The results have two practical implications.
 
-Test the separability assumption before relying on it. The two-way
-layout of Section~\ref{sec:scope} needs only a fleet whose operating point
-varies within a unit, and costs one pass over data a reliability programme
-already holds. If the interaction clears the measured noise floor, either the
-stress model or the pairing of channels with mechanisms fails, the offline
-route to the operator's authority is unavailable, and the two model-based
-readings below do not apply.
+First, the rotation arc should be assessed before an adaptive indicator is
+considered. The loss of a fixed indicator is governed by the extent to which
+the informative direction rotates, and \eqref{eq:arcbound} converts the arc
+into a worst-case increase in the error variance of the remaining-life
+estimate. For the battery fleet examined here the resulting increase is at
+most $7.5\%$, and a remaining-life estimator and a replacement policy using
+the fixed indicator perform as well there as ones using all channels; for the
+synthetic system the actual excess is about one third of the bound. Where
+the arc amounts to a few tens of degrees, a single fixed indicator is
+adequate; adaptive, segmented or learned indicators become worthwhile as the
+arc approaches a right angle, at which the bound allows the error variance to
+double. The five steps of Section~\ref{sec:procedure} make this assessment
+from run-to-failure data alone.
 
-Score the indicator's information, not the record's. This is the second of
-the two unconditional readings. By Proposition~\ref{prop:blind} the record's
-Fisher information does not fix the loss, so an input chosen to maximise a
-scalarisation of it can leave the loss far from where another input would put
-it, as Table~\ref{tab:levelset} shows at equal record information. Since the
-two informations together fix the loss by \eqref{eq:fisherpair},
-observability-aware input design serves a fixed indicator once it scores
-$I_z$ alongside $I_{\mathrm{rec}}$.
+Second, the operating point should be selected primarily for service life.
+Steering the operating point can reduce the information loss by an order of
+magnitude or more. Where the loss is already small, however, this yields
+almost no improvement in the accuracy of a practical remaining-life
+estimator, whereas the same choice alters the lifetime by an order of
+magnitude. Aligning an indicator and prolonging the life of the component are
+distinct objectives, and the latter is usually the more consequential.
 
-The binding constraint is actuation authority, not indicator
-sophistication. Theorem~\ref{thm:zero} prices the operating variables a
-lossless fixed indicator would need: fewer than $d-1$ fail for almost every
-indicator, and $d-1$ suffice only where the aligning input stays inside the
-envelope along the segment the indicator fixes, which
-Proposition~\ref{prop:contain} turns into a containment on the separable
-subclass. The exceptions of Remark~\ref{rem:family} are a knife edge. Care in
-choosing the weights substitutes for actuation in neither case. What one
-controllable variable does buy is the weaker objective of
-Corollary~\ref{cor:tri}: an installation that could never freeze the
-informative direction can still hold the misalignment constant, though not at
-zero. Authority bought this way is not free, and Section~\ref{sec:steer}
-prices it in life.
+\paragraph{Limitations} Four limitations qualify these conclusions. First,
+the construction assumes a time-shift population, whereas dispersing the
+degradation coefficients of the test system rotates the population regression
+of damage on remaining life by about $45^{\circ}$ from the direction the
+construction uses, more than the measured arc of the battery cells, so that
+the bound does not cover such dispersion even though the battery case study
+suggests that the practical conclusion survives it. Second, the pairing of
+channels with mechanisms fails on raw turbofan sensors, so the geometry
+applies to them only after the observation map has been inverted. Third, the
+actuation premise remains untested on every public fleet. Finally, the best
+achievable loss is computed and bracketed between the myopic policy and an
+extrapolation, not bounded analytically.
 
-The decision to steer precedes the design of the indicator. The width
-of the reachable arc requires only a nominal degradation model and the
-operating envelope, and Table~\ref{tab:regime} shows the value of steering
-collapsing from $68\times$ to under $3\times$ as it shortens, measured against
-the best constant input at the steering indicator, and from $47\times$ to under
-$2\times$ against a constant design with its own. It screens rather
-than decides, and across random plants the drift of the informative direction
-refines it only in combination: drift the authority can follow gives steering
-something to do, and drift that outruns it defeats steering
-(Section~\ref{sec:regime}).
+\appendix
 
-\paragraph{Limitations} Four limitations qualify the readings above. The
-separable form of \eqref{eq:plant}, read through the pairing of
-\eqref{eq:obs}, is not only an idealisation but one the data reject:
-Section~\ref{sec:scope} finds the interaction between operating point and
-state larger than either main effect on two N-CMAPSS datasets, so computing
-the operator's authority offline is available only where that form holds. The
-optimum of Section~\ref{sec:limit} is bracketed rather than certified, and on
-the test plant the bracket does not separate it from the myopic policy. The actuation premise is untested on every public fleet, for the reasons set out in Section~\ref{sec:scope}. And the population is taken to slide along one degradation path, which is what makes remaining life a coordinate on it; under dispersion in the coefficients of \eqref{eq:plant} the sensitivity that Remark~\ref{rem:shift} measures stands some $45^{\circ}$ from \eqref{eq:sens}, so the construction describes fleets that vary in when they fail rather than in how they degrade.
+\section{Derivations}
+\label{app:derivations}
 
-\section{Conclusion}
-\label{sec:conclusion}
+\subsection{Information loss and error-variance inflation}
+\label{app:loss}
+Write $\tilde y=\dvec R+\epsilon$ with $\epsilon\sim N(0,I_d)$, the
+linearised whitened record. The indicator returns
+$z=(\mathbf v^{\top}\dvec)R+\mathbf v^{\top}\epsilon$, whose noise is standard
+normal because $\|\mathbf v\|=1$, so its signal-to-noise ratio is
+$\gamma\cos^{2}\psi$. The record's sufficient statistic $\dvec^{\top}\tilde y$
+has ratio $\gamma$. A scalar Gaussian channel of signal-to-noise ratio $s$
+carries $\tfrac12\log(1+s)$ nats about $R$~\cite{cover2006}, and subtracting
+gives the first form of \eqref{eq:exact}; substituting
+$\cos^{2}\psi=1-\sin^{2}\psi$ gives the second. The posterior variances are
+$\Var[R]/(1+\gamma\cos^{2}\psi)$ and $\Var[R]/(1+\gamma)$, whose quotient is
+\eqref{eq:mmse}. Equation~\eqref{eq:fisherpair} is \eqref{eq:exact} with
+$\gamma=\Var[R]I_{\mathrm{rec}}$ and $\gamma\cos^{2}\psi=\Var[R]I_z$; at fixed
+$I_{\mathrm{rec}}$, $w$ is fixed and $\lloss$ increases continuously from zero
+towards $\tfrac12\log(1+\gamma)$ as $\psi$ goes from $0$ to $\pi/2$.
 
-A fixed health indicator discards information, and this paper has treated what
-it discards as a quantity the operating point controls. Indicator design then
-becomes a reachability question. The family of reachable direction sets bounds what the operating
-point can achieve, and their width, available before any indicator is fixed, indicates whether substantial benefit is plausible, and across random plants of this model the drift of the informative direction refines that indication only in combination with it. Under the proposed model, actuation authority, rather than sophistication of the indicator, governs whether a fixed compression can come close to lossless. What
-steering delivers in practice is bounded by how well the stress model is
-known: an error of two percent in the activation energies is almost free,
-and one of ten percent is not (Section~\ref{sec:misspec}). Whether that authority is
-present is an empirical question rather than a modelling assumption, and no
-public fleet yet answers it: the simulated turbofans keep their damage
-independent of the operating point by construction, and the measured fleets do
-not vary it within a unit. Answering it awaits records in which the operating
-point varies within units and acts on the damage.
-
-Section~\ref{sec:scope} rejects the separable form, read through the pairing
-of channels with mechanisms, on the highest-fidelity public turbofan data, so
-the geometry of Section~\ref{sec:translate}, and the offline route it opens,
-describe a model class rather than measured machinery. What replaces that
-structure when the sensors mix mechanisms or the stress model is not
-separable, and whether a weaker one still yields a computable reachability
-criterion, remains open.
-
-Two further questions remain open, the first of them now in a more specific
-form. Proposition~\ref{prop:converse} reduces the search for a converse bound
-uniform over trajectories to the exhibition of a single verification
-function. The value function satisfies it in the viscosity sense, so what is
-required is a computable version with a certified error, from a grid value
-function with a residual bound or from sum-of-squares programming. The other is whether the
-controlled horizon ever makes the myopic policy measurably suboptimal. On the
-test plant the computed optimum does not separate from it, and a plant on
-which it does would show what the fractional structure is worth in practice.
+\subsection{Rotation of the informative direction}
+\label{app:rotation}
+From $\dvec_i=e^{g_i}$, $\dot\dvec_i=\dvec_i\dot g_i$, and
+$\dot{\dhat}=\|\dvec\|^{-1}(\dot\dvec-\dhat(\dhat^{\top}\dot\dvec))$ has
+components $\dhat_i(\dot g_i-\E_p[\dot g])$ with $p_i=\dhat_i^{2}$, so its
+squared norm is $\Var_p[\dot g]$. Differentiating
+$g_i=\log\varphi_i(u)+\log h_i(x_i)-\log\sigma_i$ along \eqref{eq:plant}
+gives $\dot g_i$ in \eqref{eq:repl}. With $\cos\psi=\dhat^{\top}\mathbf v$,
+$-\sin\psi\,\dot\psi=\dot{\dhat}^{\top}\mathbf v$, so only the component of
+$\dot{\dhat}$ along the great circle towards $\mathbf v$ changes $\psi$.
 
 \section*{Data availability and reproducibility}
-The six fleets named in Section~\ref{sec:scope} are publicly available. One
+The six fleets named in Section~\ref{sec:data} are publicly available. One
 script recomputes every reported number from a single configuration and
-compares it with the value written in this manuscript and in its
+compares it with the value stated in this manuscript and in its
 supplementary material, covering the tables and the quantities reported
 alongside them; all of its checks pass, and the output of the run that
-verified this version is included. The random-plant sweep of
-Section~\ref{sec:regime} and the grid sequence of Section~\ref{sec:frac} take
-hours, so they and the downstream repeat of Section~\ref{sec:downstream} are
-recorded by three further scripts; the checks read the records and recompute
-part of the grid sequence afresh. Three groups of numbers lie outside the checks: the
-residuals of the identity checks in Supplementary Section~S4, the barycentre
-comparison in Section~\ref{sec:bary}, and the diagnostics of the two candidate
-certificates in Supplementary Section~S3. The plots are produced by three
-further scripts. All of these are available at
+verified this version is included. The random-system sweep and the
+downstream repetition of Supplementary Section~S4 and the grid sequence of
+Section~\ref{sec:case} require several hours of computation, so they are
+recorded by three further scripts; the checks read these records and
+recompute part of the grid sequence afresh. One group of numbers lies
+outside the checks: the residuals of the identity checks in Supplementary
+Section~S3. The figures are produced by three further scripts. All of these
+are available at
 \url{https://github.com/HuyHoangLe0201/health-indicator-information-loss},
 and are also provided with this article as a supplementary archive, together
 with the Supplementary Material.
 
-\section*{Supporting information}
-Additional supporting information is found in the online version of this
-article.
+\section*{CRediT authorship contribution statement}
+\textbf{Huy Hoang Le:} Conceptualization, Methodology, Formal analysis,
+Software, Validation, Investigation, Data curation, Visualization,
+Writing -- original draft. \textbf{Kim-Anh Nguyen:} Conceptualization,
+Methodology, Validation, Writing -- review \& editing, Supervision, Project
+administration.
 
-\noindent\textbf{Supplementary Material (PDF).} Supplementary Sections S1
-to S4: the protocols behind every row of Table~\ref{tab:fleets} with the
-parameters of the code that produced them, the proofs of
-Propositions~\ref{prop:record} and~\ref{prop:bary}, the two candidate
-certificates for Proposition~\ref{prop:converse} and what each would
-need, and the numerical verification of the identities and of the
-exceptional family of Remark~\ref{rem:family}.
+\section*{Declaration of generative AI and AI-assisted technologies in the manuscript preparation process}
+During the preparation of this work the authors used Claude (Anthropic) to
+assist with drafting and editing the text and with writing and checking the
+analysis and verification code. After using this tool, the authors reviewed
+and edited the content as needed and take full responsibility for the content
+of the published article.
 
-\noindent\textbf{Supplementary archive (ZIP).} The Supplementary Material
-and a copy of the repository named in the Data availability section: the
-script that recomputes and checks every reported number, the records of
-the two sweeps and the grid sequence it reads, the output of the run that verified this version,
-and the three figure scripts.
-
-\section*{Conflict of interest}
+\section*{Declaration of competing interest}
 The authors declare that they have no known competing financial interests or personal relationships that could have appeared to influence the work reported in this paper.
 
 \section*{Funding}
 This research did not receive any specific grant from funding agencies in the public, commercial, or not-for-profit sectors.
 
-\bibliographystyle{unsrtnat} \bibliography{Ref}
+\bibliographystyle{elsarticle-num} \bibliography{Ref}
 
 \end{document}

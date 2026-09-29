@@ -142,7 +142,7 @@ i0 = int(floor1.argmax())
 imin = int(floor1.argmin())
 ax.plot([tau[i0], tau[imin]], [floor1[i0], floor1[imin]], "o", ms=3.5,
         mfc="w", mec="0.15", mew=1.0, ls="none")
-ax.annotate(r"$4.52^{\circ}$ at birth", (tau[i0], floor1[i0]),
+ax.annotate(r"$4.52^{\circ}$ at $\tau=0$", (tau[i0], floor1[i0]),
             xytext=(7, 0), textcoords="offset points", fontsize=7.0,
             color="0.2")
 ax.annotate("below the $0.01^{\\circ}$\nsampling grid",

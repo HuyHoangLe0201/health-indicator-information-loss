@@ -1,11 +1,11 @@
-# Information loss of fixed linear health indicators as a control problem
+# Information loss of fixed linear health indicators
 
 Reproducibility repository for the manuscript
 
-> **Information loss of fixed linear health indicators as a control problem:
-> simplex geometry and reachability limits**
+> **Information loss of fixed linear health indicators under
+> competing degradation mechanisms and variable operating conditions**
 > Huy Hoang Le, Kim-Anh Nguyen
-> Submitted to *International Journal of Robust and Nonlinear Control*
+> Submitted to *Reliability Engineering & System Safety*
 
 ## Quick start
 
@@ -20,33 +20,33 @@ written in `theory.tex` — not against a stored expectation, but against the
 text itself, so the paper and the code cannot drift apart quietly. It ends with
 `ALL CHECKS PASS` or names the rows that failed.
 
-For all 270 checks you need the fleets; see [DATA.md](DATA.md).
+For all 420 checks you need the fleets; see [DATA.md](DATA.md).
 
 ```bash
 export HI_DATA=/path/to/data
-python verify_numbers.py --full        # about 30 minutes
+python verify_numbers.py --full        # about an hour
 ```
 
 ## What is here
 
 | | |
 |---|---|
-| `theory.tex`, `theory.pdf` | the manuscript, 34 pages |
-| `supplement.tex`, `supplement.pdf` | Supplementary Sections S1-S4: the Section 7 protocols, two proofs, the candidate certificates, the numerical checks |
+| `theory.tex`, `theory.pdf` | the manuscript, 23 pages |
+| `supplement.tex`, `supplement.pdf` | Supplementary Sections S1-S4: the Section 6 protocols and those of the Section 4 case study, the loss over a record and the best fixed indicator, the numerical checks, and the conditions for zero loss with further results on the test system |
 | `sub.tex`, `sub.pdf` | the same source set in two columns, which shows what overflows a narrow measure |
 | `Ref.bib`, `theory.bbl` | bibliography |
-| `fig1.pdf`, `fig2.pdf`, `fig4.pdf` | the three plotted figures |
+| `fig1.pdf`, `fig2.pdf`, `fig4.pdf` | the three plotted figures: Figure 2 of the paper, Figures S1 and S2 of the supplement |
 | `make_fig1.py`, `make_fig2.py`, `make_fig4.py` | the scripts that draw them |
-| `verify_numbers.py` | the 270 checks |
-| `rho_sweep.py`, `rho_sweep.json` | the random-plant sweep of Section 6.7, and what it produced |
-| `downstream_sweep.py`, `downstream_sweep.json` | Section 6.8 repeated on 120 random plants, and what it produced |
-| `dinkelbach_grids.py`, `dinkelbach_grids_NU41.json`, `dinkelbach_grids_NU81.json`, `dinkelbach_grids_NU161.json` | the fractional optimum of Section 6.6 on state grids of 25 to 137 points per axis for three control grids, and what it produced |
+| `verify_numbers.py` | the 420 checks |
+| `rho_sweep.py`, `rho_sweep.json` | the random-system sweep of Supplementary Section S4, and what it produced |
+| `downstream_sweep.py`, `downstream_sweep.json` | the downstream-estimator test of Supplementary Section S4, repeated on 120 random systems, and what it produced |
+| `dinkelbach_grids.py`, `dinkelbach_grids_NU41.json`, `dinkelbach_grids_NU81.json`, `dinkelbach_grids_NU161.json` | the fractional optimum of Section 5.2 on state grids of 25 to 137 points per axis for three control grids, and what it produced |
 | `verified_run.log` | the output of the run that checked the shipped PDF |
 | `make_sub.py` | renders `sub.tex` from `theory.tex` |
 | `check_fonts.py` | Type 3 and embedding check on every PDF |
 | `LICENSE`, `CITATION.cff` | licence, and how to cite this repository |
 
-The other three figures are TikZ and live inside `theory.tex`.
+The other figure, Figure 1, is TikZ and lives inside `theory.tex`.
 
 The bundle sent to the journal -- cover letter, highlights and the
 declarations -- is deliberately not published here. The cover letter is
@@ -61,11 +61,11 @@ This trips people up, so it is worth saying plainly:
 | file | prints as |
 |---|---|
 | `fig2.pdf` | **Figure 2** |
-| `fig1.pdf` | **Figure 4** |
-| `fig4.pdf` | **Figure 5** |
+| `fig1.pdf` | **Figure S2** |
+| `fig4.pdf` | **Figure S1** |
 
 The names are the order the scripts were written, not the order the floats
-appear. `theory.aux` is the authority; do not infer a figure number from a
+appear, and two of them now sit in the supplement. `theory.aux` and `supplement.aux` are the authority; do not infer a figure number from a
 filename. There is no `fig3.pdf` here — it belongs to an earlier, longer
 version of the paper and `theory.tex` does not include it.
 
@@ -113,7 +113,7 @@ listed ones.
 Two rows are worth pointing at, because they guard a distinction rather than a
 value:
 
-- **`Prop 2.3 record identity`** checks the closed form for the information a
+- **`S2 record-level identity`** checks the closed form for the information a
   fixed indicator forfeits over a whole record against a direct
   mutual-information computation. It agrees to 6.1e-16.
 - **`record vs time-averaged loss differ`** asserts that the record loss and
@@ -121,8 +121,7 @@ value:
   manuscript optimises the second and states the first; if this row ever
   collapsed towards zero the distinction the text draws would have quietly
   gone.
-- **`Table I: l-bar within 6% of 1/2 rms^2`** reads two columns of Table 2 as
-  printed and checks a bound that ties them, independently of the code that
+- **`Table S2: l-bar within 6% of 1/2 rms^2`** reads two columns of Supplementary Table S2 as printed and checks a bound that ties them, independently of the code that
   filled them. For many revisions the column headed "rms" held a standard
   deviation, and every row matched because the gate compared it with the same
   computation; a reviewer caught it with this bound, which the standard
@@ -131,7 +130,7 @@ value:
 ## What a passing run looks like
 
 `verified_run.log` is the real output of `--full` against the files in
-this repository: 270 rows, each with the value the manuscript states
+this repository: 420 rows, each with the value the manuscript states
 beside the value recomputed from the model, and `ALL CHECKS PASS` at the
 end. Compare your own run against it line by line.
 
@@ -141,10 +140,10 @@ grid script with its three records, and `fig4.pdf` with its script. That
 bracket is the point: it says the checks and
 the manuscript were the same files throughout, so a run that passed against an edited copy cannot
 be presented as a run that passed against this one. `theory.tex` here is
-`acee8e21fc9d`, which is the hash the log records.
+`d56df5c555fe`, which is the hash the log records.
 
 The row count depends on the data you have. Without the fleets a subset
-runs and the total is smaller; 270 is the number with all six present.
+runs and the total is smaller; 420 is the number with all six present.
 
 ## Reproducing on another machine
 
@@ -158,13 +157,13 @@ spans are identical to the ones shipped here.
 These are in the manuscript's own words and are not defects in the code:
 
 - The failure threshold is a named parameter `x_f` of the model, and the test
-  plant of Section 6.1 uses `x_f = 0.9`. It is worth saying why the code calls
+  system of Section 5.2 uses `x_f = 0.9`. It is worth saying why the code calls
   it `xfail` while `w = 0.9` also appears: `w` is the signal-to-noise weight of
-  Lemma 2.2, an unrelated parameter that happens to carry the same value. The
+  Eq. (7), an unrelated parameter that happens to carry the same value. The
   computed constants do depend on the threshold — at `x_f = 1.0` the peak floor
   is 5.41° rather than 4.52° and the myopic policy's gain at the steering
   indicator is 58× rather than 68× — so
-  do not compare numbers across thresholds. Section 6.1 says this, and two gate
+  do not compare numbers across thresholds. Supplementary Section S4 says this, and two gate
   rows check it via `threshold_sensitivity()`, which moves `XFAIL` and restores
   it in a `finally`: leaving it moved would send every later check against the
   wrong threshold, and they would all still pass.
@@ -173,7 +172,7 @@ These are in the manuscript's own words and are not defects in the code:
   it depends on the policy: about +7 % at a constant input of 1.5 and about
   +13 % under the myopic policy. A single figure would be meaningless without
   naming which.
-- The fractional optimum of Section 6.6 is bracketed, not certified: the
+- The fractional optimum of Section 5.2 is bracketed, not certified: the
   myopic policy bounds it from above, and the extrapolation of
   `dinkelbach_grids_NU*.json` puts it within about 2 % below. The lower end
   rests on the extrapolation, which the gate fits to the finest four grids
@@ -183,10 +182,10 @@ These are in the manuscript's own words and are not defects in the code:
   their damage independently of it: C-MAPSS as a function of time, and in
   N-CMAPSS the health parameters shipped with the data are constant within
   every flight, which the gate reads from the files.
-- Section 4.1, with Lemma 4.4 and Proposition 4.5, holds on a separable
-  subclass that the highest-fidelity turbofan data reject jointly with the
-  pairing of channels with mechanisms. Figure 6 marks which branch of the
-  development depends on it; nothing before that subsection does.
+- The separable form of Supplementary Section S4, which makes the operator's authority
+  computable offline, is rejected on the highest-fidelity turbofan data
+  jointly with the pairing of channels with mechanisms (Section 6); the
+  rest of the paper does not depend on it.
 
 ## Requirements
 
