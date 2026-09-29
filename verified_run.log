@@ -1,7 +1,7 @@
 md5 BEFORE
-  d56df5c555fe5827c18148bc019d3b2b  theory.tex
-  07a82570f9d49be0b8e1e30fa5fea995  supplement.tex
-  83ed8eaeb67b9ed90040f4a766eaa93c  verify_numbers.py
+  312d99a72f12343ec9f5504145f9e9a4  theory.tex
+  78aff20904ce36d4f600998816c714fd  supplement.tex
+  3f15bd4771954f46cd2a7764f602cd8b  verify_numbers.py
   c0db59819961d0f743f9c0fc5d58cac5  rho_sweep.json
   506f77029478c7d27b65de63b294c58f  downstream_sweep.json
   05eb9819d0edfdfffebbcdf66932eccb  dinkelbach_grids.py
@@ -67,6 +67,8 @@ fair ratio, restated in the abstract                                     47     
 beta_min upper, restated in S4                                         4.52      4.52015  ok
 beta_min dips below (deg)                                              0.01   0.00575907  ok (bound)
 lifetime factor, balanced-indicator loop over q* loop                   3.4      3.44018  ok
+2.3 worked example: loss (nat)                                         0.01         0.01  ok
+2.3 worked example: excess error variance (%)                             2      2.02013  ok
 5.2 activation energy 1 (eV)                                           0.44     0.440202  ok
 5.2 activation energy 2 (eV)                                           0.81     0.807037  ok
 5.2 activation energy 3 (eV)                                           0.59     0.586936  ok
@@ -100,12 +102,12 @@ S1 N-CMAPSS minimum points per cell                                     400     
 S1 N-CMAPSS sweep minimum points                                        300          300  ok
 S1 N-CMAPSS DS02 units as run                                             1            1  ok
 sections the roadmap forgets                                              0            0  ok
-longest sentence the prose says twice (words)                            16           14  ok (bound)
+longest sentence the prose says twice (words)                            16            9  ok (bound)
 reproducibility exceptions announced vs listed                            0            0  ok
 limitations announced vs listed                                           0            0  ok
 fleets announced minus fleets cited                                       0            0  ok
 Discussion: unconditional readings come first                             1            1  ok
-Discussion readings announced vs given                                    2            2  ok
+Discussion readings announced vs given                                    3            3  ok
 Table S2 u=0.0: delta                                                 0.235     0.235005  ok
 Table S2 u=0.0: indicator information I_z                            0.4055     0.405474  ok
 Table S2 u=0.0: rms beta                                               11.8      11.8032  ok
@@ -197,8 +199,8 @@ S3 family: mistuned is worse than not steering                            1     
 5.3 eps=0.35 median                                                      36      35.9769  ok
 5.3 eps=0.35 90th pct                                                  94.1      94.0508  ok
 5.3 eps=0.35 worst of 40                                                195      194.846  ok
-5.3 median cost at 5%                                                   1.4      1.40024  ok
-5.3 median cost at 10%                                                  3.1      3.10401  ok
+5.3 median loss ratio at 5%                                             1.4      1.40024  ok
+5.3 median loss ratio at 10%                                            3.1      3.10401  ok
 5.3 worst of 40 at 10%                                                 67.7       67.672  ok
 5.3 median at eps=0.35                                                   36      35.9769  ok
 5.3 every column monotone in eps                                          1            1  ok
@@ -239,7 +241,6 @@ S3 family: mistuned is worse than not steering                            1     
 5.2 policy row 5: RUL error, all channels (%)                           8.5      8.52344  ok
 5.2 policy row 5: lifetime                                            4.928      4.92834  ok
 5.2 indicator within x% of all channels, every policy                   1.2      1.13181  ok (bound)
-abstract: indicator within x% of all channels                           1.2      1.13181  ok (bound)
 5.2 RUL error as % of life, smallest                                    8.4      8.43096  ok
 5.2 RUL error as % of life, largest                                    10.7       10.675  ok
 5.2 lifetime range over the constant designs                             19      19.0713  ok
@@ -466,11 +467,11 @@ S4 optimum: record reproduced afresh, N=69 (rel)                      1e-09     
 
 ALL CHECKS PASS
 
-exit 0 after 58.3 min
+exit 0 after 68.7 min
 md5 AFTER
-  d56df5c555fe5827c18148bc019d3b2b  theory.tex  [same]
-  07a82570f9d49be0b8e1e30fa5fea995  supplement.tex  [same]
-  83ed8eaeb67b9ed90040f4a766eaa93c  verify_numbers.py  [same]
+  312d99a72f12343ec9f5504145f9e9a4  theory.tex  [same]
+  78aff20904ce36d4f600998816c714fd  supplement.tex  [same]
+  3f15bd4771954f46cd2a7764f602cd8b  verify_numbers.py  [same]
   c0db59819961d0f743f9c0fc5d58cac5  rho_sweep.json  [same]
   506f77029478c7d27b65de63b294c58f  downstream_sweep.json  [same]
   05eb9819d0edfdfffebbcdf66932eccb  dinkelbach_grids.py  [same]

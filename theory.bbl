@@ -24,6 +24,27 @@ H.~H. Le, K.-A. Nguyen, Information-theoretic limits of health indicator
 \newblock \href {https://doi.org/10.1016/j.jestch.2026.102485}
   {\path{doi:10.1016/j.jestch.2026.102485}}.
 
+\bibitem{hac2020}
+F.~Karimi~Pour, D.~Theilliol, V.~Puig, G.~Cembrano, Health-aware control design
+  based on remaining useful life estimation for autonomous racing vehicle, ISA
+  Trans. 113 (2021) 196--209.
+\newblock \href {https://doi.org/10.1016/j.isatra.2020.03.032}
+  {\path{doi:10.1016/j.isatra.2020.03.032}}.
+
+\bibitem{rulcontrol2025}
+M.~S. F{\'e}lix, J.~J. Martinez, C.~B{\'e}renguer, Remaining useful life
+  {(RUL)} control of controlled systems under degradation, Int. J. Robust
+  Nonlinear Control 35~(18) (2025) 8095--8116.
+\newblock \href {https://doi.org/10.1002/rnc.70105}
+  {\path{doi:10.1002/rnc.70105}}.
+
+\bibitem{salazar2017system}
+J.~C. Salazar, P.~Weber, F.~Nejjari, R.~Sarrate, D.~Theilliol, System
+  reliability aware model predictive control framework, Reliability Engineering
+  \& System Safety 167 (2017) 663--672.
+\newblock \href {https://doi.org/10.1016/j.ress.2017.04.012}
+  {\path{doi:10.1016/j.ress.2017.04.012}}.
+
 \bibitem{wen2021generalized}
 P.~Wen, S.~Zhao, S.~Chen, Y.~Li, A generalized remaining useful life prediction
   method for complex systems based on composite health indicator, Reliability
@@ -154,27 +175,6 @@ S.-S. Chen, X.-Y. Li, Modeling dependent degradation data considering inherent
   prediction, Reliability Engineering \& System Safety 277 (2026) 113080.
 \newblock \href {https://doi.org/10.1016/j.ress.2026.113080}
   {\path{doi:10.1016/j.ress.2026.113080}}.
-
-\bibitem{hac2020}
-F.~Karimi~Pour, D.~Theilliol, V.~Puig, G.~Cembrano, Health-aware control design
-  based on remaining useful life estimation for autonomous racing vehicle, ISA
-  Trans. 113 (2021) 196--209.
-\newblock \href {https://doi.org/10.1016/j.isatra.2020.03.032}
-  {\path{doi:10.1016/j.isatra.2020.03.032}}.
-
-\bibitem{rulcontrol2025}
-M.~S. F{\'e}lix, J.~J. Martinez, C.~B{\'e}renguer, Remaining useful life
-  {(RUL)} control of controlled systems under degradation, Int. J. Robust
-  Nonlinear Control 35~(18) (2025) 8095--8116.
-\newblock \href {https://doi.org/10.1002/rnc.70105}
-  {\path{doi:10.1002/rnc.70105}}.
-
-\bibitem{salazar2017system}
-J.~C. Salazar, P.~Weber, F.~Nejjari, R.~Sarrate, D.~Theilliol, System
-  reliability aware model predictive control framework, Reliability Engineering
-  \& System Safety 167 (2017) 663--672.
-\newblock \href {https://doi.org/10.1016/j.ress.2017.04.012}
-  {\path{doi:10.1016/j.ress.2017.04.012}}.
 
 \bibitem{langeron2015modeling}
 Y.~Langeron, A.~Grall, A.~Barros, A modeling framework for deteriorating

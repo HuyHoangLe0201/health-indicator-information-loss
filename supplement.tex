@@ -87,7 +87,7 @@ characterises the best fixed indicator as a barycentre;
 Section~\ref{sec:verification} reports the numerical verification of the
 identities and examines the non-generic systems to which the counting
 condition does not apply; and Section~\ref{sec:further} contains the
-conditions for zero loss and further results on the test system that the main
+conditions for zero loss and further results on the synthetic system that the main
 text summarises. Equation, section, figure and table numbers without
 the prefix S refer to the main text.
 \end{abstract}
@@ -161,7 +161,7 @@ Each cell is inspected every $25$ cycles from cycle $100$ until its end of
 life. At each inspection the estimator of the remaining-life test, with the
 life searched from $n_0+1$ to $n_0+1500$, predicts the remaining life, and the
 cell is replaced at the first inspection at which the prediction is at most a
-threshold $\theta$; a cell not replaced before its end of life fails. With
+threshold of $n_{\mathrm{thr}}$ cycles; a cell not replaced before its end of life fails. With
 $r$ the ratio of the corrective to the preventive cost, the long-run cost per
 cycle is $(r\,n_{\mathrm f}+n_{\mathrm p})/\sum_kT_k$, where $n_{\mathrm f}$
 and $n_{\mathrm p}$ count failures and preventive replacements and $T_k$ is
@@ -415,7 +415,7 @@ remove it, so the fragility is inherent in the construction rather than in
 the open-loop schedule. Errors in the activation energies, by contrast, are
 tolerated up to about two percent.
 
-\section{Conditions for zero loss and further results on the test system}
+\section{Conditions for zero loss and further results on the synthetic system}
 \label{sec:further}
 
 \subsection{Conditions for zero loss}
@@ -592,7 +592,7 @@ zero loss is attained along the entire closed loop.
 
 \begin{figure}[tb]
 \centering \includegraphics[width=0.85\linewidth]{fig4.pdf}
-\caption{(a)~With one input, the floor relative to $q^{\star}$ is largest at the start of life and falls below the sampling resolution near mid-life. (b)~With two inputs, the mid-life direction is maintained exactly along the closed loop, which follows the segment $\mathcal S$; the required operating point, plotted against the normalised age of the closed loop, remains within $\mathcal U$.}
+\caption{(a)~With one input, the floor relative to $q^{\star}$ is largest at the start of life and falls below the sampling resolution near mid-life. (b)~With two inputs, the mid-life direction is maintained exactly along the steered trajectory, which follows the segment $\mathcal S$; the required operating point, plotted against the normalised age of the steered trajectory, remains within $\mathcal U$.}
 \label{fig:floor}
 \end{figure}
 
@@ -619,7 +619,10 @@ degradation speeds vary by orders of magnitude across $\mathcal U$; since the
 drift is positive, the interpolation cell of every foot point has all its
 corners other than the node itself at a larger index sum, so the discrete
 equation is solved exactly by one sweep in decreasing index sum, and the
-optimal ratio by Dinkelbach's own iteration. The values
+optimal ratio by Dinkelbach's own iteration. The two steering factors of
+Section~\ref{M-sec:case} are stable under refinement of the control grid:
+with control grids of $81$ points the two factors become $72$ and $50$, and
+on $161$ points $72$ and $50$ again. The values
 converge at first order in the mesh width: fitted to the four finest grids,
 the order is $0.99$. Extrapolated from those four,
 $\lambda^{\star}_\infty=1.65\times10^{-4}$. The myopic policy attains
@@ -737,7 +740,7 @@ $5.2$ rather than $68$.
 
 Equation~\eqref{M-eq:mmse} expresses the loss in terms of the error of the estimate prescribed by the model itself. Since a practitioner does not use that estimate, the ordering is examined against a procedure that uses none of the construction: the indicator is sampled over the last $40\%$ of life, the observed history is matched against the indicator's own reference curve, and the remaining life is read from the best-fitting time offset. This estimator uses only the scalar signal; it has no access to $\dhat$, $\gamma$ or the loss. It is the estimator of Table~\ref{M-tab:policy}.
 
-On one constant-input path of the test system, over twelve indicators spanning $\bar\lloss$ from $0.012$ to $0.37$, its median absolute error, one of the standard prognostic accuracy measures~\cite{saxena2008metrics}, increases with the loss, at Spearman correlation $0.89$, and the best-aligned indicator beats the worst by a factor $1.5$. Since twelve indicators constitute a small sample, both quantities are reported with intervals obtained by resampling the $160$ units behind each median: $0.34$ to $0.90$ for the correlation, and $1.40$ to $2.03$ for the factor. The ordering is statistically significant (a one-sided permutation test gives $p=1.5\times10^{-4}$), but its strength is uncertain, and the point estimate lies near the upper end of its own interval. The factor is far smaller than the $31$-fold spread in $\bar\lloss$, as expected: the loss is a logarithmic information measure, whereas the error is a time, and an estimator using the whole history recovers much of what any single
+On one constant-input path of the synthetic system, over twelve indicators spanning $\bar\lloss$ from $0.012$ to $0.37$, its median absolute error, one of the standard prognostic accuracy measures~\cite{saxena2008metrics}, increases with the loss, at Spearman correlation $0.89$, and the best-aligned indicator beats the worst by a factor $1.5$. Since twelve indicators constitute a small sample, both quantities are reported with intervals obtained by resampling the $160$ units behind each median: $0.34$ to $0.90$ for the correlation, and $1.40$ to $2.03$ for the factor. The ordering is statistically significant (a one-sided permutation test gives $p=1.5\times10^{-4}$), but its strength is uncertain, and the point estimate lies near the upper end of its own interval. The factor is far smaller than the $31$-fold spread in $\bar\lloss$, as expected: the loss is a logarithmic information measure, whereas the error is a time, and an estimator using the whole history recovers much of what any single
 instant discards.
 
 The same protocol on $120$ further systems, drawn at random as in

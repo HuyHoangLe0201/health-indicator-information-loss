@@ -249,10 +249,13 @@ def discussion_leads(path):
     # "Discussion and conclusions"
     body = t.split(r"\section{Discussion")[1]
     body = body.split(r"\paragraph{Limitations}")[0]
-    blocks = [b for b in body.split("\n\n") if b.strip()]
-    # block 0 is the title's tail and \label, block 1 the sentence announcing
-    # the count
-    return len(blocks) - 2
+    blocks = [b.strip() for b in body.split("\n\n") if b.strip()]
+    # The readability rewrite opens the Discussion with a summary paragraph,
+    # so the implications are the paragraphs AFTER the announcing sentence.
+    ann = [i for i, b in enumerate(blocks) if b.startswith("The results have")]
+    if len(ann) != 1:
+        return -1
+    return len(blocks) - ann[0] - 1
 
 
 def discussion_order(path):
@@ -279,8 +282,15 @@ def discussion_order(path):
     # The fit-review restructure (2026-09-29) dropped the third
     # implication (the operating-variable count), which moved to the
     # supplement with the zero-loss conditions.
-    lead3 = ("First, the rotation arc", "Second, the operating point")
-    got3 = [p for p in paras if not p.startswith("The results have")]
+    # The readability rewrite (2026-09-29) added a third implication, on
+    # variable operating conditions, and a summary paragraph before the
+    # announcing sentence; the implications are the paragraphs after it.
+    lead3 = ("First, the rotation arc", "Second, the operating point",
+             "Third, variable operating conditions")
+    ann = [i for i, p in enumerate(paras) if p.startswith("The results have")]
+    if len(ann) != 1:
+        return 0.0
+    got3 = paras[ann[0] + 1:]
     return float(len(got3) == len(lead3)
                  and all(g.startswith(x) for g, x in zip(got3, lead3)))
 
@@ -1121,7 +1131,7 @@ def main():
          find(s, r"a loss of \$([0-9.]+)\\times10\^\{-3\}\$ already"),
          L_fair * 1e3, 5e-3),
         ("life: myopic loop over best constant at q*",
-         find(s, r"myopic loop at \$q\^\{\\star\}\$ attains a lifetime \$([0-9.]+)\$ times"),
+         find(s, r"myopic policy at \$q\^\{\\star\}\$ attains a lifetime \$([0-9.]+)\$ times"),
          Tf_ad / Tf_co, 0.01),
         ("life: myopic loop over the smallest-loss constant design",
          find(s, r"and \$([0-9.]+)\$ times that of the constant design "
@@ -1149,7 +1159,7 @@ def main():
         # the abstract quotes the FAIR ratio, against a constant design
         # with its own indicator
         ("fair ratio, restated in the abstract",
-         find(s, r"steering the operating point reduces the\s+information\s+loss by a factor of \$([0-9]+)\$"),
+         find(s, r"reduces this already\s+small loss \$([0-9]+)\$-fold"),
          ratio_fair, 0.01),
         ("beta_min upper, restated in S4",
          find(s, r"reduces the peak floor from \$([0-9.]+)\^\{\\circ\}\$"),
@@ -1160,6 +1170,13 @@ def main():
         ("lifetime factor, balanced-indicator loop over q* loop",
          find(s, r"extends the lifetime by a\s+further factor of \$([0-9.]+)\$"),
          Tf_bal / Tf_ad, 0.02),
+        # Section 2.3's worked example: a loss of 0.01 nat means an error
+        # variance e^{2 x 0.01} - 1 = 2.0% larger
+        ("2.3 worked example: loss (nat)",
+         find(s, r"A loss of \$([0-9.]+)\$~nat, for instance"), 0.01, 0.0),
+        ("2.3 worked example: excess error variance (%)",
+         find(s, r"means an error variance about \$([0-9]+)\\%\$ larger"),
+         100.0 * (np.exp(2.0 * 0.01) - 1.0), 0.02),
         # Section 5.2: u is reciprocal temperature scaled so that u = 0 is
         # 60 C and u = 3 is 25 C; E in those units becomes an activation
         # energy in eV, and u = 1.5 a temperature.
@@ -1505,7 +1522,9 @@ def main():
         # restored from the extended version, whose table this function
         # produced; recomputed, it matches that table to every printed digit
         _mt = misspec_table()
-        _mb = s[s.index("Cost of designing the indicator from a misspecified"):]
+        # anchored on Table 3's caption, retitled "Effect of ..." when the
+        # readability rewrite reserved "cost" for maintenance cost
+        _mb = s[s.index("Effect of designing the indicator from a misspecified"):]
         _mb = _mb[:_mb.index(r"\end{tabular}")]
         _mr = re.findall(r"\$([0-9.]+)\$ & \$([0-9.]+)\$ & \$([0-9.]+)\$ "
                          r"& \$([0-9.]+)\$", _mb)
@@ -1518,14 +1537,14 @@ def main():
                 rows.append((f"5.3 eps={_e} {_lab}", float(_claim),
                              None if _v is None else _v[_i], 0.01))
         rows += [
-            ("5.3 median cost at 5%",
-             find(s, r"At \$5\\%\$ the median cost is a factor \$([0-9.]+)\$"),
+            ("5.3 median loss ratio at 5%",
+             find(s, r"At \$5\\%\$ the\s+median loss ratio is \$([0-9.]+)\$"),
              _mt[0.05][0], 0.01),
-            ("5.3 median cost at 10%",
-             find(s, r"At \$10\\%\$ the median cost is \$([0-9.]+)\$"),
+            ("5.3 median loss ratio at 10%",
+             find(s, r"At \$10\\%\$ the median loss ratio is \$([0-9.]+)\$"),
              _mt[0.10][0], 0.01),
             ("5.3 worst of 40 at 10%",
-             find(s, r"worst of forty draws costs \$([0-9.]+)\$"),
+             find(s, r"worst of forty draws reaches \$([0-9.]+)\$"),
              _mt[0.10][2], 0.01),
             ("5.3 median at eps=0.35",
              find(s, r"to a median of \$([0-9.]+)\$ at"),
@@ -1582,7 +1601,7 @@ def main():
         _pt = policy_table()
         # anchored on Table 1's caption, which the academic rewrite retitled
         _tb = s[s.index("Information loss, remaining-life estimation error "
-                        "and lifetime of the test system"):]
+                        "and lifetime of the synthetic system"):]
         _tb = _tb[:_tb.index(r"\end{tabular}")]
         _pr = re.findall(r"& \$([0-9.]+)\\times10\^\{(-[0-9])\}\$ & "
                          r"\$([0-9.]+)\\%\$ & \$([0-9.]+)\\%\$ & "
@@ -1610,9 +1629,6 @@ def main():
             ("5.2 indicator within x% of all channels, every policy",
              find(s, r"the two estimators\s+differ by less than "
                      r"\$([0-9.]+)\\%\$"), _dev, "<"),
-            ("abstract: indicator within x% of all channels",
-             find(s, r"stays within \$([0-9.]+)\\%\$ of an estimator using every "
-                     r"channel"), _dev, "<"),
             ("5.2 RUL error as % of life, smallest",
              find(s, r"the error as a fraction of life stays between "
                      r"\$([0-9.]+)\\%\$"),
@@ -1836,10 +1852,10 @@ def main():
                            - 1.0)
             rows += [
                 ("abstract: battery cells",
-                 find(s, r"on \$([0-9]+)\$ measured battery cells the arc"),
+                 find(s, r"On \$([0-9]+)\$ lithium-ion cells the arc"),
                  st["n"], 0.0),
                 ("abstract: battery arc (deg)",
-                 find(s, r"measured battery cells the arc is\s+"
+                 find(s, r"lithium-ion cells the arc is\s+"
                          r"\$([0-9.]+)\^\{\\circ\}\$"), st["travel"], 0.01),
                 ("abstract: battery bound (%)",
                  find(s, r"so by at most \$([0-9.]+)\\%\$"), _sb, 0.01),

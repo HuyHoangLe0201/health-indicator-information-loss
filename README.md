@@ -20,7 +20,7 @@ written in `theory.tex` — not against a stored expectation, but against the
 text itself, so the paper and the code cannot drift apart quietly. It ends with
 `ALL CHECKS PASS` or names the rows that failed.
 
-For all 420 checks you need the fleets; see [DATA.md](DATA.md).
+For all 421 checks you need the fleets; see [DATA.md](DATA.md).
 
 ```bash
 export HI_DATA=/path/to/data
@@ -31,13 +31,13 @@ python verify_numbers.py --full        # about an hour
 
 | | |
 |---|---|
-| `theory.tex`, `theory.pdf` | the manuscript, 23 pages |
-| `supplement.tex`, `supplement.pdf` | Supplementary Sections S1-S4: the Section 6 protocols and those of the Section 4 case study, the loss over a record and the best fixed indicator, the numerical checks, and the conditions for zero loss with further results on the test system |
+| `theory.tex`, `theory.pdf` | the manuscript, 27 pages |
+| `supplement.tex`, `supplement.pdf` | Supplementary Sections S1-S4: the Section 6 protocols and those of the Section 4 case study, the loss over a record and the best fixed indicator, the numerical checks, and the conditions for zero loss with further results on the synthetic system |
 | `sub.tex`, `sub.pdf` | the same source set in two columns, which shows what overflows a narrow measure |
 | `Ref.bib`, `theory.bbl` | bibliography |
 | `fig1.pdf`, `fig2.pdf`, `fig4.pdf` | the three plotted figures: Figure 2 of the paper, Figures S1 and S2 of the supplement |
 | `make_fig1.py`, `make_fig2.py`, `make_fig4.py` | the scripts that draw them |
-| `verify_numbers.py` | the 420 checks |
+| `verify_numbers.py` | the 421 checks |
 | `rho_sweep.py`, `rho_sweep.json` | the random-system sweep of Supplementary Section S4, and what it produced |
 | `downstream_sweep.py`, `downstream_sweep.json` | the downstream-estimator test of Supplementary Section S4, repeated on 120 random systems, and what it produced |
 | `dinkelbach_grids.py`, `dinkelbach_grids_NU41.json`, `dinkelbach_grids_NU81.json`, `dinkelbach_grids_NU161.json` | the fractional optimum of Section 5.2 on state grids of 25 to 137 points per axis for three control grids, and what it produced |
@@ -130,7 +130,7 @@ value:
 ## What a passing run looks like
 
 `verified_run.log` is the real output of `--full` against the files in
-this repository: 420 rows, each with the value the manuscript states
+this repository: 421 rows, each with the value the manuscript states
 beside the value recomputed from the model, and `ALL CHECKS PASS` at the
 end. Compare your own run against it line by line.
 
@@ -140,10 +140,10 @@ grid script with its three records, and `fig4.pdf` with its script. That
 bracket is the point: it says the checks and
 the manuscript were the same files throughout, so a run that passed against an edited copy cannot
 be presented as a run that passed against this one. `theory.tex` here is
-`d56df5c555fe`, which is the hash the log records.
+`312d99a72f12`, which is the hash the log records.
 
 The row count depends on the data you have. Without the fleets a subset
-runs and the total is smaller; 420 is the number with all six present.
+runs and the total is smaller; 421 is the number with all six present.
 
 ## Reproducing on another machine
 
@@ -156,7 +156,7 @@ spans are identical to the ones shipped here.
 
 These are in the manuscript's own words and are not defects in the code:
 
-- The failure threshold is a named parameter `x_f` of the model, and the test
+- The failure threshold is a named parameter `x_f` of the model, and the synthetic
   system of Section 5.2 uses `x_f = 0.9`. It is worth saying why the code calls
   it `xfail` while `w = 0.9` also appears: `w` is the signal-to-noise weight of
   Eq. (7), an unrelated parameter that happens to carry the same value. The
