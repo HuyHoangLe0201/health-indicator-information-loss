@@ -31,22 +31,24 @@ python verify_numbers.py --full        # about an hour
 
 | | |
 |---|---|
-| `theory.tex`, `theory.pdf` | the manuscript, 27 pages |
+| `theory.tex`, `theory.pdf` | the manuscript, 28 pages |
 | `supplement.tex`, `supplement.pdf` | Supplementary Sections S1-S4: the Section 6 protocols and those of the Section 4 case study, the loss over a record and the best fixed indicator, the numerical checks, and the conditions for zero loss with further results on the synthetic system |
 | `sub.tex`, `sub.pdf` | the same source set in two columns, which shows what overflows a narrow measure |
 | `Ref.bib`, `theory.bbl` | bibliography |
-| `fig1.pdf`, `fig2.pdf`, `fig4.pdf` | the three plotted figures: Figure 2 of the paper, Figures S1 and S2 of the supplement |
+| `fig1.pdf`, `fig2.pdf`, `fig4.pdf` | the three plotted figures: Figure 4 of the paper, Figures S1 and S2 of the supplement |
 | `make_fig1.py`, `make_fig2.py`, `make_fig4.py` | the scripts that draw them |
 | `verify_numbers.py` | the 421 checks |
 | `rho_sweep.py`, `rho_sweep.json` | the random-system sweep of Supplementary Section S4, and what it produced |
 | `downstream_sweep.py`, `downstream_sweep.json` | the downstream-estimator test of Supplementary Section S4, repeated on 120 random systems, and what it produced |
 | `dinkelbach_grids.py`, `dinkelbach_grids_NU41.json`, `dinkelbach_grids_NU81.json`, `dinkelbach_grids_NU161.json` | the fractional optimum of Section 5.2 on state grids of 25 to 137 points per axis for three control grids, and what it produced |
 | `verified_run.log` | the output of the run that checked the shipped PDF |
+| `make_mechfigs.py` | writes the TikZ code of Figures 2 and 3 into `theory.tex`, from computed geometry, and asserts what each panel claims |
 | `make_sub.py` | renders `sub.tex` from `theory.tex` |
 | `check_fonts.py` | Type 3 and embedding check on every PDF |
 | `LICENSE`, `CITATION.cff` | licence, and how to cite this repository |
 
-The other figure, Figure 1, is TikZ and lives inside `theory.tex`.
+Figures 1 to 3 are TikZ and live inside `theory.tex`; `make_mechfigs.py`
+writes Figures 2 and 3.
 
 The bundle sent to the journal -- cover letter, highlights and the
 declarations -- is deliberately not published here. The cover letter is
@@ -60,7 +62,7 @@ This trips people up, so it is worth saying plainly:
 
 | file | prints as |
 |---|---|
-| `fig2.pdf` | **Figure 2** |
+| `fig2.pdf` | **Figure 4** |
 | `fig1.pdf` | **Figure S2** |
 | `fig4.pdf` | **Figure S1** |
 
@@ -73,6 +75,7 @@ version of the paper and `theory.tex` does not include it.
 
 ```bash
 python make_fig1.py && python make_fig2.py && python make_fig4.py
+python make_mechfigs.py
 python make_sub.py
 pdflatex theory.tex && bibtex theory
 pdflatex theory.tex && pdflatex theory.tex
@@ -81,7 +84,7 @@ pdflatex supplement.tex && pdflatex supplement.tex
 python check_fonts.py
 ```
 
-`make_fig2.py` needs the Severson archive for panel (c). The other two need no
+`make_fig2.py` needs the Severson archive for panel (b). The other two need no
 data. `bibtex` must run between the first and second LaTeX pass, or every
 citation resolves to `[?]`; skipping it once put an unresolved citation into
 a shipped PDF, and the build reported clean because the warning comes from
@@ -140,7 +143,7 @@ grid script with its three records, and `fig4.pdf` with its script. That
 bracket is the point: it says the checks and
 the manuscript were the same files throughout, so a run that passed against an edited copy cannot
 be presented as a run that passed against this one. `theory.tex` here is
-`312d99a72f12`, which is the hash the log records.
+`f4d11b6c64da`, which is the hash the log records.
 
 The row count depends on the data you have. Without the fleets a subset
 runs and the total is smaller; 421 is the number with all six present.

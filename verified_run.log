@@ -1,5 +1,5 @@
 md5 BEFORE
-  312d99a72f12343ec9f5504145f9e9a4  theory.tex
+  f4d11b6c64da2f51e88a64fdfc317110  theory.tex
   78aff20904ce36d4f600998816c714fd  supplement.tex
   3f15bd4771954f46cd2a7764f602cd8b  verify_numbers.py
   c0db59819961d0f743f9c0fc5d58cac5  rho_sweep.json
@@ -102,7 +102,7 @@ S1 N-CMAPSS minimum points per cell                                     400     
 S1 N-CMAPSS sweep minimum points                                        300          300  ok
 S1 N-CMAPSS DS02 units as run                                             1            1  ok
 sections the roadmap forgets                                              0            0  ok
-longest sentence the prose says twice (words)                            16            9  ok (bound)
+longest sentence the prose says twice (words)                            16           10  ok (bound)
 reproducibility exceptions announced vs listed                            0            0  ok
 limitations announced vs listed                                           0            0  ok
 fleets announced minus fleets cited                                       0            0  ok
@@ -467,9 +467,9 @@ S4 optimum: record reproduced afresh, N=69 (rel)                      1e-09     
 
 ALL CHECKS PASS
 
-exit 0 after 68.7 min
+exit 0 after 70.3 min
 md5 AFTER
-  312d99a72f12343ec9f5504145f9e9a4  theory.tex  [same]
+  f4d11b6c64da2f51e88a64fdfc317110  theory.tex  [same]
   78aff20904ce36d4f600998816c714fd  supplement.tex  [same]
   3f15bd4771954f46cd2a7764f602cd8b  verify_numbers.py  [same]
   c0db59819961d0f743f9c0fc5d58cac5  rho_sweep.json  [same]

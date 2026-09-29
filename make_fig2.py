@@ -1,7 +1,12 @@
 """
-fig2.pdf, which the manuscript prints as FIGURE 1 -- the file
-number and the figure number differ, because this float comes first.
-Tightened, with an automatic overlap check.
+fig2.pdf, which the manuscript prints as FIGURE 4 -- the file number and the
+figure number differ, because three TikZ figures come first. Two panels: the
+exact and quadratic loss, and the rotation measured on the Severson cells.
+The former panel (b), a simplex drawing D(x) and q, was removed on
+2026-09-29: it sat in Section 3 although D(x) is defined in Section 5, and
+TikZ Figure 3(b) now draws the components of the rotation. Drawn at the
+width of one column of the journal layout and included at natural size, so
+its type is 8 pt in both layouts. With an automatic overlap check.
 
 Two problems in the previous version: the "dotted: quadratic" annotation in
 (a) sat on the curves, and the panel was taller than it needed to be. The
@@ -26,7 +31,7 @@ plt.rcParams.update({"font.size": 8.0, "axes.linewidth": 0.7,
                      # Type 3 fonts fail the IEEE compliance check;
                      # 42 embeds TrueType. Do not remove.
                      "pdf.fonttype": 42, "ps.fonttype": 42})
-fig, ax = plt.subplots(1, 3, figsize=(5.4, 2.05))
+fig, ax = plt.subplots(1, 2, figsize=(3.45, 2.05))
 
 # ------------------------------------------------------------------ (a) ---
 a = ax[0]
@@ -50,65 +55,11 @@ a.set_ylim(0, 0.62)
 a.grid(alpha=0.22, lw=0.45)
 
 # ------------------------------------------------------------------ (b) ---
-A = np.array([0.0, 0.3, -0.2])
-E = np.array([0.6, 1.1, 0.8])
-HC = np.array([-0.5, 2.0, 0.8])
-Q = np.array([0.466109, 0.770508, 0.434809])
-Q /= np.linalg.norm(Q)
-
-
-def dh(x, u):
-    d = np.exp(A - u * E) * (1.0 + HC * x)
-    return d / np.linalg.norm(d)
-
-
-def tern(p):
-    p = np.atleast_2d(p)
-    return (0.5 * (2 * p[:, 1] + p[:, 2]) / p.sum(1),
-            (np.sqrt(3) / 2) * p[:, 2] / p.sum(1))
-
-
-c = ax[1]
-vx, vy = tern(np.eye(3))
-c.plot(np.append(vx, vx[0]), np.append(vy, vy[0]), color="0.82", lw=0.7)
-for lbl, i, dy in [(r"$e_1$", 0, -6), (r"$e_2$", 1, -9), (r"$e_3$", 2, 5)]:
-    c.annotate(lbl, (vx[i], vy[i]), fontsize=6.5, color="0.45", ha="center",
-               va="center", xytext=(0, dy), textcoords="offset points")
-x0 = np.array([0.25, 0.30, 0.22])
-Arc = np.array([dh(x0, u) ** 2 for u in np.linspace(0, 3, 160)])
-axx, ayy = tern(Arc)
-c.plot(axx, ayy, color="#D55E00", lw=1.5, zorder=2, label=r"$\mathcal{D}(x)$")
-d0 = dh(x0, 1.2)
-px, py = tern(d0 ** 2)
-qx, qy = tern(Q ** 2)
-c.plot(px, py, "o", color="#0072B2", ms=4.5, zorder=4, label=r"$\hat{d}(x,u)$")
-c.plot(qx, qy, "*", color="k", ms=7, zorder=5, label=r"$q$")
-e = Q - (d0 @ Q) * d0
-e /= np.linalg.norm(e)
-o = np.cross(d0, e)
-for vec, col, lab, off in [(e, "#009E73", r"changes $\psi$", (1, 7)),
-                           (o, "#7F7F7F", r"$\psi$ unchanged", (13, 1))]:
-    tgt = np.abs(d0 + 0.40 * vec)
-    tgt /= np.linalg.norm(tgt)
-    tx, ty = tern(tgt ** 2)
-    c.annotate("", xy=(tx[0], ty[0]), xytext=(px[0], py[0]),
-               arrowprops=dict(arrowstyle="-|>", lw=1.6, color=col))
-    c.annotate(lab, xy=(tx[0], ty[0]), fontsize=6.5, color=col,
-               xytext=off, textcoords="offset points")
-c.set_xlim(-0.04, 1.10)
-c.set_ylim(-0.10, 0.93)
-c.set_aspect("equal")
-c.axis("off")
-c.set_title("(b) components of the rotation", fontsize=8.0, pad=9)
-c.legend(fontsize=6.5, loc="upper left", frameon=False, handlelength=1.1,
-         labelspacing=0.18, borderpad=0.05, handletextpad=0.4)
-
-# ------------------------------------------------------------------ (c) ---
 _sev = _os.path.join(_DATA, "severson_cells.npz")
 if not _os.path.exists(_sev):
     raise SystemExit(
         f"severson_cells.npz not found at {_sev}.\n"
-        "Panel (c) needs the Severson fleet. Set HI_DATA to the "
+        "Panel (b) needs the Severson fleet. Set HI_DATA to the "
         "directory holding it, or see DATA.md.")
 Z = np.load(_sev, allow_pickle=True)
 CH = [str(s) for s in Z["channels"]]
@@ -148,7 +99,7 @@ def rot(idx, S):
 
 
 D301, D151 = fleet(301), fleet(151)
-d = ax[2]
+d = ax[1]
 BS = np.array([rot(rng.choice(len(D301), len(D301), True), D301)
                for _ in range(400)])
 lo, hi = np.percentile(BS, [5, 95], axis=0)
@@ -160,7 +111,7 @@ d.plot(GRID, rot(np.arange(len(D151)), D151), "--", color="#D55E00", lw=1.2,
        label="window 151")
 d.set_xlabel(r"normalised age $\tau$", fontsize=8.0, labelpad=1)
 d.set_ylabel("rotation (deg)", fontsize=8.0, labelpad=1)
-d.set_title("(c) Severson, 129 cells", fontsize=8.0, pad=9)
+d.set_title("(b) Severson, 129 cells", fontsize=8.0, pad=9)
 d.tick_params(labelsize=7.0, pad=1.5)
 d.set_xlim(0.15, 0.90)
 # 30, not 27: at the shared legend size of 6.5 the box no longer fits in any
@@ -183,7 +134,7 @@ fig.savefig(out)
 fig.canvas.draw()
 r = fig.canvas.get_renderer()
 bad = 0
-for k, axx_ in enumerate("abc"):
+for k, axx_ in enumerate("ab"):
     A_ = ax[k]
     boxes = []
     for t in A_.texts:
