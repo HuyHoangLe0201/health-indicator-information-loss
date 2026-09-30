@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-r"""The fractional optimum of Section 6.6 on a sequence of state and control
-grids, recorded to dinkelbach_grids_NU*.json. verify_numbers.py reads the record
-and recomputes two of its entries afresh.
+r"""The computed fractional optimum of Supplementary Section S4 on a sequence of state and control
+grids, recorded to dinkelbach_grids_NU*.json; records.dinkelbach_record() reads the
+record and fits its limit.
 
 The scheme is the semi-Lagrangian discretisation of the stationary
 Hamilton--Jacobi--Bellman equation of the Dinkelbach problem: fixed spatial
@@ -36,7 +36,9 @@ import time
 
 import numpy as np
 
-import verify_numbers as vn
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                "..", ".."))
+from hiloss import synthetic as vn  # noqa: E402  (was verify_numbers)
 
 A, E, HC, QS = vn.A, vn.E, vn.HC, vn.QS
 X0, XF = vn.X0, vn.XFAIL
@@ -135,7 +137,7 @@ def load(NU):
     return json.load(io.open(p, encoding="utf-8"))
 
 
-# The extrapolation of the record lives in verify_numbers.dinkelbach_record,
+# The extrapolation of the record lives in records.dinkelbach_record(),
 # the one place the reported interval is computed.
 
 

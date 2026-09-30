@@ -1,6 +1,5 @@
-PyMuPDF
+numpy>=2.0
+scipy>=1.10
 h5py
-matplotlib
-numpy
 pandas
-scipy
+matplotlib

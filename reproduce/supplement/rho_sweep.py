@@ -1,6 +1,6 @@
 r"""Does the regime index rho actually predict what steering buys?
 
-Table II supports the screening claim with three plants. All three differ only
+Supplementary Table S3 supports the screening claim with three plants. All three differ only
 in the activation energies E: same three mechanisms, same one input, same
 shape coefficients, same envelope, same initial state. Three points along one
 axis of a nine-dimensional parameter space is not a screening law, and a sweep
@@ -24,7 +24,7 @@ wrong are not symmetric:
 So the sweep reports the two separately rather than a single correlation.
 
 VALIDATION FIRST. A new estimator that disagrees with the published numbers is
-a bug until proven otherwise, so this reproduces Table II's three rows before
+a bug until proven otherwise, so this reproduces Table S3's three rows before
 it is allowed to sweep anything. The paper's arc is the angle between the two
 ENDS of the one-dimensional control grid; for m > 1 that is not defined, so
 the diameter of the direction set is used, which coincides with it at m = 1.
@@ -47,7 +47,7 @@ TMAX, XFAIL_D, X0_D = 200.0, 0.9, 5e-3
 # One setting, used for the reproduction AND the sweep. Validating at high
 # accuracy and then sweeping at low accuracy would check one estimator and
 # measure a different one; whatever the sweep runs on has to be what earns
-# the right to run by reproducing Table II. These are loose enough for a few
+# the right to run by reproducing Table S3. These are loose enough for a few
 # hundred plants and are accepted only if they still land on the published
 # arc, rho and gain.
 NTRAJ, RTOL, RESTARTS = 250, 1e-6, 4
@@ -200,14 +200,14 @@ def evaluate(P, restarts=RESTARTS, seed=7):
                 gain=L_co / L_ad)
 
 
-# ------------------------------------------------ 1. reproduce Table II ---
+# ----------------------------------------------- 1. reproduce Table S3 ---
 PAPER = [((0.60, 1.10, 0.80), 33.9, 0.88, 1.7e-4, 68.0),
          ((0.80, 0.82, 0.79), 1.93, 12.5, 3.6e-3, 2.9),
          ((0.80, 0.805, 0.798), 0.45, 53.1, 4.2e-3, 2.7)]
 A0 = (0.0, 0.3, -0.2)
 C0 = (-0.5, 2.0, 0.8)
 
-print(f"reproducing Table II at the sweep settings "
+print(f"reproducing Table S3 at the sweep settings "
       f"(n={NTRAJ}, rtol={RTOL}, restarts={RESTARTS}, "
       f"constant search: {'full grid' if CAP is None else CAP})")
 print(f"{'E':<26}{'arc':>8}{'paper':>8}{'rho':>8}{'paper':>8}"

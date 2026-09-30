@@ -1,6 +1,7 @@
-r"""Section 6.8's downstream test, repeated across randomly drawn plants.
+r"""The downstream test of Supplementary Section S4, repeated across randomly
+drawn systems.
 
-Section 6.8 ranks twelve indicators by their loss and by the median error of
+Supplementary Section S4 ranks twelve indicators by their loss and by the median error of
 a remaining-life estimator that knows nothing of the construction -- it
 matches an observed scalar history against the indicator's own reference
 curve -- and finds the two orderings agree at Spearman 0.89. That is one
@@ -65,7 +66,7 @@ def trajectory(phi, c, x0, n=4000, rtol=1e-10):
 
 def downstream(a, E, c, u0, x0, gain, nind=12, nunit=160, K=30, span=0.40,
                seed=5, tilts="paper"):
-    """The protocol of verify_numbers.downstream_rul(), for any plant.
+    """The protocol of hiloss.synthetic.downstream_rul(), for any plant.
 
     Returns (losses (nind,), per-unit absolute errors (nind, nunit)), or
     None if the plant does not fail inside the horizon or its informative
@@ -103,7 +104,7 @@ def downstream(a, E, c, u0, x0, gain, nind=12, nunit=160, K=30, span=0.40,
     XU = np.stack([at(t + aoff) for t in taus])
     XS = at(np.linspace(0.05 * Tf, 0.95 * Tf, 400))
 
-    # "paper": the Section 6.8 design, tilting ever further toward equal
+    # "paper": the design of Supplementary Section S4, tilting ever further toward equal
     #   weights. Loss and error then both grow with ONE parameter, so their
     #   agreement is close to structural -- over 120 plants the rank
     #   correlation never fell below 0.87.
@@ -167,7 +168,7 @@ if __name__ == "__main__":
     print(f"paper's plant: Spearman {sp0:.6f}, error ratio {ra0:.6f}")
     print("  gate values : Spearman 0.888112, error ratio 1.519")
     if abs(sp0 - 0.888112) > 5e-6 or abs(ra0 - 1.519) > 5e-4:
-        print("does NOT reproduce Section 6.8 -- refusing to sweep")
+        print("does NOT reproduce Supplementary Section S4 -- refusing to sweep")
         sys.exit(1)
     print("  reproduced: this is the same estimator")
 

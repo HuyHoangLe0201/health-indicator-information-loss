@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 from scipy.integrate import solve_ivp
 import os as _os
 _HERE = _os.path.dirname(_os.path.abspath(__file__))
-_DATA = _os.environ.get("HI_DATA", _os.path.join(_HERE, "data"))
+_DATA = _os.environ.get("HI_DATA", _os.path.join(_HERE, "..", "..", "data"))
 
 
 
@@ -111,8 +111,8 @@ a.set_title(r"(a) information shares on the simplex", fontsize=8.0, pad=2)
 
 # ------------------------------------------------------------- panel (b)
 b = ax[1]
-# These three arrays must agree with Table II of the manuscript; they are
-# checked against a fresh recomputation by verify_numbers.py --regime, so a
+# These three arrays must agree with Supplementary Table S3; they are
+# checked against hiloss.synthetic.regime_row (reproduce/supplement.py --slow), so a
 # drift here fails the gate instead of quietly mislabelling the figure.
 rho = np.array([0.883361, 12.5318, 53.0530])
 L_ad = np.array([1.67591e-4, 3.58573e-3, 4.1742e-3])

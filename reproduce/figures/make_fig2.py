@@ -23,7 +23,7 @@ from scipy.signal import savgol_filter
 
 import os as _os
 _HERE = _os.path.dirname(_os.path.abspath(__file__))
-_DATA = _os.environ.get("HI_DATA", _os.path.join(_HERE, "data"))
+_DATA = _os.environ.get("HI_DATA", _os.path.join(_HERE, "..", "..", "data"))
 
 
 rng = np.random.default_rng(4)

@@ -4,8 +4,9 @@ message: >-
   accompanies.
 title: >-
   Information loss of fixed linear health indicators under
-  competing degradation mechanisms and variable operating conditions: code and verification suite
+  competing degradation mechanisms and variable operating conditions: code (hiloss)
 type: software
+version: 1.0.0
 authors:
   - family-names: Le
     given-names: Huy Hoang

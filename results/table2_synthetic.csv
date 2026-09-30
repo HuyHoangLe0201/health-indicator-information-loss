@@ -1,0 +1,6 @@
+strategy,loss,excess_variance_pct,rul_error_indicator_pct,rul_error_all_pct,lifetime
+"constant, 60 C",0.00795405,1.60353,10.675,10.7553,0.377695
+"constant, 41.5 C",0.0143524,2.91208,8.85186,8.76093,1.96665
+"constant, 25 C",0.0126285,2.55787,8.80678,8.70822,7.20312
+"myopic, q*",0.000167589,0.0335235,9.45989,9.5253,1.43258
+"myopic, balanced",0.00407639,0.81861,8.43096,8.52344,4.92834

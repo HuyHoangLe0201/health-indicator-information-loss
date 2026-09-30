@@ -1,9 +1,9 @@
 r"""The reachability floor over life, and the schedule that removes it.
 
 Sections 6.3 and 6.4 state this result in words and three numbers, and nothing
-plots it. Panel (a) is Section 6.3: with one input the floor is largest at the
+plots it. Panel (a) is Supplementary Section S4, one input: with one input the floor is largest at the
 start of life at 4.52 degrees, falls through mid-life below the sampling
-resolution, and rises again towards failure. Panel (b) is Section 6.4: with a
+resolution, and rises again towards failure. Panel (b) is Supplementary Section S4, two inputs: with a
 second input the residual is below 1e-6 degrees, zero to precision.
 
 Panel (b) does NOT plot that residual. On any axis it is a flat line at zero,
@@ -11,7 +11,7 @@ which shows the reader nothing about why it is zero. What it plots instead is
 the operating point the alignment demands: u1 has to sweep most of the
 envelope over life while u2 barely moves, and both stay inside [0,3]^2 at all
 600 states. That containment along the segment S_q is the envelope condition
-of Theorem 4.1(i) and is the reason the loss vanishes; the residual itself is
+of the zero-loss conditions of Supplementary Section S4 and is the reason the loss vanishes; the residual itself is
 one annotated number.
 
 Panel (b) is drawn along the CLOSED LOOP. An earlier version solved the
@@ -24,7 +24,7 @@ below is integrated under the aligning feedback and checked to stay on it.
 The two panels use different targets, because their two sections do. Panel (a)
 measures against q*, the optimal fixed indicator, along the closed loop at q*.
 Panel (b) measures against the direction the plant occupies at mid-life under
-the central operating point (1.5, 1.5) -- the same point verify_numbers.py
+the central operating point (1.5, 1.5) -- the same point hiloss.synthetic.two_input_floor
 uses. The caption says so. Putting both curves on one axis would have read as
 a single controlled comparison, which it is not.
 
@@ -39,7 +39,7 @@ import matplotlib.pyplot as plt
 from scipy.integrate import solve_ivp
 import os as _os
 _HERE = _os.path.dirname(_os.path.abspath(__file__))
-_DATA = _os.environ.get("HI_DATA", _os.path.join(_HERE, "data"))
+_DATA = _os.environ.get("HI_DATA", _os.path.join(_HERE, "..", "..", "data"))
 
 
 
@@ -99,7 +99,7 @@ for i, x in enumerate(X1):
 
 # ---- (b) two inputs: the closed loop that holds the mid-life direction ---
 # The target is read at mid-life of the constant (1.5, 1.5) trajectory. Zero
-# loss then confines the state to the segment S_q = x0 + s*tgt (Theorem 4.1),
+# loss then confines the state to the segment S_q = x0 + s*tgt (Supplementary Section S4),
 # so the schedule is plotted along the closed loop the aligning feedback
 # generates, not along the constant-input trajectory the target came from:
 # the aligning input generates its own trajectory.

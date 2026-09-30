@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hiloss"
+version = "1.0.0"
+description = "Information loss of fixed linear health indicators: the arc bound, the design procedure, and the reproduction of the paper"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "Huy Hoang Le" }, { name = "Kim-Anh Nguyen" }]
+requires-python = ">=3.10"
+dependencies = ["numpy>=2.0", "scipy>=1.10"]
+keywords = ["health indicator", "remaining useful life", "prognostics",
+            "predictive maintenance", "information loss"]
+
+[project.optional-dependencies]
+data = ["h5py", "pandas"]
+figures = ["matplotlib"]
+
+[project.urls]
+Repository = "https://github.com/HuyHoangLe0201/health-indicator-information-loss"
+
+[tool.setuptools]
+packages = ["hiloss"]
